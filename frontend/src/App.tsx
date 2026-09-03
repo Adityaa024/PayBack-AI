@@ -1,0 +1,57 @@
+import { Routes, Route, Navigate } from "react-router-dom";
+import { AppLayout } from "./layouts/AppLayout";
+import { Dashboard } from "./pages/Dashboard";
+import { Login } from "./pages/Login";
+import { Register } from "./pages/Register";
+import { ForgotPassword } from "./pages/ForgotPassword";
+import { Invoices } from "./pages/Invoices";
+import { InvoiceDetail } from "./pages/InvoiceDetail";
+import { Agent } from "./pages/Agent";
+import { Analytics } from "./pages/Analytics";
+import { Settings } from "./pages/Settings";
+import { ActivityLog } from "./pages/ActivityLog";
+import { Disputes } from "./pages/Disputes";
+import { PaymentPlans } from "./pages/PaymentPlans";
+import { AcceptInvitation } from "./pages/AcceptInvitation";
+import { DebtorPortal } from "./pages/DebtorPortal";
+import { RecoveryDashboard } from "./pages/RecoveryDashboard";
+import { ProtectedRoute } from "./components/ProtectedRoute";
+
+function App() {
+  return (
+    <Routes>
+      {/* Public Routes */}
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/invite" element={<AcceptInvitation />} />
+      <Route path="/i/:token" element={<DebtorPortal />} />
+
+
+      {/* Protected Routes */}
+      <Route element={<ProtectedRoute />}>
+        <Route element={<AppLayout />}>
+          <Route path="/" element={<Navigate to="/recovery" replace />} />
+          <Route path="/recovery" element={<RecoveryDashboard />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/invoices" element={<Invoices />} />
+          <Route path="/invoices/:id/trashed" element={<InvoiceDetail />} />
+          <Route path="/invoices/:id" element={<InvoiceDetail />} />
+          <Route path="/agent" element={<Agent />} />
+          <Route path="/analytics" element={<Analytics />} />
+          <Route path="/recovery" element={<RecoveryDashboard />} />
+          
+          <Route element={<ProtectedRoute allowedRoles={['admin', 'manager']} />}>
+            <Route path="/dlq" element={<Navigate to="/agent?tab=dlq" replace />} />
+            <Route path="/disputes" element={<Disputes />} />
+            <Route path="/payment-plans" element={<PaymentPlans />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/activity-log" element={<ActivityLog />} />
+          </Route>
+        </Route>
+      </Route>
+    </Routes>
+  );
+}
+
+export default App;

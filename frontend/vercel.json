@@ -1,0 +1,16 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://recoveriq-backend.onrender.com/api/:path*"
+    },
+    {
+      "source": "/public/:path*",
+      "destination": "https://recoveriq-backend.onrender.com/public/:path*"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}

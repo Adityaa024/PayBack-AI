@@ -1,0 +1,435 @@
+export interface User {
+  id: string;
+  tenantId: string;
+  name: string;
+  email: string;
+  role: "admin" | "manager" | "viewer";
+  mfaEnabled: boolean;
+  created_at: string;
+}
+
+export interface AuthResponse {
+  token: string;
+  user: User;
+}
+
+export interface RegisterResponse {
+  pendingVerification: boolean;
+}
+
+export interface MfaPendingResponse {
+  mfaPending: true;
+  mfaPendingToken: string;
+}
+
+export type LoginResponse = AuthResponse | MfaPendingResponse;
+
+export interface MfaSetupInitiateResponse {
+  qrCodeDataUrl: string;
+}
+
+export interface MfaSetupConfirmResponse {
+  backupCodes: string[];
+}
+
+export interface ApiError {
+  error: {
+    code: string;
+    message: string;
+    details?: Record<string, unknown>;
+  };
+}
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+}
+
+export interface Invoice {
+  id: string;
+  tenantId: string;
+  invoiceNo: string;
+  clientName: string;
+  invoiceAmount: string; 
+  dueDate: string;
+  originalDueDate?: string;
+  activeInstallmentNumber?: number;
+  paymentStatus: 'Pending' | 'Paid' | 'Overdue';
+  contactEmail: string;
+  subject?: string | null;
+  followupCount: number;
+  lastFollowupDate: string | null;
+  urgencyTier?: string | null;
+  daysOverdue?: number; 
+  paymentLink?: {
+    url: string;
+    status: 'active' | 'paid' | 'expired' | 'cancelled';
+  } | null;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt?: string | null;
+  needsManualReview?: boolean;
+  hasActivePaymentPlan?: boolean;
+  paymentStatusChangedAt?: string | null;
+}
+
+export interface InvoiceEvent {
+  id: string;
+  tenantId: string;
+  entityType: string;
+  entityId: string;
+  invoiceId: string; 
+  invoiceNo?: string; 
+  clientName?: string | null;
+  invoiceDeletedAt?: string | null; 
+
+  actorId: string | null;
+  actorName: string | null;
+  actorEmail: string | null;
+  actorRole: string | null;
+
+  actionType: string;
+  eventType: string;    
+  source: 'ui' | 'api' | 'agent' | 'webhook' | 'system';
+  description: string | null;
+  oldValues: Record<string, unknown> | null;
+  newValues: Record<string, unknown> | null;
+  payload: Record<string, unknown> | null;
+
+  createdAt: string;
+}
+
+export interface ListInvoicesParams {
+  page?: number;
+  limit?: number;
+  sort_by?: 'invoiceNo' | 'clientName' | 'invoiceAmount' | 'dueDate' | 'paymentStatus' | 'followupCount' | 'createdAt';
+  order?: 'asc' | 'desc';
+  status?: string[];
+
+  client_name?: string;
+  days_overdue_min?: number;
+  days_overdue_max?: number;
+  urgency_tier?: 'stage_1_warm' | 'stage_2_firm' | 'stage_3_serious' | 'stage_4_stern' | 'legal_escalation';
+  has_payment_plan?: boolean;
+  needs_review?: boolean;
+  followup_status?: 'none' | 'has_followups';
+  min_amount?: number;
+  max_amount?: number;
+  aging_bucket?: '0_7' | '8_14' | '15_30' | '30_plus';
+}
+
+export interface AnalyticsSummary {
+  totalReceivable: number;
+  totalCollected: number;
+  totalOverdue: number;
+  totalPaymentPlan?: number;
+  paymentPlanCount?: number;
+  invoiceCount: number;
+}
+
+export interface AgingTier {
+  tier: string;
+  totalAmount: number;
+  count: number;
+}
+
+export interface AgentPerformance {
+  totalRuns: number;
+  invoicesProcessed: number;
+  emailsSent: number;
+  automationYield: number;
+  errorRate: number;
+  successRate: number;
+  avgDaysToPayment: number;
+}
+
+export interface EmailVolume {
+  date: string;
+  emailsSent: number;
+}
+
+export interface ChannelBreakdown {
+  channel: string;
+  count: number;
+}
+
+export interface TierEffectiveness {
+  tier: string;
+  avgDaysToPayment: number;
+  successRate: number;
+}
+
+export interface AgentRun {
+  id: string;
+  status: string;
+  startTime: string;
+  endTime: string | null;
+  invoicesProcessed: number;
+  emailsSent: number;
+  errors: number;
+  errorDetails: string | null;
+}
+
+export interface AgentRunDetail extends AgentRun {
+  events: InvoiceEvent[];
+}
+
+export interface AgentRunsResponse {
+  runs: AgentRun[];
+  total: number;
+}
+
+export interface AgentRunChunk {
+  id: string;
+  runId: string;
+  tenantId: string;
+  chunkIndex: number;
+  totalChunks: number;
+  invoiceIds: string[];
+  status: 'queued' | 'running' | 'completed' | 'failed';
+  invoicesProcessed: number;
+  emailsSent: number;
+  errors: number;
+  errorDetails: string | null;
+  startTime: string | null;
+  endTime: string | null;
+  createdAt: string;
+}
+
+export interface AgentRunChunksResponse {
+  runId: string;
+  totalChunks: number;
+  chunks: AgentRunChunk[];
+}
+
+export interface DlqEntry {
+  invoiceId: string;
+  consecutiveFailures: number;
+  lastError: string | null;
+  lastErrorDisplay?: string | null;
+  lastErrorTechnical?: string | null;
+  firstFailure: string;
+  lastFailure: string;
+  clientName: string | null;
+  invoiceNo: string | null;
+}
+
+export interface Communication {
+  id: string;
+  invoiceId: string;
+  tenantId: string;
+  channel: string;
+  recipient: string;
+  subject: string | null;
+  body: string;
+  status: 'pending' | 'sent' | 'failed';
+  source?: 'bulk_ai_agent' | 'invoice_manual' | 'dispute_agent' | 'system';
+  errorMsg: string | null;
+  providerMessageId: string | null;
+  sentAt: string | null;
+  createdAt: string;
+}
+
+export interface TenantSettings {
+  companyName: string;
+  senderName?: string;
+  senderEmail?: string;
+  replyTo?: string | null;
+  paymentLink: string | null;
+  bankDetails: string | null;
+  timezone: string;
+  currency?: string;
+  scheduleHour: number;
+  idempotencyWindowHours: number;
+
+  skipPaymentWarning: boolean;
+  autoPurgeEnabled: boolean;
+  autoPurgeDays: number;
+  autoPurgeArchivedDisputesDays?: number;
+}
+
+export interface BaseIntegrationStatus {
+  isConfigured: boolean;
+  lastValidatedAt: string | null;
+  lastValidationResult: 'valid' | 'invalid' | 'revoked' | 'insufficient_scope' | 'unverified_sender' | 'unknown';
+}
+
+export interface SendgridIntegrationStatus extends BaseIntegrationStatus {
+  provider: 'sendgrid';
+  senderName?: string | null;
+  senderEmail?: string | null;
+  replyTo?: string | null;
+  isSenderConfigured?: boolean;
+}
+
+export interface SmtpIntegrationStatus extends BaseIntegrationStatus {
+  provider: 'smtp';
+  displayHost?: string;
+  maskedUsername?: string;
+  port?: number;
+  securityMode?: string;
+}
+
+export interface ResendIntegrationStatus extends BaseIntegrationStatus {
+  provider: 'resend';
+  senderName?: string | null;
+  senderEmail?: string | null;
+  replyTo?: string | null;
+  isSenderConfigured?: boolean;
+}
+
+export interface RazorpayIntegrationStatus extends BaseIntegrationStatus {
+  provider: 'razorpay';
+  maskedKeyId?: string;
+  lastWebhookReceivedAt?: string | null;
+}
+
+export interface InboundParseIntegrationStatus {
+  webhookUrl: string;
+  sendgridSettingsUrl: string;
+  isVerified: boolean;
+  inboundDomain?: string | null;
+  replyMode?: 'real_mailbox' | 'webhook_only';
+  replyMailboxEmail?: string | null;
+  replyMailboxVerified?: boolean;
+}
+
+export interface SetupProgressStep1 {
+  isDone: boolean;
+  isConfigured: boolean;
+}
+
+export interface SetupProgressStep2Sendgrid {
+  isDone: boolean;
+  status: 'not_started' | 'awaiting_sender_info' | 'awaiting_otp' | 'completed';
+  senderName: string | null;
+  senderEmail: string | null;
+  replyTo: string | null;
+  replyMode: 'real_mailbox' | 'webhook_only';
+  replyMailboxEmail: string | null;
+  replyMailboxVerified: boolean;
+  requiresOtp: boolean;
+}
+
+export interface SetupProgressStep3Sendgrid {
+  isDone: boolean;
+  status: 'not_started' | 'awaiting_inbound_domain' | 'awaiting_mx_verification' | 'verified';
+  inboundDomain: string | null;
+  webhookUrl: string;
+  sendgridSettingsUrl: string;
+  isVerified: boolean;
+}
+
+export interface SendgridSetupProgress {
+  provider: 'sendgrid';
+  step1ApiKey: SetupProgressStep1;
+  step2SenderAndMode: SetupProgressStep2Sendgrid;
+  step3InboundWebhook: SetupProgressStep3Sendgrid;
+  overallStatus: 'not_configured' | 'partially_configured' | 'active';
+  isActive: boolean;
+}
+
+export interface SetupProgressStep1Smtp {
+  isDone: boolean;
+  host: string | null;
+  port: number;
+  username: string | null;
+  hasPassword: boolean;
+  encryptionType: 'tls' | 'ssl' | 'none';
+  allowSelfSigned: boolean;
+}
+
+export interface SetupProgressStep2Smtp {
+  isDone: boolean;
+  senderName: string | null;
+  senderEmail: string | null;
+  replyTo: string | null;
+}
+
+export interface SmtpSetupProgress {
+  provider: 'smtp';
+  step1ConnectionDetails: SetupProgressStep1Smtp;
+  step2SenderIdentity: SetupProgressStep2Smtp;
+  overallStatus: 'not_configured' | 'partially_configured' | 'active';
+  isActive: boolean;
+}
+
+export interface SetupProgressStep1Resend {
+  isDone: boolean;
+  hasApiKey: boolean;
+  lastValidationResult: 'valid' | 'invalid' | 'untested';
+}
+
+export interface SetupProgressStep2Resend {
+  isDone: boolean;
+  status: 'not_started' | 'awaiting_sender_info' | 'awaiting_otp' | 'completed';
+  senderName: string | null;
+  senderEmail: string | null;
+  replyTo: string | null;
+  replyMode: 'real_mailbox' | 'webhook_only';
+  replyMailboxEmail: string | null;
+  replyMailboxVerified: boolean;
+  requiresOtp: boolean;
+}
+
+export interface SetupProgressStep3Resend {
+  isDone: boolean;
+  status: 'not_started' | 'awaiting_inbound_domain' | 'awaiting_mx_verification' | 'verified';
+  inboundDomain: string | null;
+  webhookUrl: string;
+  resendSettingsUrl: string;
+  isVerified: boolean;
+  expectedMxTarget?: string;
+  expectedPriority?: number;
+  region?: string;
+}
+
+export interface ResendSetupProgress {
+  provider: 'resend';
+  step1ApiKey: SetupProgressStep1Resend;
+  step2SenderAndMode: SetupProgressStep2Resend;
+  step3InboundWebhook: SetupProgressStep3Resend;
+  overallStatus: 'not_configured' | 'partially_configured' | 'active';
+  isActive: boolean;
+}
+
+export interface IntegrationsResponse {
+  sendgrid: SendgridIntegrationStatus;
+  smtp: SmtpIntegrationStatus;
+  resend?: ResendIntegrationStatus;
+  razorpay: RazorpayIntegrationStatus;
+  inboundParse?: InboundParseIntegrationStatus;
+  sendgridProgress?: SendgridSetupProgress;
+  smtpProgress?: SmtpSetupProgress;
+  resendProgress?: ResendSetupProgress;
+}
+
+export interface TeamMember {
+  id: string;
+  email: string;
+  name: string;
+  role: 'admin' | 'manager' | 'viewer';
+  createdAt: string;
+}
+
+export interface TeamInvitation {
+  id: string;
+  email: string;
+  role: 'admin' | 'manager' | 'viewer';
+  deliveryStatus: 'pending' | 'sent' | 'failed';
+  createdAt: string;
+  expiresAt: string;
+}
+
+export interface SmtpConfig {
+  host: string;
+  port: number;
+  securityMode: 'none' | 'starttls' | 'tls' | string;
+  username: string;
+  password?: string;
+}

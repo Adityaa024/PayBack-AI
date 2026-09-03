@@ -1,0 +1,557 @@
+import crypto from 'crypto';
+import { logger } from '../../shared/logger.js';
+import { AimlServiceError } from '../../shared/errors/index.js';
+
+export interface AimlHealthResponse {
+  status: 'ok' | 'degraded' | 'down';
+  version?: string;
+  uptime?: number;
+}
+
+export interface FollowupRequest {
+  invoiceId: string;
+  invoiceNo: string;
+  clientName: string;
+  contactEmail: string;
+  invoiceAmount: string;
+  currency?: string;
+  dueDate: string;
+  daysOverdue: number;
+  urgencyTier: string;
+  followupCount: number;
+  channel: string;
+  paymentLink?: string;
+  invoiceSubject?: string;
+  installmentNumber?: number;
+  totalInstallments?: number;
+}
+
+/** Shape returned by the Python AI-ML /followup endpoint */
+export interface FollowupResponse {
+  invoiceId: string;
+  channel: string;
+  emailGenerated: boolean;
+  emailSent: boolean;
+  subject?: string;
+  htmlBody?: string;
+  bodyPreview?: string;
+  body?: string;
+  error?: string;
+}
+
+/** Raw snake_case shape returned by the Python service */
+interface RawFollowupResponse {
+  invoice_id: string;
+  channel: string;
+  content?: {
+    subject?: string;
+    plain_body?: string;
+    html_body?: string;
+  };
+  error?: string;
+}
+
+export interface BatchRunRequest {
+  invoiceIds: string[];
+}
+
+export interface BatchRunResponse {
+  runId: string;
+  totalQueued: number;
+  accepted: boolean;
+}
+
+interface CircuitBreakerState {
+  failures: number;
+  lastFailureAt: number;
+  state: 'closed' | 'open' | 'half-open';
+}
+
+export interface AimlServiceConfig {
+  baseUrl: string;
+  serviceKey?: string;
+  timeoutMs?: number;
+  maxRetries?: number;
+  circuitBreakerThreshold?: number;
+  circuitBreakerResetMs?: number;
+}
+
+export class AimlService {
+  private readonly baseUrl: string;
+  private readonly serviceKey: string;
+  private readonly timeoutMs: number;
+  private readonly maxRetries: number;
+  private readonly cbThreshold: number;
+  private readonly cbResetMs: number;
+  private circuit: CircuitBreakerState;
+
+  constructor(clientConfig: AimlServiceConfig) {
+    this.baseUrl = clientConfig.baseUrl.replace(/\/+$/, '');
+    this.serviceKey = clientConfig.serviceKey ?? '';
+    this.timeoutMs = clientConfig.timeoutMs ?? 120_000;
+    this.maxRetries = clientConfig.maxRetries ?? 2;
+    this.cbThreshold = clientConfig.circuitBreakerThreshold ?? 5;
+    this.cbResetMs = clientConfig.circuitBreakerResetMs ?? 60_000;
+    this.circuit = { failures: 0, lastFailureAt: 0, state: 'closed' };
+  }
+
+  async getAgentStatus(): Promise<AimlHealthResponse> {
+    try {
+      const data = await this.request<AimlHealthResponse>('GET', '/health');
+      return data;
+    } catch {
+      return { status: 'down' };
+    }
+  }
+
+  async triggerFollowup(invoice: FollowupRequest): Promise<FollowupResponse> {
+    const payload = {
+      invoice_id: invoice.invoiceId,
+      invoice_no: invoice.invoiceNo,
+      client_name: invoice.clientName,
+      contact_email: invoice.contactEmail,
+      invoice_amount: invoice.invoiceAmount,
+      currency: invoice.currency ?? 'INR',
+      due_date: invoice.dueDate,
+      days_overdue: invoice.daysOverdue,
+      urgency_tier: invoice.urgencyTier,
+      followup_count: invoice.followupCount,
+      channel: invoice.channel,
+      payment_link: invoice.paymentLink,
+      invoice_subject: invoice.invoiceSubject ?? null,
+      installment_number: invoice.installmentNumber ?? null,
+      total_installments: invoice.totalInstallments ?? null,
+    };
+    const raw = await this.request<RawFollowupResponse>('POST', '/followup', payload);
+    return {
+      invoiceId: raw.invoice_id,
+      channel: raw.channel,
+      emailGenerated: !!(raw.content?.subject || raw.content?.plain_body),
+      emailSent: false, // generation only — actual sending happens via CommunicationService
+      subject: raw.content?.subject,
+      htmlBody: raw.content?.html_body,
+      bodyPreview: raw.content?.plain_body?.slice(0, 300),
+      body: raw.content?.plain_body,
+      error: raw.error,
+    };
+  }
+
+  async triggerBatchFollowup(request: {
+    invoices: FollowupRequest[];
+    concurrency?: number;
+  }): Promise<{
+    results: Array<{
+      invoiceId: string;
+      status: 'success' | 'error';
+      content?: {
+        subject?: string;
+        plain_body?: string;
+        html_body?: string;
+      };
+      error?: string;
+      retryable?: boolean;
+    }>;
+    summary: {
+      total: number;
+      succeeded: number;
+      failed: number;
+      totalMs: number;
+    };
+  }> {
+    const payload = {
+      invoices: request.invoices.map((invoice) => ({
+        invoice_id: invoice.invoiceId,
+        invoice_no: invoice.invoiceNo,
+        client_name: invoice.clientName,
+        contact_email: invoice.contactEmail,
+        invoice_amount: invoice.invoiceAmount,
+        currency: invoice.currency ?? 'INR',
+        due_date: invoice.dueDate,
+        days_overdue: invoice.daysOverdue,
+        urgency_tier: invoice.urgencyTier,
+        followup_count: invoice.followupCount,
+        channel: invoice.channel,
+        payment_link: invoice.paymentLink,
+        invoice_subject: invoice.invoiceSubject ?? null,
+        installment_number: invoice.installmentNumber ?? null,
+        total_installments: invoice.totalInstallments ?? null,
+      })),
+      concurrency: request.concurrency ?? 2,
+    };
+
+    const raw = await this.request<{
+      results: Array<{
+        invoice_id: string;
+        status: string;
+        content?: {
+          subject?: string;
+          plain_body?: string;
+          html_body?: string;
+        };
+        error?: string;
+        retryable?: boolean;
+      }>;
+      summary: {
+        total: number;
+        succeeded: number;
+        failed: number;
+        total_ms: number;
+      };
+    }>('POST', '/followup/batch', payload);
+
+    return {
+      results: raw.results.map((res) => ({
+        invoiceId: res.invoice_id,
+        status: res.status as 'success' | 'error',
+        content: res.content,
+        error: res.error,
+        retryable: res.retryable,
+      })),
+      summary: {
+        total: raw.summary.total,
+        succeeded: raw.summary.succeeded,
+        failed: raw.summary.failed,
+        totalMs: raw.summary.total_ms,
+      },
+    };
+  }
+
+
+  async analyzeDispute(request: {
+    inboundText: string;
+    invoiceId: string;
+    invoiceNo: string;
+    clientName: string;
+    invoiceAmount: string;
+    dueDate: string;
+    priorCommunications?: Array<{ subject: string | null; body: string | null; sentAt: Date | null }>;
+  }): Promise<{
+    classification: 'dispute' | 'question' | 'payment_promise' | 'unclear';
+    confidence: number;
+    reasoning: string;
+    summary?: string;
+  }> {
+    const payload = {
+      inbound_text: request.inboundText,
+      invoice_id: request.invoiceId,
+      invoice_no: request.invoiceNo,
+      client_name: request.clientName,
+      invoice_amount: request.invoiceAmount,
+      due_date: request.dueDate,
+      prior_communications: request.priorCommunications || null,
+    };
+    const raw = await this.request<{
+      classification: string;
+      confidence: number;
+      reasoning: string;
+      summary?: string;
+    }>('POST', '/agents/dispute', payload);
+    return {
+      classification: raw.classification as 'dispute' | 'question' | 'payment_promise' | 'unclear',
+      confidence: raw.confidence,
+      reasoning: raw.reasoning,
+      summary: raw.summary,
+    };
+  }
+
+  async generateDisputeDraft(request: {
+    tenantInstruction: string;
+    inboundText: string;
+    invoiceId: string;
+    invoiceNo: string;
+    clientName: string;
+    invoiceAmount: string;
+    dueDate: string;
+    priorCommunications?: Array<{ subject: string | null; body: string | null; sentAt: Date | null }>;
+  }): Promise<{
+    suggestedResponse: string;
+  }> {
+    const payload = {
+      tenant_instruction: request.tenantInstruction,
+      inbound_text: request.inboundText,
+      invoice_id: request.invoiceId,
+      invoice_no: request.invoiceNo,
+      client_name: request.clientName,
+      invoice_amount: request.invoiceAmount,
+      due_date: request.dueDate,
+      prior_communications: request.priorCommunications || null,
+    };
+    const raw = await this.request<{
+      suggested_response: string;
+    }>('POST', '/agents/dispute/draft', payload);
+    return {
+      suggestedResponse: raw.suggested_response,
+    };
+  }
+
+  async triggerBatchRun(request: BatchRunRequest): Promise<BatchRunResponse> {
+    return this.request<BatchRunResponse>('POST', '/batch-run', request);
+  }
+
+  async summarizeEmail(request: {
+    emailText: string;
+    subject?: string;
+    direction?: 'inbound' | 'outbound';
+  }): Promise<{ summary: string }> {
+    try {
+      const payload = {
+        email_text: request.emailText,
+        subject: request.subject || null,
+        direction: request.direction || 'inbound',
+      };
+      const raw = await this.request<{ summary: string }>('POST', '/agents/summarize', payload);
+      return { summary: raw.summary || '' };
+    } catch (err: unknown) {
+      logger.warn(`AI email summarization failed: ${err instanceof Error ? err.message : String(err)}`);
+      return { summary: '' };
+    }
+  }
+
+  private async request<T>(method: string, path: string, body?: unknown): Promise<T> {
+    this.checkCircuitBreaker();
+
+    let lastError: Error | undefined;
+
+    for (let attempt = 0; attempt <= this.maxRetries; attempt++) {
+      try {
+        const response = await this.fetchWithTimeout(method, path, body);
+
+        if (!response.ok) {
+          const errorBody = await response.text().catch(() => 'Unknown error');
+          throw new AimlServiceError(
+            `AI-ML service returned ${response.status}: ${errorBody}`,
+            response.status,
+          );
+        }
+
+        this.onSuccess();
+        return (await response.json()) as T;
+      } catch (err: unknown) {
+        lastError = err instanceof Error ? err : new Error(String(err));
+
+        if (err instanceof AimlServiceError && err.statusCode >= 400 && err.statusCode < 500) {
+          throw err;
+        }
+
+        if (attempt < this.maxRetries) {
+          const delay = Math.min(1000 * 2 ** attempt, 5000);
+          logger.warn(`AI-ML request failed (attempt ${attempt + 1}/${this.maxRetries + 1}), retrying in ${delay}ms`);
+          await this.sleep(delay);
+        }
+      }
+    }
+
+    this.onFailure();
+    throw lastError ?? new AimlServiceError('AI-ML service request failed', 503);
+  }
+
+  private async fetchWithTimeout(method: string, path: string, body?: unknown): Promise<Response> {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), this.timeoutMs);
+
+    try {
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        'X-Request-ID': crypto.randomUUID(),
+      };
+      if (this.serviceKey) {
+        headers['X-Service-Key'] = this.serviceKey;
+      }
+      return await fetch(`${this.baseUrl}${path}`, {
+        method,
+        headers,
+        body: body ? JSON.stringify(body) : undefined,
+        signal: controller.signal,
+      });
+    } catch (err: unknown) {
+      if (err instanceof DOMException && err.name === 'AbortError') {
+        throw new AimlServiceError(`AI-ML request timed out after ${this.timeoutMs}ms`, 504);
+      }
+      throw err;
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  private checkCircuitBreaker(): void {
+    if (this.circuit.state === 'closed') return;
+
+    const elapsed = Date.now() - this.circuit.lastFailureAt;
+    if (elapsed >= this.cbResetMs) {
+      this.circuit.state = 'half-open';
+      logger.info('AI-ML circuit breaker half-open — allowing probe request');
+      return;
+    }
+
+    throw new AimlServiceError(
+      'AI-ML circuit breaker is open — service temporarily unavailable',
+      503,
+    );
+  }
+
+  private onSuccess(): void {
+    if (this.circuit.state === 'half-open') {
+      logger.info('AI-ML circuit breaker closed — probe request succeeded');
+    }
+    this.circuit = { failures: 0, lastFailureAt: 0, state: 'closed' };
+  }
+
+  private onFailure(): void {
+    this.circuit.failures++;
+    this.circuit.lastFailureAt = Date.now();
+
+    if (this.circuit.state === 'half-open') {
+      this.circuit.state = 'open';
+      logger.error('AI-ML circuit breaker re-opened — probe request failed');
+    } else if (this.circuit.failures >= this.cbThreshold) {
+      this.circuit.state = 'open';
+      logger.error(`AI-ML circuit breaker opened after ${this.circuit.failures} failures`);
+    }
+  }
+
+  private sleep(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // AI Revenue Recovery methods
+  // ──────────────────────────────────────────────────────────────────────────
+
+  async callRecoveryAgent(params: {
+    invoiceId: string;
+    invoiceNo: string;
+    clientName: string;
+    invoiceAmount: string;
+    currency: string;
+    dueDate: string;
+    daysOverdue: number;
+    paymentStatus: string;
+    followupCount: number;
+    retryCount: number;
+    failureReason: string | null;
+    portalViews: number;
+    hasDispute: boolean;
+    ptpCount: number;
+    ptpBroken: number;
+    communicationHistory: Array<{ subject: string; status: string }>;
+  }): Promise<{
+    root_cause: string;
+    strategy: string;
+    confidence: number;
+    reasoning: string;
+    estimated_recovery_probability: number;
+    recommended_delay_hours: number;
+    stopping_condition: string;
+    personalization_hint: string;
+  }> {
+    return this.request('POST', '/agents/recovery', {
+      invoice_id: params.invoiceId,
+      invoice_no: params.invoiceNo,
+      client_name: params.clientName,
+      invoice_amount: params.invoiceAmount,
+      currency: params.currency,
+      due_date: params.dueDate,
+      days_overdue: params.daysOverdue,
+      payment_status: params.paymentStatus,
+      followup_count: params.followupCount,
+      retry_count: params.retryCount,
+      failure_reason: params.failureReason ?? null,
+      portal_views: params.portalViews,
+      has_dispute: params.hasDispute,
+      ptp_count: params.ptpCount,
+      ptp_broken: params.ptpBroken,
+      communication_history: params.communicationHistory,
+    });
+  }
+
+  async callPaymentRetryAgent(params: {
+    invoiceId: string;
+    invoiceNo: string;
+    clientName: string;
+    invoiceAmount: string;
+    currency: string;
+    dueDate: string;
+    daysOverdue: number;
+    errorCode: string | null;
+    errorDescription: string | null;
+    retryCount: number;
+    previousLinkSent: boolean;
+  }): Promise<{
+    should_retry: boolean;
+    failure_classification: string;
+    delay_hours: number;
+    email_subject: string;
+    email_body: string;
+    personalized_reason: string;
+  }> {
+    return this.request('POST', '/agents/payment-retry', {
+      invoice_id: params.invoiceId,
+      invoice_no: params.invoiceNo,
+      client_name: params.clientName,
+      invoice_amount: params.invoiceAmount,
+      currency: params.currency,
+      due_date: params.dueDate,
+      days_overdue: params.daysOverdue,
+      error_code: params.errorCode ?? null,
+      error_description: params.errorDescription ?? null,
+      retry_count: params.retryCount,
+      previous_link_sent: params.previousLinkSent,
+    });
+  }
+
+  async callPromiseExtractor(params: {
+    invoiceId: string;
+    invoiceNo: string;
+    clientName: string;
+    invoiceAmount: string;
+    currency: string;
+    emailText: string;
+  }): Promise<{
+    has_promise: boolean;
+    confidence: number;
+    promised_date: string | null;
+    promised_amount: number | null;
+    promise_type: string;
+    extracted_text: string;
+    requires_followup_at: string | null;
+  }> {
+    return this.request('POST', '/agents/promise-extract', {
+      invoice_id: params.invoiceId,
+      invoice_no: params.invoiceNo,
+      client_name: params.clientName,
+      invoice_amount: params.invoiceAmount,
+      currency: params.currency,
+      email_text: params.emailText,
+    });
+  }
+
+  async callMandateSequencer(params: {
+    invoiceId: string;
+    clientName: string;
+    invoiceAmount: string;
+    currency: string;
+    failureReason: string | null;
+    previousFailures: number;
+    mandateStatus: string;
+    communicationCount: number;
+  }): Promise<{
+    should_sequence: boolean;
+    stop_reason: string | null;
+    retry_slots: Array<{ attempt: number; delay_hours: number; notify_customer: boolean; message_tone: string }>;
+    escalation_after_all_failed: string;
+    reasoning: string;
+  }> {
+    return this.request('POST', '/agents/mandate-sequence', {
+      invoice_id: params.invoiceId,
+      client_name: params.clientName,
+      invoice_amount: params.invoiceAmount,
+      currency: params.currency,
+      failure_reason: params.failureReason ?? null,
+      previous_failures: params.previousFailures,
+      mandate_status: params.mandateStatus,
+      communication_count: params.communicationCount,
+    });
+  }
+}
+
+

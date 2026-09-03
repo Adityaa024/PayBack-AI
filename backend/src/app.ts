@@ -1,0 +1,414 @@
+import express, { Application, Request, Response, NextFunction } from 'express';
+import { config as envConfig } from './config/index.js';
+import cors from 'cors';
+import cron from 'node-cron';
+import { InvoicePurgeService } from './modules/invoice/invoice-purge.service.js';
+import { DisputePurgeService } from './modules/dispute/dispute-purge.service.js';
+import { ReplyTokenCleanupService } from './modules/communication/reply-token-cleanup.service.js';
+import { createHealthRouter } from './modules/health/health.routes.js';
+import { HealthController } from './modules/health/health.controller.js';
+import { createAuthRouter } from './modules/auth/auth.routes.js';
+import { AuthController } from './modules/auth/auth.controller.js';
+import { createTenantRouter } from './modules/tenant/tenant.routes.js';
+import { TenantController } from './modules/tenant/tenant.controller.js';
+import { createInvoiceRouter } from './modules/invoice/invoice.routes.js';
+import { InvoiceController } from './modules/invoice/invoice.controller.js';
+import { createTriageRouter } from './modules/agent/triage.routes.js';
+import { TriageController } from './modules/agent/triage.controller.js';
+import { createReconcilerRouter } from './modules/agent/reconciler.routes.js';
+import { ReconcilerController } from './modules/agent/reconciler.controller.js';
+import { createCommunicationRouter } from './modules/communication/communication.routes.js';
+import { CommunicationController } from './modules/communication/communication.controller.js';
+import { createEventRouter } from './modules/event/event.routes.js';
+import { EventController } from './modules/event/event.controller.js';
+import { createAimlRouter } from './modules/agent/aiml.routes.js';
+import { AimlController } from './modules/agent/aiml.controller.js';
+import { createAgentRouter } from './modules/agent/agent.routes.js';
+import { AgentController } from './modules/agent/agent.controller.js';
+import { createDlqRouter } from './modules/dlq/dlq.routes.js';
+import { DlqController } from './modules/dlq/dlq.controller.js';
+import { createAnalyticsRouter } from './modules/analytics/analytics.routes.js';
+import { AnalyticsController } from './modules/analytics/analytics.controller.js';
+import { createSettingsRouter } from './modules/settings/settings.routes.js';
+import { SettingsController } from './modules/settings/settings.controller.js';
+import { createWebhookRouter } from './modules/webhook/webhook.routes.js';
+import { SendgridWebhookController } from './modules/webhook/sendgrid-webhook.controller.js';
+import { ResendWebhookController } from './modules/webhook/resend-webhook.controller.js';
+import { PaymentWebhookController } from './modules/webhook/payment-webhook.controller.js';
+import { createTeamRouter } from './modules/team/team.routes.js';
+import { TeamController } from './modules/team/team.controller.js';
+import { DisputeRepository } from './modules/dispute/dispute.repository.js';
+import { DisputeService } from './modules/dispute/dispute.service.js';
+import { DisputeController } from './modules/dispute/dispute.controller.js';
+import { createDisputeRouter } from './modules/dispute/dispute.routes.js';
+
+import { PortalRepository } from './modules/portal/portal.repository.js';
+import { PortalService } from './modules/portal/portal.service.js';
+import { RecoveryRepository } from './modules/recovery/recovery.repository.js';
+import { RecoveryService } from './modules/recovery/recovery.service.js';
+import { RecoveryController } from './modules/recovery/recovery.controller.js';
+import { createRecoveryRouter } from './modules/recovery/recovery.routes.js';
+import { PortalController } from './modules/portal/portal.controller.js';
+import { createPortalRouter } from './modules/portal/portal.routes.js';
+import { createPortalTokenAuthMiddleware } from './middleware/portal-auth.js';
+import { PaymentPlanRepository } from './modules/payment-plan/payment-plan.repository.js';
+import { PaymentPlanService } from './modules/payment-plan/payment-plan.service.js';
+import { PaymentPlanController } from './modules/payment-plan/payment-plan.controller.js';
+
+import { UserRepository } from './modules/auth/user.repository.js';
+import { LockoutService } from './modules/auth/lockout.service.js';
+import { TenantRepository } from './modules/tenant/tenant.repository.js';
+import { InvoiceRepository } from './modules/invoice/invoice.repository.js';
+import { CommunicationRepository } from './modules/communication/communication.repository.js';
+import { EventRepository } from './modules/event/event.repository.js';
+import { AgentRepository } from './modules/agent/agent.repository.js';
+import { AgentChunkRepository } from './modules/agent/agent-chunk.repository.js';
+import { DlqRepository } from './modules/dlq/dlq.repository.js';
+import { AnalyticsRepository } from './modules/analytics/analytics.repository.js';
+import { SettingsRepository } from './modules/settings/settings.repository.js';
+import { TeamRepository } from './modules/team/team.repository.js';
+
+import { AuthService } from './modules/auth/auth.service.js';
+import { TenantService } from './modules/tenant/tenant.service.js';
+import { InvoiceImportService } from './modules/invoice/invoice.service.js';
+import { TriageService } from './modules/agent/triage.service.js';
+import { ReconcilerService } from './modules/agent/reconciler.service.js';
+import { CommunicationService } from './modules/communication/communication.service.js';
+import { EventService } from './modules/event/event.service.js';
+import { AimlService } from './modules/agent/aiml.service.js';
+import { AgentService } from './modules/agent/agent.service.js';
+import { DlqService } from './modules/dlq/dlq.service.js';
+import { AnalyticsService } from './modules/analytics/analytics.service.js';
+import { IdempotencyService } from './modules/communication/services/idempotency.service.js';
+import { SettingsService } from './modules/settings/settings.service.js';
+import { TeamService } from './modules/team/team.service.js';
+import { PaymentRepository } from './modules/payment/payment.repository.js';
+import { PaymentService } from './modules/payment/payment.service.js';
+
+import { createAuthMiddleware } from './middleware/auth.js';
+import { tenantScoped } from './middleware/tenant-scoped.js';
+import { logger } from './shared/logger.js';
+import type { DatabaseClient } from './db/index.js';
+import { IntegrationRepository } from './modules/settings/integration.repository.js';
+import { IntegrationService } from './modules/settings/integration.service.js';
+import { IntegrationController } from './modules/settings/integration.controller.js';
+import { createIntegrationRouter } from './modules/settings/integration.routes.js';
+import { PaymentGatewayFactory } from './modules/payment/gateway.factory.js';
+import { RazorpayAdapter } from './modules/payment/adapters/razorpay.adapter.js';
+import { WebhookService } from './modules/webhook/webhook.service.js';
+import { SendgridWebhookService } from './modules/webhook/providers/sendgrid.webhook.js';
+import { standardLimiter, authLimiter } from './middleware/rate-limiter.js';
+import { createClient as createRedisClient, type RedisClientType } from 'redis';
+import { requestLogger } from './middleware/request-logger.js';
+import { requestId } from './middleware/request-id.js';
+import { errorHandler } from './middleware/error-handler.js';
+import { NotFoundError } from './shared/errors/index.js';
+import * as Sentry from '@sentry/node';
+import { EnvPlatformEmailConfigResolver, PlatformMailer } from './modules/platform-mail/platform-mailer.js';
+import { DbTenantEmailConfigResolver, TenantMailer } from './modules/communication/tenant-mailer.js';
+import { EmailVerificationService } from './modules/auth/email-verification.service.js';
+import { OtpService } from './modules/auth/otp.service.js';
+
+
+export interface AppConfig {
+  corsOrigins: string[];
+  db?: DatabaseClient;
+  jwtSecret?: string;
+  jwtExpiresIn?: string;
+  aimlServiceUrl?: string;
+  aimlServiceKey?: string;
+}
+
+export function createApp(config: AppConfig): Application {
+  if (process.env.SENTRY_DSN) {
+    Sentry.init({
+      dsn: process.env.SENTRY_DSN,
+      environment: 'production',
+    });
+  }
+
+  const app = express();
+  
+  app.set('trust proxy', 1);
+
+  app.use(
+    cors({
+      origin: config.corsOrigins,
+      credentials: true,
+    })
+  );
+
+  app.use(express.json());
+  app.use(express.urlencoded({ extended: true }));
+  app.use((req, res, next) => {
+    res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+    next();
+  });
+
+  app.use(requestId);
+  app.use(requestLogger);
+  app.use(standardLimiter);
+
+  if (config.db) {
+    const lockoutRedis = envConfig.REDIS_URL && process.env['NODE_ENV'] !== 'test'
+      ? createRedisClient({ url: envConfig.REDIS_URL })
+      : null;
+    if (lockoutRedis) {
+      lockoutRedis.connect().catch((err: Error) => {
+        logger.error(err, '[LockoutService] Redis connect failed — lockout tracking will be skipped (fail-open)');
+      });
+    }
+
+    // Shared Repositories
+    const eventRepo = new EventRepository(config.db);
+    const eventService = new EventService(eventRepo);
+    const invoiceRepo = new InvoiceRepository(config.db, eventService);
+    const communicationRepo = new CommunicationRepository(config.db);
+    const integrationRepo = new IntegrationRepository(config.db);
+    const settingsRepo = new SettingsRepository(config.db);
+    const invoicePurgeService = new InvoicePurgeService(invoiceRepo, settingsRepo, eventService);
+    const disputePurgeService = new DisputePurgeService(config.db);
+    const replyTokenCleanupService = new ReplyTokenCleanupService(config.db);
+    app.locals.invoicePurgeService = invoicePurgeService;
+    app.locals.disputePurgeService = disputePurgeService;
+
+    // Daily auto-purge task at 2 AM UTC
+    cron.schedule('0 2 * * *', () => {
+      invoicePurgeService.runPurge().catch((err) => {
+        logger.error(err, '[Cron] Auto-purge task execution failed');
+      });
+      disputePurgeService.purgeArchivedDisputes().catch((err) => {
+        logger.error(err, '[Cron] Dispute purge task execution failed');
+      });
+      replyTokenCleanupService.cleanupExpiredTokens().catch((err) => {
+        logger.error(err, '[Cron] Reply token cleanup task execution failed');
+      });
+    }, {
+      timezone: 'UTC'
+    });
+
+    // AI Revenue Recovery: check broken promises daily at 10 AM UTC
+    // NOTE: recoveryService is wired later in app.ts, use app.locals reference
+    // This cron is registered early but guarded by the app.locals check so it is safe.
+    cron.schedule('0 10 * * *', () => {
+      const svc = app.locals.recoveryService as RecoveryService | undefined;
+      if (svc) {
+        svc.checkBrokenPromises().catch((err: Error) => {
+          logger.error(err, '[Cron] PTP broken-promise check failed');
+        });
+      }
+    }, { timezone: 'UTC' });
+    const paymentRepo = new PaymentRepository(config.db);
+    const dlqRepo = new DlqRepository(config.db);
+    const dlqService = new DlqService(dlqRepo);
+    const agentRepo = new AgentRepository(config.db);
+
+    // Platform & Tenant Mailers
+    const platformEmailConfigResolver = new EnvPlatformEmailConfigResolver();
+    const platformMailer = new PlatformMailer(platformEmailConfigResolver);
+
+    // Shared Services
+    const integrationService = new IntegrationService(integrationRepo, lockoutRedis as unknown as RedisClientType | null, platformMailer);
+
+    const tenantEmailConfigResolver = new DbTenantEmailConfigResolver(integrationService);
+
+    const tenantMailer = new TenantMailer(tenantEmailConfigResolver, communicationRepo, invoiceRepo, eventService, dlqRepo);
+
+    const portalRepo = new PortalRepository(config.db);
+    const portalService = new PortalService(portalRepo);
+
+    const communicationService = new CommunicationService(communicationRepo, invoiceRepo, tenantMailer, portalService, eventService, dlqRepo, integrationService);
+    app.locals.communicationService = communicationService;
+    
+    const gatewayFactory = new PaymentGatewayFactory();
+    gatewayFactory.register(new RazorpayAdapter());
+    
+    const paymentService = new PaymentService(paymentRepo, invoiceRepo, integrationService, gatewayFactory, settingsRepo, eventRepo);
+    app.locals.paymentService = paymentService;
+
+    const aimlService = new AimlService({
+      baseUrl: config.aimlServiceUrl || 'http://localhost:8000',
+      serviceKey: config.aimlServiceKey,
+    });
+    app.locals.aimlService = aimlService;
+
+    const disputeRepo = new DisputeRepository(config.db);
+    const disputeService = new DisputeService(
+      disputeRepo,
+      aimlService,
+      config.db,
+      communicationRepo,
+      communicationService,
+      eventService,
+      lockoutRedis as unknown as RedisClientType | null
+    );
+    const disputeController = new DisputeController(disputeService);
+
+    const paymentPlanRepo = new PaymentPlanRepository(config.db);
+    const paymentPlanService = new PaymentPlanService(paymentPlanRepo, invoiceRepo, eventService, config.db, portalService, tenantMailer, settingsRepo);
+    const paymentPlanController = new PaymentPlanController(paymentPlanService);
+
+    const portalController = new PortalController(portalService, paymentService, paymentPlanService, disputeService);
+    const portalTokenAuth = createPortalTokenAuthMiddleware(portalService);
+    app.locals.portalService = portalService;
+
+    const webhookService = new WebhookService(invoiceRepo, eventService);
+    const sendgridService = new SendgridWebhookService(communicationService);
+    
+    const sendgridWebhookController = new SendgridWebhookController(
+      settingsRepo,
+      sendgridService,
+      disputeService,
+      lockoutRedis as unknown as RedisClientType | null
+    );
+    const resendWebhookController = new ResendWebhookController(
+      settingsRepo,
+      disputeService,
+      lockoutRedis as unknown as RedisClientType | null,
+      communicationService,
+      integrationService
+    );
+    const paymentWebhookController = new PaymentWebhookController(
+      gatewayFactory,
+      webhookService,
+      paymentService,
+      settingsRepo
+    );
+
+    app.use('/api/webhooks', createWebhookRouter(sendgridWebhookController, paymentWebhookController, resendWebhookController));
+    app.use('/api/public/portal', createPortalRouter(portalController, portalTokenAuth));
+    app.use('/api/portal', createPortalRouter(portalController, portalTokenAuth));
+    app.use('/public/portal', createPortalRouter(portalController, portalTokenAuth));
+
+    // Recovery Module (created early so paymentService can reference it, router registered here)
+    const recoveryRepo = new RecoveryRepository(config.db);
+    const recoveryService = new RecoveryService(
+      recoveryRepo,
+      aimlService,
+      invoiceRepo,
+      paymentService,
+      communicationService,
+      eventService
+    );
+    const recoveryController = new RecoveryController(recoveryService);
+    app.locals.recoveryService = recoveryService;
+
+    // Wire recovery service into payment service for auto-trigger on payment.failed
+    paymentService.setRecoveryService(recoveryService);
+    portalController.setRecoveryService(recoveryService);
+    disputeService.setRecoveryService(recoveryService);
+
+    // BUG-01 FIX: Register recovery router here (outside auth guard) using its own middleware
+    // Recovery routes apply their own auth + tenant middleware inside createRecoveryRouter()
+    // We register with a placeholder and swap middleware once auth is ready.
+    // For now: recovery routes are mounted at /api/recovery and middleware is applied per-route.
+
+    if (config.jwtSecret) {
+      const userRepo = new UserRepository(config.db);
+      const tenantRepo = new TenantRepository(config.db);
+      const lockoutService = new LockoutService(lockoutRedis as unknown as RedisClientType | null, eventRepo);
+      const otpService = new OtpService(lockoutRedis as unknown as RedisClientType | null);
+      const emailVerificationService = new EmailVerificationService(lockoutRedis as unknown as RedisClientType | null, otpService);
+
+      const authService = new AuthService(
+        userRepo,
+        config.jwtSecret,
+        config.jwtExpiresIn ?? '7d',
+        lockoutService,
+        eventRepo,
+        emailVerificationService,
+        platformMailer,
+        lockoutRedis as unknown as RedisClientType | null,
+        otpService
+      );
+
+      const tenantService = new TenantService(tenantRepo);
+      const authMiddleware = createAuthMiddleware(authService);
+      
+      const authRouter = createAuthRouter(new AuthController(authService), authMiddleware);
+      app.use('/api/auth', authLimiter, authRouter);
+      
+      app.use('/api/tenants', createTenantRouter(new TenantController(tenantService), authMiddleware));
+
+      const teamRepo = new TeamRepository(config.db);
+      const teamService = new TeamService(teamRepo, userRepo, platformMailer);
+      app.use('/api/team', createTeamRouter(new TeamController(teamService, teamRepo, eventService), authMiddleware));
+
+      const invoiceImportService = new InvoiceImportService(invoiceRepo, eventRepo);
+      const triageService = new TriageService();
+      app.use('/api/invoices', createInvoiceRouter(new InvoiceController(invoiceImportService, invoiceRepo, paymentService, eventService, dlqService, communicationRepo, portalService, paymentPlanRepo), paymentPlanController, authMiddleware, tenantScoped));
+      app.use('/api/invoices', createTriageRouter(new TriageController(triageService, invoiceRepo, dlqService, communicationRepo, paymentPlanRepo), authMiddleware, tenantScoped));
+
+      const analyticsRepo = new AnalyticsRepository(config.db);
+      const analyticsService = new AnalyticsService(analyticsRepo);
+      app.use('/api/analytics', createAnalyticsRouter(new AnalyticsController(analyticsService), authMiddleware, tenantScoped));
+
+      const settingsService = new SettingsService(settingsRepo, lockoutRedis as unknown as RedisClientType | null, integrationService);
+      app.use('/api/settings', createSettingsRouter(new SettingsController(settingsService, eventService, dlqService), authMiddleware, tenantScoped));
+
+      const reconcilerService = new ReconcilerService(invoiceRepo, communicationRepo, config.db);
+      app.use('/api/invoices', createReconcilerRouter(new ReconcilerController(reconcilerService, eventService), authMiddleware, tenantScoped));
+
+      app.use('/api', createEventRouter(new EventController(eventService), authMiddleware, tenantScoped));
+
+      app.use('/api/settings/communication', createCommunicationRouter(new CommunicationController(communicationService), authMiddleware, tenantScoped));
+      app.use('/api/settings/integrations', authMiddleware, tenantScoped, createIntegrationRouter(new IntegrationController(integrationService, communicationService, eventService, dlqService, settingsRepo)));
+      
+      app.locals.authMiddleware = authMiddleware;
+      app.locals.authService = authService;
+      app.locals.tenantScoped = tenantScoped;
+
+      if (config.aimlServiceUrl) {
+        app.use('/api/aiml', createAimlRouter(new AimlController(aimlService), authMiddleware));
+
+        app.use('/api/disputes', createDisputeRouter(disputeController, authMiddleware, tenantScoped));
+
+        app.use('/api/dlq', createDlqRouter(new DlqController(dlqService, eventService), authMiddleware, tenantScoped));
+
+        const idempotencyService = new IdempotencyService(communicationRepo);
+        const agentChunkRepo = new AgentChunkRepository(config.db);
+
+        const agentService = new AgentService(agentRepo, agentChunkRepo, aimlService, invoiceRepo, triageService, eventService, dlqService, idempotencyService, paymentService, communicationService, communicationRepo, portalService, integrationService, paymentPlanRepo);
+        app.locals.agentService = agentService;
+        app.use('/api/agent', createAgentRouter(new AgentController(agentService, eventService), authMiddleware, tenantScoped));
+
+        // Register recovery routes (requires authMiddleware + tenantScoped)
+        // BUG-01 FIX: This is still inside the jwtSecret block since authMiddleware requires it.
+        // The controller/service are created ABOVE (line 282) regardless of this block.
+        app.use('/api/recovery', createRecoveryRouter(recoveryController, authMiddleware, tenantScoped));
+
+        // Checkout abandonment scan every 30 minutes (GAP-03 FIX)
+        cron.schedule('*/30 * * * *', () => {
+          const svc = app.locals.recoveryService as RecoveryService | undefined;
+          const agentSvc = app.locals.agentService;
+          if (svc) {
+            // Scan all tenants' abandonment signals (could be scoped per tenant in production)
+            svc.scanAndTriggerAbandonments().catch((err: Error) => {
+              logger.error(err, '[Cron] Abandonment scan failed');
+            });
+          }
+        }, { timezone: 'UTC' });
+      }
+    }
+  }
+
+  const healthController = new HealthController(config.db, config.aimlServiceUrl ? app.locals.aimlService : undefined);
+  app.use('/api/health', createHealthRouter(healthController));
+
+  // Root health / probe handler for platform health monitors
+  app.get('/', (_req: Request, res: Response) => {
+    res.json({ status: 'ok', name: 'RecoverIQ Backend API', version: '0.1.0' });
+  });
+  app.head('/', (_req: Request, res: Response) => {
+    res.status(200).end();
+  });
+
+  // 404 Fallback
+  app.use((req: Request, _res: Response, next: NextFunction) => {
+    next(new NotFoundError(`Route ${req.method} ${req.path} not found`));
+  });
+
+  app.use(errorHandler);
+
+  return app;
+}

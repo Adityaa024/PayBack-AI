@@ -1,0 +1,310 @@
+import { Request, Response, NextFunction } from 'express';
+import { z } from 'zod';
+import type { AuthService } from './auth.service.js';
+import { AuthError, ValidationError } from '../../shared/errors/index.js';
+import type { AuthenticatedRequest } from '../../shared/types/auth.js';
+
+
+export const passwordSchema = z.string()
+  .min(8, 'Password must be at least 8 characters long')
+  .max(100, 'Password cannot exceed 100 characters');
+
+const onboardSchema = z.object({
+  name: z.string().min(1, 'Full name is required'),
+  companyName: z.string().min(1, 'Company name is required'),
+  email: z.string().email('Please enter a valid email address'),
+  password: passwordSchema,
+});
+
+const loginSchema = z.object({
+  email: z.string().email('Please enter a valid email address'),
+  password: z.string().min(1, 'Password is required'),
+});
+
+const updateProfileSchema = z.object({
+  name: z.string().min(1, 'Name is required').max(100),
+});
+
+const mfaVerifySchema = z.object({
+  mfaPendingToken: z.string().min(1, 'MFA pending token is required'),
+  code: z.string().min(1, 'Verification code is required'),
+});
+
+const mfaConfirmSchema = z.object({
+  code: z.string().length(6, 'Verification code must be 6 digits'),
+});
+
+const mfaDisableSchema = z.object({
+  code: z.string().length(6, 'Verification code must be 6 digits'),
+});
+
+const verifyEmailSchema = z.object({
+  email: z.string().email('Please enter a valid email address'),
+  code: z.string().length(6, 'Verification code must be 6 digits'),
+});
+
+const resendVerificationSchema = z.object({
+  email: z.string().email('Please enter a valid email address'),
+});
+
+const forgotPasswordSchema = z.object({
+  email: z.string().email('Please enter a valid email address'),
+});
+
+const resetPasswordVerifySchema = z.object({
+  email: z.string().email('Please enter a valid email address'),
+  code: z.string().length(6, 'Verification code must be 6 digits'),
+});
+
+const resetPasswordConfirmSchema = z.object({
+  resetToken: z.string().min(1, 'Reset token is required'),
+  newPassword: passwordSchema,
+});
+
+const resetPasswordResendSchema = z.object({
+  email: z.string().email('Please enter a valid email address'),
+});
+
+function formatZodError(error: z.ZodError): string {
+  const first = error.issues[0];
+  if (!first) return 'Invalid request data';
+  return first.message || 'Invalid request data';
+}
+
+export class AuthController {
+  constructor(private authService: AuthService) {}
+
+  onboard = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const parsed = onboardSchema.safeParse(req.body);
+    if (!parsed.success) {
+      next(new ValidationError(formatZodError(parsed.error), JSON.stringify(parsed.error.issues)));
+      return;
+    }
+
+    try {
+      const result = await this.authService.onboard(parsed.data);
+      res.status(201).json(result);
+    } catch (err: unknown) {
+      next(err);
+    }
+  };
+
+  login = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const parsed = loginSchema.safeParse(req.body);
+    if (!parsed.success) {
+      next(new ValidationError(formatZodError(parsed.error), JSON.stringify(parsed.error.issues)));
+      return;
+    }
+
+    try {
+      const result = await this.authService.login(parsed.data);
+      res.status(200).json(result);
+    } catch (err: unknown) {
+      next(err);
+    }
+  };
+
+  refresh = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const header = req.headers.authorization;
+    if (!header?.startsWith('Bearer ')) {
+      next(new AuthError('Missing or malformed Authorization header', 401));
+      return;
+    }
+
+    try {
+      const result = await this.authService.refreshToken(header.slice(7));
+      res.status(200).json(result);
+    } catch (err: unknown) {
+      next(err);
+    }
+  };
+
+  getMe = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { userId } = (req as AuthenticatedRequest).user;
+      const profile = await this.authService.getProfile(userId);
+      res.status(200).json(profile);
+    } catch (err: unknown) {
+      next(err);
+    }
+  };
+
+  updateProfile = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const parsed = updateProfileSchema.safeParse(req.body);
+    if (!parsed.success) {
+      next(new ValidationError('Validation failed', JSON.stringify(parsed.error.issues)));
+      return;
+    }
+
+    try {
+      const { userId } = (req as AuthenticatedRequest).user;
+      const updatedUser = await this.authService.updateProfile(userId, parsed.data);
+      res.status(200).json(updatedUser);
+    } catch (err: unknown) {
+      next(err);
+    }
+  };
+
+
+  mfaVerify = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const parsed = mfaVerifySchema.safeParse(req.body);
+    if (!parsed.success) {
+      next(new ValidationError('Validation failed', JSON.stringify(parsed.error.issues)));
+      return;
+    }
+
+    try {
+      const result = await this.authService.verifyMfaCode(
+        parsed.data.mfaPendingToken,
+        parsed.data.code,
+      );
+      res.status(200).json(result);
+    } catch (err: unknown) {
+      next(err);
+    }
+  };
+
+  mfaSetupInitiate = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { userId } = (req as AuthenticatedRequest).user;
+      const result = await this.authService.initiateMfaSetup(userId);
+      res.status(200).json(result);
+    } catch (err: unknown) {
+      next(err);
+    }
+  };
+
+  mfaSetupConfirm = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const parsed = mfaConfirmSchema.safeParse(req.body);
+    if (!parsed.success) {
+      next(new ValidationError('Validation failed', JSON.stringify(parsed.error.issues)));
+      return;
+    }
+
+    try {
+      const { userId } = (req as AuthenticatedRequest).user;
+      const result = await this.authService.confirmMfaSetup(userId, parsed.data.code);
+      res.status(200).json(result);
+    } catch (err: unknown) {
+      next(err);
+    }
+  };
+
+  mfaDisable = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const parsed = mfaDisableSchema.safeParse(req.body);
+    if (!parsed.success) {
+      next(new ValidationError('Validation failed', JSON.stringify(parsed.error.issues)));
+      return;
+    }
+
+    try {
+      const { userId } = (req as AuthenticatedRequest).user;
+      await this.authService.disableMfa(userId, parsed.data.code);
+      res.status(204).send();
+    } catch (err: unknown) {
+      next(err);
+    }
+  };
+
+  verifyEmail = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const parsed = verifyEmailSchema.safeParse(req.body);
+    if (!parsed.success) {
+      next(new ValidationError('Validation failed', JSON.stringify(parsed.error.issues)));
+      return;
+    }
+
+    try {
+      const result = await this.authService.verifyEmail(parsed.data.email, parsed.data.code);
+      res.status(200).json(result);
+    } catch (err: unknown) {
+      next(err);
+    }
+  };
+
+  resendVerification = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const parsed = resendVerificationSchema.safeParse(req.body);
+    if (!parsed.success) {
+      next(new ValidationError('Validation failed', JSON.stringify(parsed.error.issues)));
+      return;
+    }
+
+    try {
+      await this.authService.resendVerification(parsed.data.email);
+      res.status(200).json({ success: true, message: 'Verification code resent successfully' });
+    } catch (err: unknown) {
+      next(err);
+    }
+  };
+
+  forgotPassword = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const parsed = forgotPasswordSchema.safeParse(req.body);
+    if (!parsed.success) {
+      next(new ValidationError('Validation failed', JSON.stringify(parsed.error.issues)));
+      return;
+    }
+
+    try {
+      await this.authService.forgotPassword(parsed.data.email);
+      res.status(200).json({
+        success: true,
+        message: 'If an account exists with this email, a reset code has been sent',
+      });
+    } catch (err: unknown) {
+      next(err);
+    }
+  };
+
+  resetPasswordVerify = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const parsed = resetPasswordVerifySchema.safeParse(req.body);
+    if (!parsed.success) {
+      next(new ValidationError('Validation failed', JSON.stringify(parsed.error.issues)));
+      return;
+    }
+
+    try {
+      const result = await this.authService.verifyForgotPasswordOtp(
+        parsed.data.email,
+        parsed.data.code,
+      );
+      res.status(200).json(result);
+    } catch (err: unknown) {
+      next(err);
+    }
+  };
+
+  resetPasswordConfirm = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const parsed = resetPasswordConfirmSchema.safeParse(req.body);
+    if (!parsed.success) {
+      next(new ValidationError('Validation failed', JSON.stringify(parsed.error.issues)));
+      return;
+    }
+
+    try {
+      const result = await this.authService.confirmForgotPassword(
+        parsed.data.resetToken,
+        parsed.data.newPassword,
+      );
+      res.status(200).json(result);
+    } catch (err: unknown) {
+      next(err);
+    }
+  };
+
+  resetPasswordResend = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const parsed = resetPasswordResendSchema.safeParse(req.body);
+    if (!parsed.success) {
+      next(new ValidationError('Validation failed', JSON.stringify(parsed.error.issues)));
+      return;
+    }
+
+    try {
+      await this.authService.resendForgotPasswordOtp(parsed.data.email);
+      res.status(200).json({
+        success: true,
+        message: 'If an account exists with this email, a reset code has been sent',
+      });
+    } catch (err: unknown) {
+      next(err);
+    }
+  };
+}

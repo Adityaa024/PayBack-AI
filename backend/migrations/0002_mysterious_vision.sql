@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX "recovery_sessions_active_uniq" ON "recovery_sessions" USING btree ("tenant_id","invoice_id") WHERE "recovery_sessions"."status" = 'active';

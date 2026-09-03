@@ -1,0 +1,139 @@
+import { eq, desc, and, count } from 'drizzle-orm';
+import crypto from 'crypto';
+import { communications, invoices, replyTokens } from '../../db/index.js';
+import type { DatabaseClient } from '../../db/index.js';
+import type { Communication, NewCommunication } from '../../db/index.js';
+import { tenantSettings, type TenantSettings, type NewTenantSettings } from '../../db/schema.js';
+
+export class CommunicationRepository {
+  constructor(private db: DatabaseClient) {}
+
+  async createReplyToken(params: {
+    rawToken: string;
+    tenantId: string;
+    communicationId?: string;
+    invoiceId?: string;
+    expiresAt?: Date;
+  }): Promise<string> {
+    const tokenHash = crypto.createHash('sha256').update(params.rawToken.toLowerCase()).digest('hex');
+    await this.db.insert(replyTokens).values({
+      tokenHash,
+      tenantId: params.tenantId,
+      communicationId: params.communicationId ?? null,
+      invoiceId: params.invoiceId ?? null,
+      expiresAt: params.expiresAt ?? null,
+      createdAt: new Date(),
+    });
+    return tokenHash;
+  }
+
+  async findByInvoiceId(invoiceId: string): Promise<(Pick<Communication, 'id' | 'invoiceId' | 'tenantId' | 'channel' | 'subject' | 'body' | 'status' | 'sentAt' | 'error' | 'createdAt'> & { recipient: string | null; errorMsg: string | null })[]> {
+    const rows = await this.db
+      .select({
+        id: communications.id,
+        invoiceId: communications.invoiceId,
+        tenantId: communications.tenantId,
+        channel: communications.channel,
+        subject: communications.subject,
+        body: communications.body,
+        status: communications.status,
+        source: communications.source,
+        sentAt: communications.sentAt,
+        error: communications.error,
+        createdAt: communications.createdAt,
+        recipient: invoices.contactEmail,
+      })
+      .from(communications)
+      .innerJoin(invoices, eq(communications.invoiceId, invoices.id))
+      .where(eq(communications.invoiceId, invoiceId))
+      .orderBy(desc(communications.createdAt));
+
+    return rows.map((r) => ({
+      ...r,
+      errorMsg: r.error,
+    }));
+  }
+
+  async findLastSuccessfulByInvoiceId(invoiceId: string): Promise<Communication | undefined> {
+    const [lastSent] = await this.db
+      .select()
+      .from(communications)
+      .where(
+        and(
+          eq(communications.invoiceId, invoiceId),
+          eq(communications.status, 'sent')
+        )
+      )
+      .orderBy(desc(communications.createdAt))
+      .limit(1);
+    return lastSent;
+  }
+
+  async countSuccessfulByInvoiceId(invoiceId: string): Promise<number> {
+    const [result] = await this.db
+      .select({ count: count() })
+      .from(communications)
+      .where(
+        and(
+          eq(communications.invoiceId, invoiceId),
+          eq(communications.status, 'sent')
+        )
+      );
+    return Number(result?.count ?? 0);
+  }
+
+  async create(data: NewCommunication): Promise<Communication> {
+    const id = data.id || crypto.randomUUID();
+    const insertData = { ...data, id };
+    await this.db.insert(communications).values(insertData);
+    const [row] = await this.db.select().from(communications).where(eq(communications.id, id)).limit(1);
+    return row!;
+  }
+
+  async markFailed(id: string, error: string): Promise<void> {
+    await this.db
+      .update(communications)
+      .set({ status: 'failed', error })
+      .where(eq(communications.id, id));
+  }
+
+  async update(id: string, updates: Partial<Omit<Communication, 'id' | 'createdAt'>>): Promise<void> {
+    await this.db
+      .update(communications)
+      .set(updates)
+      .where(eq(communications.id, id));
+  }
+
+  // Provider Settings Management (e.g. Email Settings)
+  async getSettings(tenantId: string): Promise<TenantSettings | undefined> {
+    const [settings] = await this.db
+      .select()
+      .from(tenantSettings)
+      .where(eq(tenantSettings.tenantId, tenantId));
+    return settings;
+  }
+
+  async upsertSettings(tenantId: string, settings: Omit<NewTenantSettings, 'tenantId' | 'updatedAt'>): Promise<TenantSettings> {
+    const token = crypto.randomBytes(32).toString('hex');
+    await this.db
+      .insert(tenantSettings)
+      .values({
+        tenantId,
+        ...settings,
+        webhookToken: token,
+        updatedAt: new Date(),
+      })
+      .onConflictDoUpdate({
+        target: tenantSettings.tenantId,
+        set: {
+          ...settings,
+          updatedAt: new Date(),
+        },
+      });
+    
+    const result = await this.getSettings(tenantId);
+    return result!;
+  }
+
+}
+
