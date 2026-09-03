@@ -10,6 +10,10 @@ An enterprise-grade accounts receivable automation platform with an AI Revenue R
 
 | Criteria | Implementation |
 |---|---|
+| **A/B Testing & Smart Yield** | Live analytics proving *Incremental Holdout Revenue* vs Treatment cohort |
+| **Multi-Channel Stepper** | Visual interactive escalation timeline (Email → SMS → Voice → Internal) |
+| **Hackathon Demo Reset** | Instant 1-click database wipe and re-seed for flawless live judging |
+| **Voice-First AI Simulation** | Browser-native Hinglish voice negotiation powered by Web Speech API |
 | **Measured money recovered** | Real-time ₹ recovered per batch on the Recovery Dashboard |
 | **Batch processing** | `POST /api/recovery/run` scans all at-risk invoices and starts sessions |
 | **Compliant escalation** | 5-Stage Tone Matrix + Razorpay mandate retry (T+1, T+3, T+7) |
@@ -219,6 +223,4 @@ cd frontend && npm install && npm run dev
 
 ---
 
-*Built with ❤️ for Razorpay Buildathon 2026 — Track 03: AI Revenue Recovery*
 
-**Suresh Jakhar**
