@@ -1,0 +1,23 @@
+# World Assumptions for PayBack-AI Synthetic Batch Generator
+# This configuration makes all assumptions explicit, labeled as [ASSUMPTION] or [OBSERVED].
+# OBSERVED values are based on industry standards or Razorpay's public docs.
+
+natural_recovery_rate: 0.15          # [ASSUMPTION] 15% of failed payments resolve themselves with zero intervention (customer realizes and pays)
+base_failure_rate: 0.12              # [OBSERVED] ~12% standard payment failure rate for Indian recurring mandates
+cost_per_contact: 1.50               # [ASSUMPTION] Average ₹1.50 blended cost per SMS/Email intervention
+avg_invoice_value: 1499              # [ASSUMPTION] Average transaction value at risk (₹)
+
+cohort_sizes:
+  total_batch_size: 1000             # Generate a batch of 1000 failed invoices
+  holdout_percentage: 0.20           # [ASSUMPTION] 20% assigned to "no intervention" (Control Arm)
+
+recovery_probabilities:
+  naive_baseline: 0.35               # [ASSUMPTION] "Always send a link" recovers ~35% (gross)
+  ai_agent_baseline: 0.65            # [ASSUMPTION] Full AI agent recovers ~65% (gross) due to optimal timing, channels, and tones
+
+# Incident Lane Distribution
+incident_lanes:
+  payment_degradation: 0.40          # 40%
+  subscription_rescue: 0.30          # 30%
+  b2b_receivables: 0.20              # 20%
+  checkout_dropoff: 0.10             # 10%

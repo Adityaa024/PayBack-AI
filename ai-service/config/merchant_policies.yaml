@@ -1,0 +1,38 @@
+# PayBack-AI Differentiator: Merchant-Specific Policy Controls
+# These settings override system defaults and act as hard guardrails before the AI executes.
+
+# Default generic merchant profile
+default_merchant:
+  intervention_caps:
+    max_contacts_per_invoice: 3
+    max_daily_contacts_per_customer: 1
+    max_total_spend_per_batch: 5000.0  # ₹ limit circuit breaker
+  compliance:
+    quiet_hours_start: "21:00"         # Cannot contact after 9 PM
+    quiet_hours_end: "08:00"           # Cannot contact before 8 AM
+    require_human_approval_above: 50000.0
+    allowed_channels: ["email", "sms"]
+
+# Enterprise merchant with relaxed limits
+enterprise_tenant_1:
+  intervention_caps:
+    max_contacts_per_invoice: 5
+    max_daily_contacts_per_customer: 2
+    max_total_spend_per_batch: 50000.0
+  compliance:
+    quiet_hours_start: "20:00"
+    quiet_hours_end: "09:00"
+    require_human_approval_above: 250000.0
+    allowed_channels: ["email", "sms", "voice", "whatsapp"]
+
+# Strict compliance merchant (e.g. Healthcare billing)
+strict_health_tenant:
+  intervention_caps:
+    max_contacts_per_invoice: 2
+    max_daily_contacts_per_customer: 1
+    max_total_spend_per_batch: 2000.0
+  compliance:
+    quiet_hours_start: "18:00"
+    quiet_hours_end: "10:00"
+    require_human_approval_above: 10000.0
+    allowed_channels: ["email"]        # No SMS/Voice allowed

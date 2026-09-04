@@ -389,6 +389,37 @@ export class RecoveryRepository {
   // ─── Audit Log ────────────────────────────────────────────────────────────
 
   async appendAuditLog(data: NewRecoveryAuditLog): Promise<RecoveryAuditLog> {
+    let previousHash: string | null = null;
+    try {
+      const [latest] = await this.db
+        .select({ hash: recoveryAuditLog.hash })
+        .from(recoveryAuditLog)
+        .where(eq(recoveryAuditLog.tenantId, data.tenantId))
+        .orderBy(desc(recoveryAuditLog.createdAt))
+        .limit(1);
+      if (latest && latest.hash) {
+        previousHash = latest.hash;
+      }
+    } catch {
+      const latestMem = this.memAudit.filter(a => a.tenantId === data.tenantId)[0];
+      if (latestMem?.hash) {
+        previousHash = latestMem.hash;
+      }
+    }
+
+    const payloadString = JSON.stringify({
+      sessionId: data.sessionId,
+      tenantId: data.tenantId,
+      invoiceId: data.invoiceId,
+      action: data.action,
+      actor: data.actor || 'system',
+      result: data.result || 'success',
+      amountAtRisk: data.amountAtRisk,
+    });
+    
+    const hashData = (previousHash || 'GENESIS') + '|' + payloadString;
+    const currentHash = crypto.createHash('sha256').update(hashData).digest('hex');
+
     const entry: RecoveryAuditLog = {
       id: data.id || `audit_${crypto.randomUUID()}`,
       sessionId: data.sessionId,
@@ -400,6 +431,8 @@ export class RecoveryRepository {
       razorpayRef: data.razorpayRef ?? null,
       amountAtRisk: data.amountAtRisk ?? null,
       result: data.result || 'success',
+      previousHash: previousHash,
+      hash: currentHash,
       metadata: data.metadata ?? null,
       createdAt: new Date(),
     };
@@ -407,14 +440,19 @@ export class RecoveryRepository {
     try {
       const [row] = await this.db
         .insert(recoveryAuditLog)
-        .values(data)
+        .values({
+            ...data,
+            id: entry.id,
+            previousHash,
+            hash: currentHash
+        })
         .returning();
       if (row) {
         this.memAudit.unshift(row);
         return row;
       }
-    } catch {
-      // fallback
+    } catch (err) {
+      logger.error('Failed to append audit log to DB', { error: err });
     }
 
     this.memAudit.unshift(entry);

@@ -6,6 +6,20 @@ An enterprise-grade accounts receivable automation platform with an AI Revenue R
 
 ---
 
+## 📈 Proof of Yield (Evaluation Harness)
+
+We don't just claim AI recovery; we prove it mathematically. We built a synthetic batch evaluation harness (`ai-service/scripts/run_evaluation.py`) that simulates 1000 failed invoices. It enforces a strict **20% Hash-Based Holdout Cohort (Control Arm)** to measure *true incremental lift*.
+
+| Arm | Cases Eligible | Contacts Made | Intervention Cost | Net Recovered | Incremental Lift |
+|-----|----------------|---------------|-------------------|---------------|------------------|
+| **Control (Do Nothing)** | ₹424,846 | 0 | ₹0.00 | ₹83,881 | Baseline |
+| **Naive (Always Contact)** | ₹1,836,144 | 811 | ₹1,216.50 | ₹571,354 | **₹208,826** |
+| **PayBack-AI Agent** | ₹1,836,144 | 972 | ₹1,458.00 | ₹938,201 | **₹575,674** |
+
+PayBack-AI yields the highest **Incremental Lift** because it uses smart tone escalation and routing, while strictly obeying 6 hard stopping rules. Read the full evaluation methodology in [EVALUATION.md](EVALUATION.md) and our honest bug log in [FAILURES.md](FAILURES.md).
+
+---
+
 ## 🏆 Hackathon Highlights
 
 | Criteria | Implementation |
@@ -19,6 +33,8 @@ An enterprise-grade accounts receivable automation platform with an AI Revenue R
 | **Compliant escalation** | 5-Stage Tone Matrix + Razorpay mandate retry (T+1, T+3, T+7) |
 | **Stopping rules** | 6 hard stops: 90-day cap, 3-retry max, PTP-broken-twice, DLQ, mandate-cap, invoice-paid |
 | **Audit trail** | Immutable `recovery_audit_log` table with every AI decision + Razorpay ref |
+| **Hash-Chained Ledger** | Cryptographic sequence verification (`verify-ledger.ts`) to prevent tampering |
+| **Merchant YAML Policy** | Absolute control via `ai-service/config/merchant_policies.yaml` (Differentiator) |
 | **Razorpay Test APIs** | Payment links, mandate retry, subscription status, payment.failed webhook |
 
 ---

@@ -983,6 +983,8 @@ export const recoveryAuditLog = pgTable(
     razorpayRef: varchar('razorpay_ref', { length: 255 }),
     amountAtRisk: numeric('amount_at_risk', { precision: 14, scale: 2 }),
     result: varchar('result', { length: 50 }).notNull().default('pending'),
+    previousHash: varchar('previous_hash', { length: 64 }),
+    hash: varchar('hash', { length: 64 }),
     metadata: jsonb('metadata'),
     createdAt: timestamp('created_at', { mode: 'date' })
       .notNull()

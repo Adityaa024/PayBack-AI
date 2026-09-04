@@ -26,6 +26,8 @@ async function main() {
     ALTER TABLE recovery_audit_log ADD COLUMN IF NOT EXISTS razorpay_ref VARCHAR(255);
     ALTER TABLE recovery_audit_log ADD COLUMN IF NOT EXISTS amount_at_risk NUMERIC(14, 2);
     ALTER TABLE recovery_audit_log ADD COLUMN IF NOT EXISTS result VARCHAR(50) DEFAULT 'success';
+    ALTER TABLE recovery_audit_log ADD COLUMN IF NOT EXISTS previous_hash VARCHAR(64);
+    ALTER TABLE recovery_audit_log ADD COLUMN IF NOT EXISTS hash VARCHAR(64);
 
     -- promise_to_pay columns
     ALTER TABLE promise_to_pay ADD COLUMN IF NOT EXISTS session_id VARCHAR(36);
