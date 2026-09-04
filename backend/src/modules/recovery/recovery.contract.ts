@@ -1,4 +1,6 @@
 import { z } from 'zod';
+import type { MerchantPolicyConfig } from '../policy/merchant-policy.service.js';
+import { ResponsibleContactService } from '../policy/responsible-contact.service.js';
 
 export type IncidentLane =
   | 'payment_degradation'
@@ -60,6 +62,22 @@ export const RecoveryContractSchema = z.object({
     'risk_score_above_threshold',
   ]),
   requiresHumanApproval: z.boolean().default(false),
+  policyVersion: z.string().optional(),
+  policyHash: z.string().optional(),
+  selectedChannel: z.enum(['email', 'sms', 'whatsapp', 'voice']).optional(),
+  economics: z.object({
+    expectedIncrementalValue: z.number(),
+    predictedProbability: z.number(),
+    totalInterventionCost: z.number(),
+    channelCost: z.number(),
+    providerCost: z.number(),
+    discountCost: z.number(),
+    recommendation: z.enum(['proceed', 'human_review', 'abstain']),
+    rationale: z.string(),
+    modelVersion: z.string(),
+    promptVersion: z.string(),
+    chosenChannel: z.string(),
+  }).optional(),
 });
 
 export type RecoveryContract = z.infer<typeof RecoveryContractSchema>;
@@ -79,11 +97,25 @@ export interface PolicyContext {
   daysOverdue?: number;
   amountAtRisk?: number;
   hasHumanApproval?: boolean;
+  channel?: 'email' | 'sms' | 'whatsapp' | 'voice';
+  customerTimezone?: string;
+  merchantPolicy?: MerchantPolicyConfig;
+  enforceQuietHours?: boolean;
+  customerPreferences?: {
+    preferredChannel?: string;
+    optedOutChannels?: string[];
+    hasConsent?: boolean;
+  };
+  economics?: {
+    expectedIncrementalValue: number;
+    recommendation: 'proceed' | 'human_review' | 'abstain';
+  };
+  now?: Date;
 }
 
 export class PolicyGuard {
   /**
-   * Evaluates the recovery contract against hard guardrails and regulatory compliance rules.
+   * Evaluates the recovery contract against hard guardrails, merchant policy, and compliance rules.
    * "The model recommends; policy code decides."
    */
   static validate(
@@ -91,6 +123,7 @@ export class PolicyGuard {
     context: PolicyContext
   ): { allowed: boolean; blockedReason?: string; violations: string[] } {
     const violations: string[] = [];
+    const policy = context.merchantPolicy;
 
     // 1. Payment Already Captured / Settled
     if (context.invoiceStatus === 'Paid' || context.invoiceStatus === 'Written Off') {
@@ -108,39 +141,82 @@ export class PolicyGuard {
     }
 
     // 4. Maximum Attempt Ceiling
-    if (context.retryCount >= contract.maxAttempts) {
-      violations.push(`MAX_ATTEMPTS_EXCEEDED: Max retry attempts reached (${context.retryCount}/${contract.maxAttempts}).`);
+    const maxAttempts = policy?.retrySchedule.maxAttempts ?? contract.maxAttempts;
+    if (context.retryCount >= maxAttempts) {
+      violations.push(`MAX_ATTEMPTS_EXCEEDED: Max retry attempts reached (${context.retryCount}/${maxAttempts}).`);
     }
 
     // 5. Cooldown Window Violation
-    if (context.lastContactedAt && contract.cooldownHours > 0) {
+    const cooldownHours = policy?.retrySchedule.cooldownHours ?? contract.cooldownHours;
+    if (context.lastContactedAt && cooldownHours > 0) {
       const lastMs = typeof context.lastContactedAt === 'string'
         ? new Date(context.lastContactedAt).getTime()
         : context.lastContactedAt instanceof Date
           ? context.lastContactedAt.getTime()
           : new Date(String(context.lastContactedAt)).getTime();
       const elapsedHours = (Date.now() - lastMs) / (1000 * 60 * 60);
-      if (elapsedHours < contract.cooldownHours) {
+      if (elapsedHours < cooldownHours) {
         violations.push(
-          `COOLDOWN_ACTIVE: Cooldown period active: ${elapsedHours.toFixed(1)}h elapsed out of ${contract.cooldownHours}h required.`
+          `COOLDOWN_ACTIVE: Cooldown period active: ${elapsedHours.toFixed(1)}h elapsed out of ${cooldownHours}h required.`
         );
       }
     }
 
     // 6. 90-Day Overdue Hard Cap (Legal Stop)
-    if (context.daysOverdue && context.daysOverdue > 90) {
+    if (context.daysOverdue !== undefined && context.daysOverdue > 90) {
       violations.push(`LEGAL_STOP: Overdue duration (${context.daysOverdue} days) exceeds 90-day automated recovery cap.`);
     }
 
-    // 7. High-Value B2B Guard (> ₹5,00,000 requires human approval)
-    if (contract.amountAtRisk > 500000 && contract.requiresHumanApproval && !context.hasHumanApproval) {
-      violations.push('HUMAN_APPROVAL_REQUIRED: High-value threshold (> ₹5,00,000) requires explicit human approval before execution.');
+    // 7. High-Value B2B Guard (> threshold requires human approval)
+    const amount = context.amountAtRisk !== undefined ? context.amountAtRisk : contract.amountAtRisk;
+    const approvalThreshold = policy?.compliance.requireHumanApprovalAbove ?? 500000.0;
+    if (amount > approvalThreshold && (contract.requiresHumanApproval || !context.hasHumanApproval)) {
+      if (!context.hasHumanApproval) {
+        violations.push(
+          `HUMAN_APPROVAL_REQUIRED: High-value threshold (> ₹${approvalThreshold.toLocaleString('en-IN')}) requires explicit human approval before execution.`
+        );
+      }
     }
 
-    // 8. Economic Floor Check (Invoices < ₹100 are rejected as economically unviable for recovery intervention)
-    const amount = context.amountAtRisk !== undefined ? context.amountAtRisk : contract.amountAtRisk;
-    if (amount !== undefined && amount < 100) {
-      violations.push(`ECONOMIC_FLOOR_VIOLATION: Amount (₹${amount}) is below the ₹100 economic floor for automated recovery.`);
+    // 8. Economic Floor Check
+    const minFloor = policy?.amountFloor ?? 100.0;
+    if (amount !== undefined && amount < minFloor) {
+      violations.push(`ECONOMIC_FLOOR_VIOLATION: Amount (₹${amount}) is below the ₹${minFloor} economic floor for automated recovery.`);
+    }
+
+    // 9. Responsible Contact: Quiet Hours
+    if (policy && (context.enforceQuietHours || context.now !== undefined)) {
+      const quietCheck = ResponsibleContactService.isQuietHours(
+        policy,
+        context.customerTimezone,
+        context.now || new Date()
+      );
+      if (quietCheck.inQuietHours) {
+        violations.push(
+          `QUIET_HOURS_ACTIVE: Outreach suppressed during quiet hours (${quietCheck.quietHoursWindow}) in timezone ${quietCheck.timezone}. Current local time: ${quietCheck.currentLocalTime}.`
+        );
+      }
+    }
+
+    // 10. Responsible Contact: Channel Permissions & Customer Consent
+    if (policy && context.channel) {
+      const channelCheck = ResponsibleContactService.validateChannel(
+        policy,
+        context.channel,
+        context.customerPreferences
+      );
+      if (!channelCheck.allowed) {
+        violations.push(channelCheck.reason || `CHANNEL_BLOCKED: Channel ${context.channel} is disallowed.`);
+      }
+    }
+
+    // 11. Economically Grounded Routing: Abstain on Non-Positive EIV
+    if (context.economics) {
+      if (context.economics.recommendation === 'abstain' || context.economics.expectedIncrementalValue <= 0) {
+        violations.push(
+          `ECONOMIC_ABSTAIN: Expected incremental value (₹${context.economics.expectedIncrementalValue}) is non-positive; intervention withheld.`
+        );
+      }
     }
 
     if (violations.length > 0) {

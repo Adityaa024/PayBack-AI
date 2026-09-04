@@ -24,6 +24,7 @@ export {
   promiseToPay,
   checkoutAbandonmentSignals,
   recoveryAuditLog,
+  recoveryOutboxIntents,
 } from './schema.js';
 
 export {
@@ -47,6 +48,7 @@ export {
   recoverySessionStatusEnum,
   recoveryStopReasonEnum,
   promiseToPayStatusEnum,
+  outboxStatusEnum,
 } from './schema.js';
 
 export type {
@@ -104,6 +106,8 @@ export type {
   NewCheckoutAbandonmentSignal,
   RecoveryAuditLog,
   NewRecoveryAuditLog,
+  RecoveryOutboxIntent,
+  NewRecoveryOutboxIntent,
 } from './schema.js';
 
 export { createDatabaseClient } from './client.js';

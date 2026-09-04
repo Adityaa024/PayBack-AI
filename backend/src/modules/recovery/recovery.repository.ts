@@ -15,8 +15,10 @@ import {
   type RecoveryAuditLog,
   type CheckoutAbandonmentSignal,
 } from '../../db/schema.js';
+import { MerchantPolicyService } from '../policy/merchant-policy.service.js';
 import { eq, and, desc, sql, isNull, isNotNull, lt, lte, or, ne } from 'drizzle-orm';
 import { logger } from '../../shared/logger.js';
+import { config } from '../../config/index.js';
 import crypto from 'crypto';
 
 export class RecoveryRepository {
@@ -40,6 +42,10 @@ export class RecoveryRepository {
         return row;
       }
     } catch (err) {
+      if (!config.ALLOW_IN_MEMORY_FALLBACK) {
+        logger.error('database_unavailable_fail_closed', { action: 'createSession', error: err });
+        throw new Error(`Operational Database Error: Postgres unavailable during createSession. Fail-closed policy active.`);
+      }
       logger.warn('recovery_repo_db_offline_fallback', { action: 'createSession' });
     }
 
@@ -85,8 +91,12 @@ export class RecoveryRepository {
         )
         .limit(1);
       if (rows[0]) return rows[0];
-    } catch {
-      // fallback
+      return null;
+    } catch (err) {
+      if (!config.ALLOW_IN_MEMORY_FALLBACK) {
+        logger.error('database_unavailable_fail_closed', { action: 'getSessionByInvoiceId', error: err });
+        throw new Error(`Operational Database Error: Postgres unavailable during getSessionByInvoiceId. Fail-closed policy active.`);
+      }
     }
 
     const mem = Array.from(this.memSessions.values()).find(
@@ -207,6 +217,10 @@ export class RecoveryRepository {
         return row;
       }
     } catch (err) {
+      if (!config.ALLOW_IN_MEMORY_FALLBACK) {
+        logger.error('database_unavailable_fail_closed', { action: 'markSessionRecoveredAtomic', error: err });
+        throw new Error(`Operational Database Error: Postgres unavailable during markSessionRecoveredAtomic. Fail-closed policy active.`);
+      }
       logger.error('markSessionRecoveredAtomic failed', { tenantId, invoiceId, error: err });
     }
     return null;
@@ -448,6 +462,10 @@ export class RecoveryRepository {
         (error as any).cause = err;
         throw error;
       }
+      if (!config.ALLOW_IN_MEMORY_FALLBACK) {
+        logger.error('database_unavailable_fail_closed', { action: 'recordRetryAttempt', error: err });
+        throw new Error(`Operational Database Error: Postgres unavailable during recordRetryAttempt. Fail-closed policy active.`);
+      }
       logger.warn('record_retry_attempt_failed', { error: err });
     }
   }
@@ -474,81 +492,128 @@ export class RecoveryRepository {
   // ─── Audit Log ────────────────────────────────────────────────────────────
 
   async appendAuditLog(data: NewRecoveryAuditLog): Promise<RecoveryAuditLog> {
-    let previousHash: string | null = null;
     try {
-      const [latest] = await this.db
-        .select({ hash: recoveryAuditLog.hash })
-        .from(recoveryAuditLog)
-        .where(eq(recoveryAuditLog.tenantId, data.tenantId))
-        .orderBy(desc(recoveryAuditLog.createdAt))
-        .limit(1);
-      if (latest && latest.hash) {
-        previousHash = latest.hash;
-      }
-    } catch {
-      const latestMem = this.memAudit.filter(a => a.tenantId === data.tenantId)[0];
-      if (latestMem?.hash) {
-        previousHash = latestMem.hash;
-      }
-    }
+      return await this.db.transaction(async (tx) => {
+        // Advisory transaction lock per tenant to serialize ledger hash-chain appends
+        await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext(${'recovery_ledger_' + data.tenantId}))`);
 
-    const payloadString = JSON.stringify({
-      sessionId: data.sessionId,
-      tenantId: data.tenantId,
-      invoiceId: data.invoiceId,
-      action: data.action,
-      actor: data.actor || 'system',
-      result: data.result || 'success',
-      amountAtRisk: data.amountAtRisk,
-    });
-    
-    const hashData = (previousHash || 'GENESIS') + '|' + payloadString;
-    const currentHash = crypto.createHash('sha256').update(hashData).digest('hex');
+        const headResult = await tx.execute(sql`
+          SELECT hash FROM recovery_audit_log
+          WHERE tenant_id = ${data.tenantId}
+            AND hash NOT IN (
+              SELECT previous_hash FROM recovery_audit_log
+              WHERE tenant_id = ${data.tenantId} AND previous_hash IS NOT NULL
+            )
+          LIMIT 1;
+        `);
 
-    const entry: RecoveryAuditLog = {
-      id: data.id || crypto.randomUUID(),
-      sessionId: data.sessionId,
-      tenantId: data.tenantId,
-      invoiceId: data.invoiceId,
-      action: data.action || 'policy_validation',
-      actor: data.actor || 'system',
-      aiDecision: data.aiDecision ?? null,
-      razorpayRef: data.razorpayRef ?? null,
-      amountAtRisk: data.amountAtRisk ?? null,
-      result: data.result || 'success',
-      previousHash: previousHash,
-      hash: currentHash,
-      metadata: data.metadata ?? null,
-      idempotencyKey: (data as any).idempotencyKey ?? null,
-      createdAt: new Date(),
-    };
+        const latestHash = (headResult as any)?.rows?.[0]?.hash as string | undefined;
+        const previousHash = latestHash || 'GENESIS';
 
-    try {
-      const [row] = await this.db
-        .insert(recoveryAuditLog)
-        .values({
+        const payloadString = JSON.stringify({
+          sessionId: data.sessionId,
+          tenantId: data.tenantId,
+          invoiceId: data.invoiceId,
+          action: data.action,
+          actor: data.actor || 'system',
+          result: data.result || 'success',
+          amountAtRisk: data.amountAtRisk,
+        });
+
+        const hashData = previousHash + '|' + payloadString;
+        const currentHash = crypto.createHash('sha256').update(hashData).digest('hex');
+        const policy = MerchantPolicyService.getPolicyForMerchant(data.tenantId);
+        const metadataObj = typeof data.metadata === 'object' && data.metadata !== null ? { ...(data.metadata as any) } : {};
+        if (!metadataObj.policyVersion) metadataObj.policyVersion = policy.version;
+        if (!metadataObj.policyHash) metadataObj.policyHash = policy.policyHash;
+        const entryId = data.id || crypto.randomUUID();
+        const [row] = await tx
+          .insert(recoveryAuditLog)
+          .values({
             ...data,
-            id: entry.id,
+            id: entryId,
             previousHash,
             hash: currentHash,
-            idempotencyKey: (data as any).idempotencyKey ?? null
-        })
-        .returning();
-      if (row) {
-        this.memAudit.unshift(row);
-        return row;
-      }
+            metadata: metadataObj,
+            idempotencyKey: (data as any).idempotencyKey ?? null,
+          })
+          .returning();
+
+        if (row) {
+          this.memAudit.unshift(row);
+          return row;
+        }
+        throw new Error('Insert failed to return row');
+      });
     } catch (err: unknown) {
-      // Catch unique constraint violation and return gracefully
       if (err && typeof err === 'object' && 'code' in err && (err as any).code === '23505') {
         logger.info('Duplicate audit log suppressed by unique constraint', { idempotencyKey: (data as any).idempotencyKey });
-        return entry; // Return entry silently (already processed)
+        const [existing] = await this.db
+          .select()
+          .from(recoveryAuditLog)
+          .where(eq(recoveryAuditLog.idempotencyKey, (data as any).idempotencyKey))
+          .limit(1);
+        if (existing) return existing;
       }
-      logger.error('Failed to append audit log to DB', { error: err });
-    }
 
-    this.memAudit.unshift(entry);
-    return entry;
+      if (!config.ALLOW_IN_MEMORY_FALLBACK) {
+        logger.error('database_unavailable_fail_closed', { action: 'appendAuditLog', error: err });
+        throw new Error(`Operational Database Error: Postgres unavailable during appendAuditLog. Fail-closed policy active.`);
+      }
+
+      logger.warn('recovery_repo_db_offline_fallback', { action: 'appendAuditLog' });
+      const latestMem = this.memAudit.filter(a => a.tenantId === data.tenantId)[0];
+      const previousHash = latestMem?.hash || 'GENESIS';
+      const payloadString = JSON.stringify({
+        sessionId: data.sessionId,
+        tenantId: data.tenantId,
+        invoiceId: data.invoiceId,
+        action: data.action,
+        actor: data.actor || 'system',
+        result: data.result || 'success',
+        amountAtRisk: data.amountAtRisk,
+      });
+      const hashData = previousHash + '|' + payloadString;
+      const currentHash = crypto.createHash('sha256').update(hashData).digest('hex');
+
+      const policy = MerchantPolicyService.getPolicyForMerchant(data.tenantId);
+      const fallbackMeta = typeof data.metadata === 'object' && data.metadata !== null ? { ...(data.metadata as any) } : {};
+      if (!fallbackMeta.policyVersion) fallbackMeta.policyVersion = policy.version;
+      if (!fallbackMeta.policyHash) fallbackMeta.policyHash = policy.policyHash;
+
+      const entry: RecoveryAuditLog = {
+        id: data.id || crypto.randomUUID(),
+        sessionId: data.sessionId,
+        tenantId: data.tenantId,
+        invoiceId: data.invoiceId,
+        action: data.action || 'policy_validation',
+        actor: data.actor || 'system',
+        aiDecision: data.aiDecision ?? null,
+        razorpayRef: data.razorpayRef ?? null,
+        amountAtRisk: data.amountAtRisk ?? null,
+        result: data.result || 'success',
+        previousHash,
+        hash: currentHash,
+        metadata: fallbackMeta,
+        idempotencyKey: (data as any).idempotencyKey ?? null,
+        createdAt: new Date(),
+      };
+
+      this.memAudit.unshift(entry);
+      return entry;
+    }
+  }
+
+  /**
+   * Immutable Audit Ledger Protection:
+   * Block any attempt to update or delete audit log entries.
+   */
+  async updateAuditLog(): Promise<never> {
+    throw new Error('LEDGER_TAMPER_PROTECTION: Audit logs are cryptographically sealed and immutable. Updates are prohibited.');
+  }
+
+  async deleteAuditLog(): Promise<never> {
+    throw new Error('LEDGER_TAMPER_PROTECTION: Audit logs are cryptographically sealed and immutable. Deletions are prohibited.');
   }
 
   async getAuditLog(sessionId: string): Promise<RecoveryAuditLog[]> {

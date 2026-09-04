@@ -33,6 +33,9 @@ const schema = z.object({
   DISPUTE_LIMIT_PER_TENANT_HOURLY: z.coerce.number().int().positive().default(100),
   DISPUTE_LIMIT_PER_SENDER_HOURLY: z.coerce.number().int().positive().default(15),
 
+  ALLOW_IN_MEMORY_FALLBACK: z.coerce.boolean().default(false),
+  DEMO_MODE: z.coerce.boolean().default(false),
+
   ENCRYPTION_KEY: z.string().refine((val) => {
     try {
       return Buffer.from(val, 'base64').length === 32;

@@ -3,7 +3,7 @@ import type { IncidentLane } from './recovery.contract.js';
 
 export interface HoldoutAssignment {
   isHoldout: boolean;
-  holdoutRatio: number; // e.g., 0.15 for 15% holdout
+  holdoutRatio: number; // e.g., 0.20 for 20% holdout
   strata: string;
 }
 
@@ -37,7 +37,7 @@ export interface ExperimentMetrics {
 }
 
 export class HoldoutManager {
-  private static readonly DEFAULT_HOLDOUT_PERCENT = 15; // 15% holdout
+  private static readonly DEFAULT_HOLDOUT_PERCENT = 20; // 20% holdout
 
   /**
    * Deterministically assigns an incident to Treatment or Holdout based on hash of invoiceId & tenantId.

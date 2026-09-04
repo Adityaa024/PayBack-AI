@@ -258,6 +258,21 @@ export class DisputeRepository {
       .where(eq(inboundEmails.id, id));
   }
 
+  async hasActiveDisputeForInvoice(invoiceId: string): Promise<boolean> {
+    const rows = await this.db
+      .select({ id: inboundEmails.id })
+      .from(inboundEmails)
+      .where(
+        and(
+          eq(inboundEmails.invoiceId, invoiceId),
+          eq(inboundEmails.status, 'pending'),
+          eq(inboundEmails.classification, 'dispute')
+        )
+      )
+      .limit(1);
+    return rows.length > 0;
+  }
+
   async delete(id: string): Promise<void> {
     await this.db.delete(inboundEmails).where(eq(inboundEmails.id, id));
   }

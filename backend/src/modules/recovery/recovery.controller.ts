@@ -1,6 +1,7 @@
 import type { Request, Response, NextFunction } from 'express';
 import type { RecoveryService } from './recovery.service.js';
 import { logger } from '../../shared/logger.js';
+import { config } from '../../config/index.js';
 
 export class RecoveryController {
   constructor(private readonly recoveryService: RecoveryService) {}
@@ -107,9 +108,24 @@ export class RecoveryController {
     }
   }
 
-  /** POST /api/recovery/reset — clear demo data */
+  /** POST /api/recovery/reset — clear demo data (restricted to demo/dev environments and admin role) */
   async resetDemo(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
+      if (config.NODE_ENV === 'production' && !config.DEMO_MODE) {
+        res.status(403).json({
+          error: 'FORBIDDEN',
+          message: 'Demo reset is strictly disabled in production environments without DEMO_MODE enabled.',
+        });
+        return;
+      }
+      const user = (req as any).user;
+      if (user && user.role !== 'admin') {
+        res.status(403).json({
+          error: 'FORBIDDEN',
+          message: 'Admin authorization required for demo reset.',
+        });
+        return;
+      }
       const tenantId = this.getTenantId(req);
       const result = await this.recoveryService.resetDemo(tenantId);
       res.json(result);

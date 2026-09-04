@@ -11,6 +11,12 @@ import { NotFoundError } from '../../shared/errors/index.js';
 import { PolicyGuard, type RecoveryContract, type IncidentLane } from './recovery.contract.js';
 import { HoldoutManager, type ExperimentMetrics } from './recovery.holdout.js';
 import { ScenarioCatalog } from './recovery.scenarios.js';
+import type { DisputeRepository } from '../dispute/dispute.repository.js';
+import type { IntegrationService } from '../settings/integration.service.js';
+import type { OutboxService } from './outbox.service.js';
+import { MerchantPolicyService } from '../policy/merchant-policy.service.js';
+import { ResponsibleContactService } from '../policy/responsible-contact.service.js';
+import { EconomicEngine } from './economic-engine.js';
 
 // Stopping rule constants
 const MAX_RETRY_COUNT = 3;
@@ -45,7 +51,10 @@ export class RecoveryService {
     private readonly invoiceRepo: InvoiceRepository,
     private readonly paymentService: PaymentService,
     private readonly communicationService: CommunicationService,
-    private readonly eventService: EventService
+    private readonly eventService: EventService,
+    private readonly integrationService?: IntegrationService,
+    private readonly disputeRepo?: DisputeRepository,
+    private readonly outboxService?: OutboxService
   ) {}
 
   /**
@@ -221,8 +230,20 @@ export class RecoveryService {
       incidentLane = 'b2b_receivables';
     }
 
+    const policy = MerchantPolicyService.getPolicyForMerchant(tenantId);
     const numAmount = parseFloat(String(invoice.invoiceAmount)) || 0;
-    const { isHoldout } = HoldoutManager.assignCohort(tenantId, invoiceId, incidentLane, numAmount);
+    const { isHoldout } = HoldoutManager.assignCohort(tenantId, invoiceId, incidentLane, numAmount, policy.holdoutRatio * 100);
+
+    const chosenChannel = (strategy === 'mandate_retry' ? 'sms' : 'email') as 'email' | 'sms' | 'whatsapp' | 'voice';
+    const economicDecision = EconomicEngine.evaluateIntervention({
+      predictedProbability: parseFloat(aiConfidence) || 0.85,
+      amountAtRisk: numAmount,
+      channel: chosenChannel,
+      minConfidenceThreshold: 0.35,
+      minExpectedValueThreshold: 0.0,
+      modelVersion: 'payback-ai-v1',
+      promptVersion: 'v1.2.0',
+    });
 
     const voiceScriptHinglish = `Namaste ${invoice.clientName} ji, aapka ₹${numAmount.toLocaleString('en-IN')} ka invoice payment update hai. Aap UPI ya card se secure link par turant payment complete kar sakte hain. Agar aap abhi payment nahi karna chahte, 'STOP' reply karein.`;
 
@@ -249,11 +270,27 @@ export class RecoveryService {
       },
       customerMessage: aiReasoning || `Your payment of ${invoice.currency} ${numAmount} for invoice ${invoice.invoiceNo} is due. Please settle via the payment link.`,
       voiceScriptHinglish,
-      cooldownHours: 24,
-      maxAttempts: 3,
+      cooldownHours: policy.retrySchedule.cooldownHours,
+      maxAttempts: policy.retrySchedule.maxAttempts,
       escalateAfter: 'no_payment_after_48h',
       stopRules: ['payment_captured', 'customer_opted_out', 'refund_or_dispute_signal', 'max_attempts_reached'],
-      requiresHumanApproval: numAmount > 500000,
+      requiresHumanApproval: numAmount > policy.compliance.requireHumanApprovalAbove || economicDecision.recommendation === 'human_review',
+      policyVersion: policy.version,
+      policyHash: policy.policyHash,
+      selectedChannel: chosenChannel,
+      economics: {
+        expectedIncrementalValue: economicDecision.expectedIncrementalValue,
+        predictedProbability: economicDecision.predictedProbability,
+        totalInterventionCost: economicDecision.totalInterventionCost,
+        channelCost: economicDecision.channelCost,
+        providerCost: economicDecision.providerCost,
+        discountCost: economicDecision.discountCost,
+        recommendation: economicDecision.recommendation,
+        rationale: economicDecision.rationale,
+        modelVersion: economicDecision.modelVersion,
+        promptVersion: economicDecision.promptVersion,
+        chosenChannel: economicDecision.chosenChannel,
+      },
     };
 
     // Create recovery session - guardrail fires transition immediately to escalated
@@ -362,7 +399,7 @@ export class RecoveryService {
     }
 
     try {
-      // Holdout Guard: If this case is in the 15% holdout cohort, suppress intervention
+      // Holdout Guard: If this case is in the 20% holdout cohort, suppress intervention
       if (session.isHoldout) {
         await this.recoveryRepo.appendAuditLog({
           sessionId,
@@ -371,20 +408,53 @@ export class RecoveryService {
           action: 'holdout_action_suppressed',
           actor: 'holdout_guard',
           result: 'stopped',
-          metadata: { reason: 'counterfactual_holdout_cohort', holdoutRatio: 0.15 },
+          metadata: { reason: 'counterfactual_holdout_cohort', holdoutRatio: 0.20 },
         });
-        return { success: false, message: 'Case is in the 15% holdout control group — automated action suppressed to measure incremental recovery' };
+        return { success: false, message: 'Case is in the 20% holdout control group — automated action suppressed to measure incremental recovery' };
       }
 
-      // PolicyGuard Validation: verify contract against dynamic business rules
+      // Load current invoice immediately before an external recovery action
+      const invoice = await this.invoiceRepo.findById(session.invoiceId);
+      if (!invoice) {
+        return { success: false, message: 'Invoice not found for session' };
+      }
+
+      // Check relevant dispute state immediately before external recovery action
+      let hasDispute = false;
+      if (this.disputeRepo && typeof this.disputeRepo.hasActiveDisputeForInvoice === 'function') {
+        try {
+          hasDispute = await this.disputeRepo.hasActiveDisputeForInvoice(session.invoiceId);
+        } catch (disputeErr) {
+          logger.warn('Failed to query dispute status for invoice', { invoiceId: session.invoiceId, error: disputeErr });
+        }
+      }
+
+      // Derive days overdue from invoice.dueDate, NEVER session.createdAt
+      const dueDate = invoice.dueDate ? new Date(invoice.dueDate) : new Date();
+      const daysOverdue = Math.max(0, Math.floor((Date.now() - dueDate.getTime()) / (1000 * 60 * 60 * 24)));
+      const amountAtRisk = parseFloat(invoice.invoiceAmount) || parseFloat(session.amountAtRisk) || 0;
+
+      // PolicyGuard Validation: verify contract against dynamic business rules and merchant policy
+      const policy = MerchantPolicyService.getPolicyForMerchant(tenantId);
       const contract = session.recoveryContract as RecoveryContract | null;
       if (contract) {
+        const chosenChannel = contract.selectedChannel || (contract as any)?.channel || 'email';
         const policyCheck = PolicyGuard.validate(contract, {
           retryCount: attemptCount,
           lastContactedAt: session.lastActionAt,
           optedOut: session.optedOut,
-          daysOverdue: session.createdAt ? this.calculateDaysOverdue(session.createdAt.toISOString()) : 0,
-          amountAtRisk: parseFloat(session.amountAtRisk) || 0,
+          invoiceStatus: invoice.paymentStatus,
+          hasDispute,
+          hasHumanApproval: (contract as any)?.hasHumanApproval || false,
+          daysOverdue,
+          amountAtRisk,
+          channel: chosenChannel as any,
+          customerTimezone: policy.compliance.customerTimezone,
+          merchantPolicy: policy,
+          economics: contract.economics ? {
+            expectedIncrementalValue: contract.economics.expectedIncrementalValue,
+            recommendation: contract.economics.recommendation,
+          } : undefined,
         });
 
         if (!policyCheck.allowed) {
@@ -398,10 +468,46 @@ export class RecoveryService {
             action: 'action_blocked_by_policy_guard',
             actor: 'policy_guard',
             result: 'escalated',
-            metadata: { violations: policyCheck.violations, reason: policyCheck.blockedReason },
+            metadata: {
+              violations: policyCheck.violations,
+              reason: policyCheck.blockedReason,
+              policyVersion: policy.version,
+              policyHash: policy.policyHash,
+            },
           });
           return { success: false, message: `Blocked by PolicyGuard: ${policyCheck.blockedReason}` };
         }
+      }
+
+      // Check customer-level daily contact cap across all active sessions
+      const customerIdentifier = invoice.contactEmail || invoice.clientName || 'customer';
+      const capCheck = await ResponsibleContactService.checkCustomerDailyContactCap({
+        tenantId,
+        customerId: customerIdentifier,
+        maxDailyContacts: policy.interventionCaps.maxDailyContactsPerCustomer,
+        db: (this.recoveryRepo as any).db,
+      });
+
+      if (!capCheck.allowed) {
+        await this.recoveryRepo.updateSessionStatus(sessionId, 'escalated', {
+          stopReason: 'manual_override',
+        });
+        await this.recoveryRepo.appendAuditLog({
+          sessionId,
+          tenantId,
+          invoiceId: session.invoiceId,
+          action: 'action_blocked_by_contact_cap',
+          actor: 'responsible_contact',
+          result: 'escalated',
+          metadata: {
+            reason: capCheck.reason,
+            currentCount: capCheck.currentCount,
+            maxAllowed: capCheck.maxAllowed,
+            policyVersion: policy.version,
+            policyHash: policy.policyHash,
+          },
+        });
+        return { success: false, message: `Blocked by contact cap: ${capCheck.reason}` };
       }
 
       // Branch on strategy
@@ -443,49 +549,204 @@ export class RecoveryService {
     attemptCount: number
   ): Promise<{ success: boolean; message: string; razorpayRef?: string }> {
     const sessionId = session!.id;
-    let paymentUrl: string | null = null;
-    let razorpayLinkId: string | null = null;
+    const attemptNumber = attemptCount + 1;
+    const idempotencyKey = `act_intent_${sessionId}_${attemptNumber}`;
 
+    // 1. Log action intent created
+    await this.recoveryRepo.appendAuditLog({
+      sessionId,
+      tenantId,
+      invoiceId: session!.invoiceId,
+      action: 'action_intent_created',
+      actor: 'recovery_agent',
+      amountAtRisk: session!.amountAtRisk,
+      result: 'pending',
+      idempotencyKey,
+      metadata: {
+        attemptNumber,
+        strategy: session!.strategy,
+        channel: (session!.recoveryContract as any)?.selectedChannel || 'email',
+      },
+    });
+
+    // 2. Outbox intent creation if outboxService is available
+    if (this.outboxService) {
+      try {
+        await this.outboxService.createIntent({
+          tenantId,
+          sessionId,
+          invoiceId: session!.invoiceId,
+          actionType: 'payment_link_refresh',
+          idempotencyKey,
+          payload: { attemptNumber, strategy: session!.strategy },
+        });
+      } catch (outboxErr) {
+        logger.warn('Failed to record outbox intent (non-fatal)', { outboxErr });
+      }
+    }
+
+    // 3. Generate fresh payment link
+    let freshLink: { paymentUrl: string; providerPaymentLinkId: string } | null = null;
     try {
-      // BUG-06 FIX: Generate a fresh payment link directly via adapter (with 48h expiry)
-      const freshLink = await this.paymentService.generateFreshRecoveryLink(
+      freshLink = await this.paymentService.generateFreshRecoveryLink(
         tenantId,
         session!.invoiceId
       );
-      paymentUrl = freshLink.paymentUrl;
-      // BUG-02 FIX: Store the actual Razorpay payment link ID
-      razorpayLinkId = freshLink.providerPaymentLinkId ?? null;
     } catch (err) {
-      logger.warn('recovery_payment_link_failed', { sessionId, error: err });
+      logger.error('recovery_payment_link_failed', { sessionId, error: err });
+      await this.recoveryRepo.appendAuditLog({
+        sessionId,
+        tenantId,
+        invoiceId: session!.invoiceId,
+        action: 'provider_action_failed',
+        actor: 'payment_gateway',
+        amountAtRisk: session!.amountAtRisk,
+        result: 'failed',
+        metadata: {
+          attemptNumber,
+          error: err instanceof Error ? err.message : String(err),
+          provider: 'razorpay',
+        },
+      });
+      return {
+        success: false,
+        message: `Recovery action failed: Payment link generation failed (${err instanceof Error ? err.message : String(err)})`,
+      };
     }
 
-    // Create retry attempt record
+    const razorpayLinkId = freshLink.providerPaymentLinkId;
+    const redactedPaymentRef = `https://rzp.io/i/[REDACTED_${razorpayLinkId.slice(-6)}]`;
+
+    // 4. Record provider action succeeded with redacted URL reference (no raw URLs in audit metadata)
+    await this.recoveryRepo.appendAuditLog({
+      sessionId,
+      tenantId,
+      invoiceId: session!.invoiceId,
+      action: 'provider_action_succeeded',
+      actor: 'payment_gateway',
+      razorpayRef: razorpayLinkId,
+      amountAtRisk: session!.amountAtRisk,
+      result: 'succeeded',
+      metadata: {
+        attemptNumber,
+        providerPaymentLinkId: razorpayLinkId,
+        paymentLinkRef: redactedPaymentRef,
+      },
+    });
+
+    // 5. Dispatch communication via CommunicationService
+    const invoice = await this.invoiceRepo.findById(session!.invoiceId);
+    let communicationId: string | undefined = undefined;
+
+    if (invoice?.contactEmail && this.communicationService) {
+      await this.recoveryRepo.appendAuditLog({
+        sessionId,
+        tenantId,
+        invoiceId: session!.invoiceId,
+        action: 'message_queued',
+        actor: 'communication_service',
+        amountAtRisk: session!.amountAtRisk,
+        result: 'pending',
+        metadata: {
+          attemptNumber,
+          channel: 'email',
+          recipient: invoice.contactEmail,
+        },
+      });
+
+      try {
+        const emailSubject = `Payment Required: Invoice ${invoice.invoiceNo}`;
+        const emailHtml = `<p>Dear Customer,</p><p>Please settle Invoice ${invoice.invoiceNo} (${invoice.currency} ${invoice.invoiceAmount}) using the payment link: <a href="${freshLink.paymentUrl}">Pay Now</a>.</p>`;
+
+        const sent = await this.communicationService.send({
+          tenantId,
+          to: invoice.contactEmail,
+          subject: emailSubject,
+          html: emailHtml,
+          channel: 'email',
+          invoiceId: invoice.id,
+          source: 'bulk_ai_agent',
+        });
+
+        if (sent) {
+          await this.recoveryRepo.appendAuditLog({
+            sessionId,
+            tenantId,
+            invoiceId: session!.invoiceId,
+            action: 'provider_accepted',
+            actor: 'communication_service',
+            amountAtRisk: session!.amountAtRisk,
+            result: 'succeeded',
+            metadata: {
+              attemptNumber,
+              channel: 'email',
+              recipient: invoice.contactEmail,
+              status: 'delivered',
+            },
+          });
+        }
+      } catch (commErr) {
+        logger.warn('recovery_communication_dispatch_failed', { sessionId, error: commErr });
+        await this.recoveryRepo.appendAuditLog({
+          sessionId,
+          tenantId,
+          invoiceId: session!.invoiceId,
+          action: 'communication_dispatch_failed',
+          actor: 'communication_service',
+          amountAtRisk: session!.amountAtRisk,
+          result: 'failed',
+          metadata: {
+            attemptNumber,
+            error: commErr instanceof Error ? commErr.message : String(commErr),
+          },
+        });
+        return {
+          success: false,
+          message: `Recovery communication failed: ${commErr instanceof Error ? commErr.message : String(commErr)}`,
+        };
+      }
+    }
+
+    // 6. Complete outbox intent if available
+    if (this.outboxService) {
+      try {
+        const intent = await this.outboxService.getByIdempotencyKey(idempotencyKey);
+        if (intent) {
+          await this.outboxService.completeIntent(intent.id, razorpayLinkId);
+        }
+      } catch {
+        // non-fatal
+      }
+    }
+
+    // 7. Persist retry attempt and increment count
     await this.recoveryRepo.createRetryAttempt({
       sessionId,
       tenantId,
       invoiceId: session!.invoiceId,
-      attemptNumber: attemptCount + 1,
-      razorpayPaymentLinkUrl: paymentUrl ?? undefined,
-      razorpayPaymentLinkId: razorpayLinkId ?? undefined,
-      status: 'pending',
+      attemptNumber,
+      razorpayPaymentLinkId: razorpayLinkId,
+      razorpayPaymentLinkUrl: redactedPaymentRef,
+      communicationId,
+      status: 'succeeded',
     });
 
     await this.recoveryRepo.incrementRetryCount(sessionId);
 
-    // BUG-02 FIX: razorpayRef now actually contains the Razorpay link ID
+    // Also append the summary audit log for backwards-compatibility with existing tests
     await this.recoveryRepo.appendAuditLog({
       sessionId,
       tenantId,
       invoiceId: session!.invoiceId,
       action: 'payment_link_refreshed',
       actor: 'recovery_agent',
-      razorpayRef: razorpayLinkId ?? undefined,
+      razorpayRef: razorpayLinkId,
       amountAtRisk: session!.amountAtRisk,
       result: 'succeeded',
       metadata: {
-        attemptNumber: attemptCount + 1,
-        paymentUrl,
-        razorpayLinkId,
+        attemptNumber,
+        providerPaymentLinkId: razorpayLinkId,
+        paymentLinkRef: redactedPaymentRef,
         strategy: session!.strategy,
       },
     });
@@ -493,14 +754,14 @@ export class RecoveryService {
     logger.info('recovery_payment_link_executed', {
       sessionId,
       invoiceId: session!.invoiceId,
-      attemptNumber: attemptCount + 1,
+      attemptNumber,
       razorpayLinkId,
     });
 
     return {
       success: true,
-      message: `Recovery payment link #${attemptCount + 1} sent`,
-      razorpayRef: razorpayLinkId ?? undefined,
+      message: `Recovery payment link #${attemptNumber} sent`,
+      razorpayRef: razorpayLinkId,
     };
   }
 
@@ -604,24 +865,42 @@ export class RecoveryService {
     const activePtp = ptps.find((p) => p.status === 'pending');
 
     // Generate a follow-up payment link
-    let paymentUrl: string | null = null;
-    let razorpayLinkId: string | null = null;
+    let freshLink: { paymentUrl: string; providerPaymentLinkId: string } | null = null;
     try {
-      const link = await this.paymentService.generateFreshRecoveryLink(tenantId, session!.invoiceId);
-      paymentUrl = link.paymentUrl;
-      razorpayLinkId = link.providerPaymentLinkId ?? null;
+      freshLink = await this.paymentService.generateFreshRecoveryLink(tenantId, session!.invoiceId);
     } catch (err) {
-      logger.warn('ptp_followup_payment_link_failed', { sessionId, error: err });
+      logger.error('ptp_followup_payment_link_failed', { sessionId, error: err });
+      await this.recoveryRepo.appendAuditLog({
+        sessionId,
+        tenantId,
+        invoiceId: session!.invoiceId,
+        action: 'provider_action_failed',
+        actor: 'payment_gateway',
+        amountAtRisk: session!.amountAtRisk,
+        result: 'failed',
+        metadata: {
+          attemptNumber: attemptCount + 1,
+          error: err instanceof Error ? err.message : String(err),
+          provider: 'razorpay',
+        },
+      });
+      return {
+        success: false,
+        message: `Promise follow-up failed: Payment link generation failed (${err instanceof Error ? err.message : String(err)})`,
+      };
     }
+
+    const razorpayLinkId = freshLink.providerPaymentLinkId;
+    const redactedPaymentRef = `https://rzp.io/i/[REDACTED_${razorpayLinkId.slice(-6)}]`;
 
     await this.recoveryRepo.createRetryAttempt({
       sessionId,
       tenantId,
       invoiceId: session!.invoiceId,
       attemptNumber: attemptCount + 1,
-      razorpayPaymentLinkUrl: paymentUrl ?? undefined,
-      razorpayPaymentLinkId: razorpayLinkId ?? undefined,
-      status: 'pending',
+      razorpayPaymentLinkUrl: redactedPaymentRef,
+      razorpayPaymentLinkId: razorpayLinkId,
+      status: 'succeeded',
     });
 
     await this.recoveryRepo.incrementRetryCount(sessionId);
@@ -632,12 +911,13 @@ export class RecoveryService {
       invoiceId: session!.invoiceId,
       action: 'promise_followup_sent',
       actor: 'recovery_agent',
-      razorpayRef: razorpayLinkId ?? undefined,
+      razorpayRef: razorpayLinkId,
       amountAtRisk: session!.amountAtRisk,
       result: 'succeeded',
       metadata: {
         attemptNumber: attemptCount + 1,
-        paymentUrl,
+        providerPaymentLinkId: razorpayLinkId,
+        paymentLinkRef: redactedPaymentRef,
         activePtpId: activePtp?.id ?? null,
         promisedDate: activePtp?.promisedDate ?? null,
         promisedAmount: activePtp?.promisedAmount ?? null,
@@ -1010,9 +1290,74 @@ export class RecoveryService {
     if (actNumber === 3 && 'targetCase' in preset && preset.targetCase) {
       const session = await this.recoveryRepo.getSessionByInvoiceId(tenantId, preset.targetCase.id);
       if (session) {
+        // Step 1: Execute recovery action (e.g. generate link, queue message)
         const execResult = await this.executeRecoveryAction(session.id, tenantId);
-        await this.markSessionRecovered(tenantId, session.invoiceId, String(session.amountAtRisk));
-        return { ...preset, executed: true, result: execResult, status: 'recovered' };
+
+        // Step 2: Route payment success through the normal signed test-mode Razorpay payment.captured webhook path!
+        // Never mark session recovered directly from action execution alone.
+        const invoice = await this.invoiceRepo.findById(session.invoiceId);
+        if (invoice) {
+          const amountInPaise = Math.round(Number(invoice.invoiceAmount) * 100);
+          const paymentId = `pay_demo_${crypto.randomBytes(8).toString('hex')}`;
+          
+          let webhookSecret = 'test_webhook_secret';
+          if (this.integrationService) {
+            try {
+              const creds = await this.integrationService.getDecryptedRazorpayConfig(tenantId);
+              if (creds?.webhookSecret) webhookSecret = creds.webhookSecret;
+            } catch {
+              // fallback to test_webhook_secret
+            }
+          }
+
+          const webhookPayload = {
+            entity: 'event',
+            account_id: 'acc_demo_test',
+            event: 'payment.captured',
+            contains: ['payment'],
+            payload: {
+              payment: {
+                entity: {
+                  id: paymentId,
+                  entity: 'payment',
+                  amount: amountInPaise,
+                  currency: invoice.currency || 'INR',
+                  status: 'captured',
+                  notes: {
+                    invoice_id: invoice.id,
+                  },
+                },
+              },
+            },
+            created_at: Math.floor(Date.now() / 1000),
+          };
+
+          const rawBody = Buffer.from(JSON.stringify(webhookPayload));
+          const signature = crypto
+            .createHmac('sha256', webhookSecret)
+            .update(rawBody)
+            .digest('hex');
+
+          // Process the signed webhook through the normal paymentService path
+          const webhookResult = await this.paymentService.processPaymentCaptured(
+            tenantId,
+            'razorpay',
+            webhookPayload as any,
+            rawBody,
+            signature
+          );
+
+          const updatedSession = await this.recoveryRepo.getSessionById(session.id);
+          return {
+            ...preset,
+            executed: true,
+            result: execResult,
+            webhookResult,
+            status: updatedSession?.status || 'recovered',
+            amountRecovered: updatedSession?.amountRecovered || String(session.amountAtRisk),
+            verifiedByWebhook: true,
+          };
+        }
       }
     }
 
@@ -1020,6 +1365,17 @@ export class RecoveryService {
       const session = await this.recoveryRepo.getSessionByInvoiceId(tenantId, preset.targetCase.id);
       if (session) {
         await this.recoveryRepo.updateSessionOptOut(session.id, true);
+        const invoice = await this.invoiceRepo.findById(session.invoiceId);
+        const customerId = invoice?.contactEmail || invoice?.clientName || preset.targetCase.contract.customerId;
+        if ((this.recoveryRepo as any).db) {
+          await ResponsibleContactService.propagateCustomerOptOut({
+            tenantId,
+            customerId,
+            reason: 'Customer replied STOP in Act 4 demo',
+            db: (this.recoveryRepo as any).db,
+            recoveryRepo: this.recoveryRepo,
+          });
+        }
         await this.recoveryRepo.appendAuditLog({
           sessionId: session.id,
           tenantId,
@@ -1053,13 +1409,32 @@ export class RecoveryService {
 
     const contract = (session.recoveryContract as RecoveryContract) || null;
     const attemptCount = await this.recoveryRepo.countRetryAttempts(sessionId);
+    const invoice = await this.invoiceRepo.findById(session.invoiceId);
 
+    const dueDate = invoice?.dueDate ? new Date(invoice.dueDate) : (session.createdAt || new Date());
+    const daysOverdue = Math.max(0, Math.floor((Date.now() - new Date(dueDate).getTime()) / (1000 * 60 * 60 * 24)));
+
+    let hasDispute = false;
+    if (this.disputeRepo && typeof this.disputeRepo.hasActiveDisputeForInvoice === 'function') {
+      try {
+        hasDispute = await this.disputeRepo.hasActiveDisputeForInvoice(session.invoiceId);
+      } catch {
+        // non-fatal
+      }
+    }
+
+    const policy = MerchantPolicyService.getPolicyForMerchant(tenantId);
     const policyStatus = contract ? PolicyGuard.validate(contract, {
       retryCount: attemptCount,
       lastContactedAt: session.lastActionAt,
       optedOut: session.optedOut,
-      amountAtRisk: parseFloat(session.amountAtRisk) || 0,
-      daysOverdue: session.createdAt ? this.calculateDaysOverdue(session.createdAt.toISOString()) : 0,
+      invoiceStatus: invoice?.paymentStatus || 'Pending',
+      hasDispute,
+      hasHumanApproval: (contract as any)?.hasHumanApproval || false,
+      amountAtRisk: parseFloat(invoice?.invoiceAmount || session.amountAtRisk) || 0,
+      daysOverdue,
+      merchantPolicy: policy,
+      customerTimezone: policy.compliance.customerTimezone,
     }) : { allowed: true, violations: [] };
 
     return { session, contract, policyStatus };
@@ -1070,6 +1445,21 @@ export class RecoveryService {
     if (!session || session.tenantId !== tenantId) throw new NotFoundError('Session not found');
 
     await this.recoveryRepo.updateSessionOptOut(sessionId, true);
+
+    const invoice = await this.invoiceRepo.findById(session.invoiceId);
+    if (invoice) {
+      const customerId = invoice.contactEmail || invoice.clientName;
+      if (customerId && (this.recoveryRepo as any).db) {
+        await ResponsibleContactService.propagateCustomerOptOut({
+          tenantId,
+          customerId,
+          reason: 'Customer opted out via STOP keyword',
+          db: (this.recoveryRepo as any).db,
+          recoveryRepo: this.recoveryRepo,
+        });
+      }
+    }
+
     await this.recoveryRepo.appendAuditLog({
       sessionId,
       tenantId,

@@ -22,7 +22,7 @@ export class ScenarioCatalog {
    * - 15 Subscription Failures (Halted/Pending)
    * - 10 B2B Receivables (Overdue/Partial/PTP)
    * - 5 Checkout Drop-offs
-   * Stratified ~15% holdout group (8 holdout cases, 42 treatment cases).
+   * Stratified 20% holdout group (10 holdout cases, 40 treatment cases).
    */
   static generate50Batch(tenantId: string): ScenarioFixture[] {
     const fixtures: ScenarioFixture[] = [];
@@ -39,7 +39,7 @@ export class ScenarioCatalog {
       const pIndex = (i - 1) % paymentFailureReasons.length;
       const p = paymentFailureReasons[pIndex]!;
       const amount = 2500 + (i * 1200);
-      const isHoldout = i % 7 === 0; // ~15% holdout
+      const isHoldout = i % 5 === 0; // 20% holdout (4 cases)
       const caseId = `rcv_pay_${String(i).padStart(3, '0')}`;
 
       fixtures.push({
@@ -92,7 +92,7 @@ export class ScenarioCatalog {
       const sIndex = (i - 1) % subReasons.length;
       const s = subReasons[sIndex]!;
       const amount = 4999 + (i * 2500);
-      const isHoldout = i === 4 || i === 11;
+      const isHoldout = i === 4 || i === 8 || i === 12;
       const caseId = `rcv_sub_${String(i).padStart(3, '0')}`;
 
       fixtures.push({
@@ -246,7 +246,7 @@ export class ScenarioCatalog {
         return {
           act: 1,
           title: 'Act 1: Seed Batch',
-          description: 'Display 50 at-risk cases across 4 lanes with 15% holdout split and zero policy violations.',
+          description: 'Display 50 at-risk cases across 4 lanes with 20% holdout split and zero policy violations.',
           batch,
         };
       case 2:

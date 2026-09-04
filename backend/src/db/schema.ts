@@ -1002,6 +1002,49 @@ export const recoveryAuditLog = pgTable(
   ]
 );
 
+export const outboxStatusEnum = pgEnum('outbox_status', [
+  'queued',
+  'claimed',
+  'completed',
+  'failed',
+]);
+
+/** Transactional Outbox for external recovery actions (Razorpay links, communications) */
+export const recoveryOutboxIntents = pgTable(
+  'recovery_outbox_intents',
+  {
+    id: varchar('id', { length: 36 }).primaryKey().$defaultFn(() => crypto.randomUUID()),
+    tenantId: varchar('tenant_id', { length: 36 })
+      .notNull()
+      .references(() => tenants.id, { onDelete: 'cascade' }),
+    sessionId: varchar('session_id', { length: 36 })
+      .notNull()
+      .references(() => recoverySessions.id, { onDelete: 'cascade' }),
+    invoiceId: varchar('invoice_id', { length: 36 })
+      .notNull()
+      .references(() => invoices.id, { onDelete: 'cascade' }),
+    actionType: varchar('action_type', { length: 100 }).notNull(),
+    idempotencyKey: varchar('idempotency_key', { length: 128 }).notNull(),
+    status: outboxStatusEnum('status').notNull().default('queued'),
+    payload: jsonb('payload'),
+    providerRef: varchar('provider_ref', { length: 255 }),
+    retryCount: integer('retry_count').notNull().default(0),
+    lastError: text('last_error'),
+    lockedAt: timestamp('locked_at', { mode: 'date' }),
+    createdAt: timestamp('created_at', { mode: 'date' })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`),
+    updatedAt: timestamp('updated_at', { mode: 'date' })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`),
+  },
+  (table) => [
+    index('recovery_outbox_tenant_status_idx').on(table.tenantId, table.status),
+    index('recovery_outbox_session_idx').on(table.sessionId),
+    uniqueIndex('recovery_outbox_idempotency_uniq').on(table.idempotencyKey),
+  ]
+);
+
 // Recovery type exports
 export type RecoverySession = typeof recoverySessions.$inferSelect;
 export type NewRecoverySession = typeof recoverySessions.$inferInsert;
@@ -1013,4 +1056,6 @@ export type CheckoutAbandonmentSignal = typeof checkoutAbandonmentSignals.$infer
 export type NewCheckoutAbandonmentSignal = typeof checkoutAbandonmentSignals.$inferInsert;
 export type RecoveryAuditLog = typeof recoveryAuditLog.$inferSelect;
 export type NewRecoveryAuditLog = typeof recoveryAuditLog.$inferInsert;
+export type RecoveryOutboxIntent = typeof recoveryOutboxIntents.$inferSelect;
+export type NewRecoveryOutboxIntent = typeof recoveryOutboxIntents.$inferInsert;
 

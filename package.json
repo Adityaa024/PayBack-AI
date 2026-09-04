@@ -1,0 +1,11 @@
+{
+  "name": "payback-ai",
+  "version": "1.0.0",
+  "private": true,
+  "description": "PayBack-AI — AI Revenue Recovery Platform",
+  "scripts": {
+    "verify:all": "python scripts/verify_all.py",
+    "test": "npm --prefix backend run test:run",
+    "test:recovery": "npm --prefix backend run test:run test/modules/recovery"
+  }
+}

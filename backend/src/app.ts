@@ -47,6 +47,7 @@ import { PortalService } from './modules/portal/portal.service.js';
 import { RecoveryRepository } from './modules/recovery/recovery.repository.js';
 import { RecoveryService } from './modules/recovery/recovery.service.js';
 import { RecoveryController } from './modules/recovery/recovery.controller.js';
+import { OutboxService } from './modules/recovery/outbox.service.js';
 import { createRecoveryRouter } from './modules/recovery/recovery.routes.js';
 import { PortalController } from './modules/portal/portal.controller.js';
 import { createPortalRouter } from './modules/portal/portal.routes.js';
@@ -282,13 +283,17 @@ export function createApp(config: AppConfig): Application {
 
     // Recovery Module (created early so paymentService can reference it, router registered here)
     const recoveryRepo = new RecoveryRepository(config.db);
+    const outboxService = new OutboxService(config.db);
     const recoveryService = new RecoveryService(
       recoveryRepo,
       aimlService,
       invoiceRepo,
       paymentService,
       communicationService,
-      eventService
+      eventService,
+      integrationService,
+      disputeRepo,
+      outboxService
     );
     const recoveryController = new RecoveryController(recoveryService);
     app.locals.recoveryService = recoveryService;
