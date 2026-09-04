@@ -1,6 +1,6 @@
 # RecoverIQ — AI Revenue Recovery Platform
 
-**Razorpay Buildathon 2026 — Track 03: AI Revenue Recovery**
+
 
 An enterprise-grade accounts receivable automation platform with an AI Revenue Recovery Engine that detects revenue at risk, determines the right intervention, executes bounded recovery workflows, and measures recovered money across every batch — with compliant escalation, hard stopping rules, and a full immutable audit trail.
 
