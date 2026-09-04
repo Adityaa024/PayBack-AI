@@ -15,7 +15,7 @@ import {
   type RecoveryAuditLog,
   type CheckoutAbandonmentSignal,
 } from '../../db/schema.js';
-import { eq, and, desc, sql, isNull, lt, lte } from 'drizzle-orm';
+import { eq, and, desc, sql, isNull, isNotNull, lt, lte, or, ne } from 'drizzle-orm';
 import { logger } from '../../shared/logger.js';
 import crypto from 'crypto';
 
@@ -62,6 +62,7 @@ export class RecoveryRepository {
       stopReason: data.stopReason || null,
       retryCount: data.retryCount || 0,
       lastActionAt: null,
+      lockedAt: null,
       resolvedAt: null,
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -169,8 +170,8 @@ export class RecoveryRepository {
           updatedAt: new Date(),
         })
         .where(eq(recoverySessions.id, sessionId));
-    } catch {
-      // fallback
+    } catch (err) {
+      logger.error('updateSessionStatus failed', { sessionId, error: err });
     }
 
     const mem = this.memSessions.get(sessionId);
@@ -180,6 +181,83 @@ export class RecoveryRepository {
       if (extra?.stopReason !== undefined) mem.stopReason = extra.stopReason as any;
       if (extra?.resolvedAt) mem.resolvedAt = extra.resolvedAt;
       mem.updatedAt = new Date();
+    }
+  }
+
+  async markSessionRecoveredAtomic(tenantId: string, invoiceId: string, amount: string): Promise<RecoverySession | null> {
+    try {
+      const [row] = await this.db
+        .update(recoverySessions)
+        .set({
+          status: 'recovered',
+          amountRecovered: amount,
+          resolvedAt: new Date(),
+          updatedAt: new Date(),
+        })
+        .where(
+          and(
+            eq(recoverySessions.tenantId, tenantId),
+            eq(recoverySessions.invoiceId, invoiceId),
+            ne(recoverySessions.status, 'recovered')
+          )
+        )
+        .returning();
+      if (row) {
+        this.memSessions.set(row.id, row);
+        return row;
+      }
+    } catch (err) {
+      logger.error('markSessionRecoveredAtomic failed', { tenantId, invoiceId, error: err });
+    }
+    return null;
+  }
+
+  async acquireSessionLock(sessionId: string, timeoutMinutes = 15): Promise<boolean> {
+    const threshold = new Date(Date.now() - timeoutMinutes * 60 * 1000);
+    try {
+      const rows = await this.db
+        .update(recoverySessions)
+        .set({ lockedAt: new Date(), updatedAt: new Date() })
+        .where(
+          and(
+            eq(recoverySessions.id, sessionId),
+            eq(recoverySessions.status, 'active'),
+            or(isNull(recoverySessions.lockedAt), lte(recoverySessions.lockedAt, threshold))
+          )
+        )
+        .returning({ id: recoverySessions.id });
+      return rows.length > 0;
+    } catch {
+      return false;
+    }
+  }
+
+  async releaseSessionLock(sessionId: string): Promise<void> {
+    try {
+      await this.db
+        .update(recoverySessions)
+        .set({ lockedAt: null, updatedAt: new Date() })
+        .where(eq(recoverySessions.id, sessionId));
+    } catch {
+      // fallback
+    }
+  }
+
+  async getStaleLockedSessions(staleMinutes = 15): Promise<RecoverySession[]> {
+    const threshold = new Date(Date.now() - staleMinutes * 60 * 1000);
+    try {
+      return await this.db
+        .select()
+        .from(recoverySessions)
+        .where(
+          and(
+            eq(recoverySessions.status, 'active'),
+            isNotNull(recoverySessions.lockedAt),
+            lte(recoverySessions.lockedAt, threshold)
+          )
+        );
+    } catch {
+      return [];
     }
   }
 
@@ -362,8 +440,15 @@ export class RecoveryRepository {
   async recordRetryAttempt(data: NewPaymentRetryAttempt): Promise<void> {
     try {
       await this.db.insert(paymentRetryAttempts).values(data);
-    } catch {
-      // fallback
+    } catch (err: any) {
+      const code = err?.code || err?.cause?.code;
+      if (code === '23505') {
+        const error = new Error('Duplicate payment retry attempt rejected by database unique constraint');
+        (error as any).code = '23505';
+        (error as any).cause = err;
+        throw error;
+      }
+      logger.warn('record_retry_attempt_failed', { error: err });
     }
   }
 
@@ -421,7 +506,7 @@ export class RecoveryRepository {
     const currentHash = crypto.createHash('sha256').update(hashData).digest('hex');
 
     const entry: RecoveryAuditLog = {
-      id: data.id || `audit_${crypto.randomUUID()}`,
+      id: data.id || crypto.randomUUID(),
       sessionId: data.sessionId,
       tenantId: data.tenantId,
       invoiceId: data.invoiceId,
@@ -434,6 +519,7 @@ export class RecoveryRepository {
       previousHash: previousHash,
       hash: currentHash,
       metadata: data.metadata ?? null,
+      idempotencyKey: (data as any).idempotencyKey ?? null,
       createdAt: new Date(),
     };
 
@@ -444,14 +530,20 @@ export class RecoveryRepository {
             ...data,
             id: entry.id,
             previousHash,
-            hash: currentHash
+            hash: currentHash,
+            idempotencyKey: (data as any).idempotencyKey ?? null
         })
         .returning();
       if (row) {
         this.memAudit.unshift(row);
         return row;
       }
-    } catch (err) {
+    } catch (err: unknown) {
+      // Catch unique constraint violation and return gracefully
+      if (err && typeof err === 'object' && 'code' in err && (err as any).code === '23505') {
+        logger.info('Duplicate audit log suppressed by unique constraint', { idempotencyKey: (data as any).idempotencyKey });
+        return entry; // Return entry silently (already processed)
+      }
       logger.error('Failed to append audit log to DB', { error: err });
     }
 

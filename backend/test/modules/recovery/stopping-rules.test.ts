@@ -14,6 +14,7 @@ describe('RecoverIQ — Stopping Rules (Hard Guards)', () => {
 
   beforeEach(() => {
     mockRepo = {
+      getSessionById: vi.fn(),
       getSessionByInvoiceId: vi.fn(),
       getPTPByInvoice: vi.fn().mockResolvedValue([]),
       countRetryAttempts: vi.fn().mockResolvedValue(0),
@@ -24,6 +25,8 @@ describe('RecoverIQ — Stopping Rules (Hard Guards)', () => {
       getOverduePendingPTPs: vi.fn().mockResolvedValue([]),
       getOverduePTPs: vi.fn().mockResolvedValue([]),
       updatePTPStatus: vi.fn(),
+      acquireSessionLock: vi.fn().mockResolvedValue(true),
+      releaseSessionLock: vi.fn().mockResolvedValue(undefined),
     };
     mockAiClient = {
       evaluateRecoveryAction: vi.fn().mockResolvedValue({
@@ -75,8 +78,14 @@ describe('RecoverIQ — Stopping Rules (Hard Guards)', () => {
       
       expect(mockRepo.updateSessionStatus).toHaveBeenCalledWith(
         expect.any(String),
-        'stopped',
+        'escalated',
         expect.objectContaining({ stopReason: 'over_90_days' })
+      );
+      expect(mockRepo.appendAuditLog).toHaveBeenCalledWith(
+        expect.objectContaining({
+          result: 'escalated',
+          metadata: expect.objectContaining({ stopReason: 'over_90_days' }),
+        })
       );
     });
   });
@@ -113,8 +122,14 @@ describe('RecoverIQ — Stopping Rules (Hard Guards)', () => {
       
       expect(mockRepo.updateSessionStatus).toHaveBeenCalledWith(
         expect.any(String),
-        'stopped',
+        'escalated',
         expect.objectContaining({ stopReason: 'ptp_broken_twice' })
+      );
+      expect(mockRepo.appendAuditLog).toHaveBeenCalledWith(
+        expect.objectContaining({
+          result: 'escalated',
+          metadata: expect.objectContaining({ stopReason: 'ptp_broken_twice' }),
+        })
       );
     });
 
@@ -126,6 +141,8 @@ describe('RecoverIQ — Stopping Rules (Hard Guards)', () => {
         { id: 'p1', status: 'broken' },
         { id: 'p2', status: 'broken' }
       ]);
+      mockRepo.getSessionById.mockResolvedValue({ id: 's1', tenantId: 't1', invoiceId: 'i1' });
+      mockRepo.getSessionByInvoiceId.mockResolvedValue({ id: 's1', tenantId: 't1', invoiceId: 'i1' });
       mockInvoiceRepo.findById.mockResolvedValue({ paymentStatus: 'Pending', tenantId: 't1' });
 
       const result = await recoveryService.checkBrokenPromises();
@@ -136,12 +153,43 @@ describe('RecoverIQ — Stopping Rules (Hard Guards)', () => {
         'escalated',
         expect.objectContaining({ stopReason: 'ptp_broken_twice' })
       );
+      expect(mockRepo.appendAuditLog).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sessionId: 's1',
+          action: 'escalated_ptp_broken_twice',
+          result: 'escalated',
+        })
+      );
     });
   });
 
   describe('Rule 4: DLQ (Dead Letter Queue)', () => {
-    it('ensures sessions hitting max attempts go to escalated/DLQ state', () => {
-      expect(true).toBe(true);
+    it('ensures sessions hitting max attempts go to escalated/DLQ state', async () => {
+      mockRepo.getSessionById.mockResolvedValue({
+        id: 's_dlq',
+        tenantId: 't1',
+        invoiceId: 'i1',
+        status: 'active',
+        strategy: 'payment_link_refresh',
+      });
+      mockRepo.countRetryAttempts.mockResolvedValue(3); // Hit MAX_RETRY_COUNT (3)
+
+      const result = await recoveryService.executeRecoveryAction('s_dlq', 't1');
+
+      expect(result.success).toBe(false);
+      expect(result.message).toContain('Escalated');
+      expect(mockRepo.updateSessionStatus).toHaveBeenCalledWith(
+        's_dlq',
+        'escalated',
+        expect.objectContaining({ stopReason: 'max_retries_reached' })
+      );
+      expect(mockRepo.appendAuditLog).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sessionId: 's_dlq',
+          action: 'session_escalated_max_retries',
+          result: 'escalated',
+        })
+      );
     });
   });
 
@@ -173,5 +221,26 @@ describe('RecoverIQ — Stopping Rules (Hard Guards)', () => {
         expect(result.allowed).toBe(false);
         expect(result.violations[0]).toContain('INVOICE_SETTLED');
       });
+  });
+
+  describe('Rule 7: Economic Floor Check (< ₹100)', () => {
+    it('blocks automated recovery for amounts below ₹100', () => {
+      const result = PolicyGuard.validate(
+        { maxAttempts: 3, amountAtRisk: 49.99, cooldownHours: 0 } as any,
+        { retryCount: 0, daysOverdue: 5, amountAtRisk: 49.99 }
+      );
+      expect(result.allowed).toBe(false);
+      expect(result.violations[0]).toContain('ECONOMIC_FLOOR_VIOLATION');
+      expect(result.violations[0]).toContain('49.99');
+    });
+
+    it('allows automated recovery for amounts >= ₹100', () => {
+      const result = PolicyGuard.validate(
+        { maxAttempts: 3, amountAtRisk: 100, cooldownHours: 0 } as any,
+        { retryCount: 0, daysOverdue: 5, amountAtRisk: 100 }
+      );
+      expect(result.allowed).toBe(true);
+      expect(result.violations).toHaveLength(0);
+    });
   });
 });

@@ -411,6 +411,7 @@ function AuditDrawer({ sessionId, onClose }: { sessionId: string; onClose: () =>
 export function RecoveryDashboard() {
   const queryClient = useQueryClient();
   const [activeLane, setActiveLane] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
   const [inspectContractId, setInspectContractId] = useState<string | null>(null);
   const [isSimulatingMessages, setIsSimulatingMessages] = useState<boolean>(true);
@@ -482,10 +483,20 @@ export function RecoveryDashboard() {
 
   const sessions = sessionsData?.sessions ?? [];
 
-  // Filter by incident lane
-  const filteredSessions = activeLane === "all"
-    ? sessions
-    : sessions.filter((s) => s.incidentLane === activeLane);
+  // Filter by incident lane & status
+  const filteredSessions = sessions.filter((s) => {
+    const matchesLane = activeLane === "all" || s.incidentLane === activeLane;
+    const matchesStatus = statusFilter === "all" || s.status === statusFilter;
+    return matchesLane && matchesStatus;
+  });
+
+  const statusCounts = {
+    all: sessions.filter((s) => activeLane === "all" || s.incidentLane === activeLane).length,
+    active: sessions.filter((s) => (activeLane === "all" || s.incidentLane === activeLane) && s.status === "active").length,
+    recovered: sessions.filter((s) => (activeLane === "all" || s.incidentLane === activeLane) && s.status === "recovered").length,
+    escalated: sessions.filter((s) => (activeLane === "all" || s.incidentLane === activeLane) && s.status === "escalated").length,
+    stopped: sessions.filter((s) => (activeLane === "all" || s.incidentLane === activeLane) && s.status === "stopped").length,
+  };
 
   // Strategy chart data
   const strategyCounts = sessions.reduce<Record<string, number>>((acc, s) => {
@@ -781,6 +792,43 @@ export function RecoveryDashboard() {
                 </button>
               );
             })}
+          </div>
+
+          {/* Status Filter Sub-Bar (Includes Escalated / Human Review) */}
+          <div className="flex flex-wrap items-center justify-between gap-3 pt-3">
+            <div className="flex flex-wrap items-center gap-1.5 bg-black/30 p-1 rounded-xl border border-white/5">
+              {[
+                { id: "all", label: "All Statuses", count: statusCounts.all, color: "text-zinc-300" },
+                { id: "active", label: "Active", count: statusCounts.active, color: "text-amber-400" },
+                { id: "recovered", label: "Recovered", count: statusCounts.recovered, color: "text-emerald-400" },
+                { id: "escalated", label: "⚠️ Escalated / Human Review", count: statusCounts.escalated, color: "text-violet-400", badge: "bg-violet-500/20 text-violet-300 border border-violet-500/30 font-semibold" },
+                { id: "stopped", label: "Stopped", count: statusCounts.stopped, color: "text-rose-400" },
+              ].map((tab) => {
+                const isSelected = statusFilter === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setStatusFilter(tab.id)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 ${
+                      isSelected
+                        ? "bg-white/10 text-white shadow-sm border border-white/20"
+                        : "text-zinc-400 hover:text-zinc-200 hover:bg-white/5"
+                    }`}
+                  >
+                    <span className={isSelected ? "text-white" : tab.color}>{tab.label}</span>
+                    <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-mono ${tab.badge || "bg-white/5 text-zinc-400"}`}>
+                      {tab.count}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+            {statusFilter === "escalated" && (
+              <div className="text-xs text-violet-300/90 flex items-center gap-1.5 bg-violet-500/10 px-3 py-1.5 rounded-lg border border-violet-500/20">
+                <Shield className="w-3.5 h-3.5 text-violet-400" />
+                <span>Deterministic stopping rules triggered: human review required</span>
+              </div>
+            )}
           </div>
         </motion.div>
 

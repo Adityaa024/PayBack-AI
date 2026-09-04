@@ -17,6 +17,8 @@ describe('RecoverIQ — Control Arm (Holdout) Isolation', () => {
       countRetryAttempts: vi.fn().mockResolvedValue(0),
       updateSessionStatus: vi.fn(),
       appendAuditLog: vi.fn(),
+      acquireSessionLock: vi.fn().mockResolvedValue(true),
+      releaseSessionLock: vi.fn().mockResolvedValue(true),
     };
     mockAiClient = {
       evaluateRecoveryAction: vi.fn(),

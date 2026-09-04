@@ -16,7 +16,7 @@ We don't just claim AI recovery; we prove it mathematically. We built a syntheti
 | **Naive (Always Contact)** | ₹1,836,144     | 811           | ₹1,216.50         | ₹571,354      | **₹208,826**     |
 | **PayBack-AI Agent**       | ₹1,836,144     | 972           | ₹1,458.00         | ₹938,201      | **₹575,674**     |
 
-PayBack-AI yields the highest **Incremental Lift** because it uses smart tone escalation and routing, while strictly obeying 6 hard stopping rules. Read the full evaluation methodology in [EVALUATION.md](EVALUATION.md) and our honest bug log in [FAILURES.md](FAILURES.md).
+PayBack-AI yields the highest **Incremental Lift** because it uses smart tone escalation and routing, while strictly obeying 7 hard stopping rules and an Economic Floor Guard. Read the full evaluation methodology in [EVALUATION.md](EVALUATION.md) and our honest bug log in [FAILURES.md](FAILURES.md).
 
 ---
 
@@ -31,7 +31,9 @@ PayBack-AI yields the highest **Incremental Lift** because it uses smart tone es
 | **Measured money recovered**  | Real-time ₹ recovered per batch on the Recovery Dashboard                               |
 | **Batch processing**          | `POST /api/recovery/run` scans all at-risk invoices and starts sessions                 |
 | **Compliant escalation**      | 5-Stage Tone Matrix + Razorpay mandate retry (T+1, T+3, T+7)                            |
-| **Stopping rules**            | 6 hard stops: 90-day cap, 3-retry max, PTP-broken-twice, DLQ, mandate-cap, invoice-paid |
+| **Stopping rules**            | 7 hard stops + Economic Floor (< ₹100), explicit escalated transitions, audit reasons |
+| **Concurrency & Idempotency** | At-most-once execution proven by live adversarial Postgres tests (`concurrency.test.ts`) |
+| **AST-Enforced AI Isolation** | Zero payment SDKs, HTTP clients, or DB drivers imported in AI agent layer                |
 | **Audit trail**               | Immutable `recovery_audit_log` table with every AI decision + Razorpay ref              |
 | **Hash-Chained Ledger**       | Cryptographic sequence verification (`verify-ledger.ts`) to prevent tampering           |
 | **Merchant YAML Policy**      | Absolute control via `ai-service/config/merchant_policies.yaml` (Differentiator)        |
@@ -94,16 +96,73 @@ graph TD
 - Daily cron at 10 AM UTC checks for broken promises
 - PTP broken ≥2 times → session escalated automatically
 
-### 5. Stopping Rules (Compliant Escalation)
+### 5. Stopping Rules (Compliant Escalation & Economic Guard)
 
-| Condition             | Stop Action                     |
-| --------------------- | ------------------------------- |
-| Days overdue > 90     | Legal Stop — no automated comms |
-| Retry count ≥ 3       | DLQ + human review              |
-| PTP broken ≥ 2 times  | Escalate to dispute flow        |
-| Mandate retries ≥ 3   | Stop mandate sequence           |
-| Invoice marked Paid   | Session closed as `recovered`   |
-| DLQ threshold reached | Session escalated               |
+All stopping rules strictly transition active sessions to an explicit `escalated` status with machine-readable reasons and immutable audit log entries (no silent drops or missing states):
+
+| Condition | Stop Action | Transition State | Audit Action / Reason |
+| :--- | :--- | :--- | :--- |
+| **Days overdue > 90** | Legal Stop — suppress automated comms | `escalated` | `session_escalated_legal_stop` |
+| **Retry count ≥ 3** | Exhausted attempts — human review | `escalated` | `session_escalated_max_retries` |
+| **PTP broken ≥ 2 times** | Broken commitment twice | `escalated` | `escalated_ptp_broken_twice` |
+| **Mandate retries ≥ 3** | Subscription mandate capped | `escalated` | `session_escalated_max_retries` |
+| **Invoice marked Paid** | Payment settled via webhook | `recovered` | `session_recovered` |
+| **Economic Floor (< ₹100)** | Invoiced amount below economic threshold | `escalated` | `session_escalated_economic_floor` |
+| **Stale Lock Timeout** | Worker crashed mid-execution (>15m) | `escalated` | `stale_lock_timeout` |
+
+---
+
+## 🛡️ Concurrency, Idempotency & Trust Boundaries (Proven Guarantees)
+
+Most hackathon submissions claim "the LLM cannot touch money" in prose. PayBack-AI physically enforces it at the compiler, network, and database layers, backed by **adversarial concurrency tests** executed against PostgreSQL.
+
+Detailed architecture and threat models can be reviewed in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+
+### 1. Component Trust Boundaries
+
+| Layer | Runtime | Authority Level | Can Execute Actions? | Can Write DB? | Can Touch Money / Razorpay? |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **AI Advisory Layer** (`ai-service/src/agents`) | Python 3.13 / FastAPI | **Read-Only Advisory** | ❌ **NO** (AST banned) | ❌ **NO** (0 DB drivers) | ❌ **NO** (0 Payment SDKs) |
+| **Policy Engine** (`backend/src/modules/recovery`) | Node.js / TypeScript | **Deterministic Guard** | ❌ **NO** (Policy evaluator) | ✅ Audit Log & Status | ❌ Enforces stopping rules & floors |
+| **Execution Gateway** (`backend/src/modules/payment`) | Node.js / Express | **Authorized Executor** | ✅ **YES** (PolicyGuard approved) | ✅ Atomic SQL updates | ✅ **YES** (Signed Razorpay webhooks) |
+| **PostgreSQL Database** (`backend/src/db/schema.ts`) | PostgreSQL 16 | **Physical Enforcer** | 🔒 Rejects race conditions | 🔒 Unique compound indexes | 🔒 Immutable cryptographic ledger |
+
+### 2. AST-Enforced Import Bans
+The AI service codebase is statically scanned at test time (`ai-service/test/src/test_structural_safety.py`) using Python's `ast` module. The presence of any network request library (`requests`, `httpx`, `aiohttp`, `urllib`), database driver (`sqlalchemy`, `psycopg2`, `asyncpg`, `sqlite3`), or payment provider SDK (`razorpay`, `stripe`) instantly fails CI:
+```bash
+python ai-service/test/src/test_structural_safety.py
+# Output: PASS: Structural safety verified — 0 banned execution/DB imports in AI agents.
+```
+
+### 3. Adversarial Concurrency Test Suite
+We ship live adversarial tests (`backend/test/modules/recovery/concurrency.test.ts`) that execute real concurrent operations against PostgreSQL to prove at-most-once semantics:
+
+```bash
+npm --prefix backend test/modules/recovery/concurrency.test.ts
+```
+
+- **Test 1: 10 Concurrent Duplicate Webhooks via `Promise.all`**
+  Simulates a payment gateway firing 10 identical webhook deliveries simultaneously during network jitter.
+  *Guaranteed Result:* Exactly **1** webhook processes, exactly **1** DB status changes to `recovered`, exactly **1** audit entry is written. The remaining **9** are rejected as duplicate deliveries via atomic conditional SQL:
+  ```sql
+  UPDATE recovery_sessions 
+  SET status = 'recovered', amount_recovered = $1, resolved_at = NOW() 
+  WHERE tenant_id = $2 AND invoice_id = $3 AND status != 'recovered' 
+  RETURNING id;
+  ```
+- **Test 2: Double-Dispatch Race Condition**
+  Simulates two worker nodes attempting to execute the same retry attempt number concurrently.
+  *Guaranteed Result:* PostgreSQL physically rejects the second attempt with error `23505` via compound unique constraint:
+  ```sql
+  CREATE UNIQUE INDEX payment_retry_attempts_session_attempt_uniq 
+  ON payment_retry_attempts (session_id, attempt_number);
+  ```
+- **Test 3: Crashed Worker & Stale In-Flight Lock Recovery**
+  Simulates a worker dying abruptly while holding an active recovery session lock.
+  *Guaranteed Result:* Background lock sweeper detects sessions locked longer than 15 minutes, safely clears `locked_at = NULL`, and transitions the session to `escalated` with `stale_lock_timeout` for operator audit.
+
+### 4. Human-in-the-Loop Escalated Visibility
+Escalated sessions never disappear into a silent black hole. The frontend dashboard (`frontend/src/pages/RecoveryDashboard.tsx`) features a real-time **⚠️ Escalated / Human Review** filter pill showing live session counts, failure reasons, and quick access to manual collections.
 
 ---
 

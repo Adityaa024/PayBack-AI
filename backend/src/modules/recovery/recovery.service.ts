@@ -124,11 +124,34 @@ export class RecoveryService {
    * Start a new recovery session for an invoice. Calls AI for strategy selection.
    */
   async startRecoverySession(
-    tenantId: string,
-    invoiceId: string,
-    daysOverdue: number,
-    failureReason?: string
+    tenantIdOrData: string | { tenantId?: string; invoiceId?: string; id?: string; daysOverdue?: number; dueDate?: string | Date; [key: string]: any },
+    invoiceIdOrReason?: string,
+    daysOverdueOrReason?: number | string,
+    failureReasonParam?: string
   ) {
+    let tenantId: string;
+    let invoiceId: string;
+    let daysOverdue: number;
+    let failureReason: string | undefined;
+
+    if (typeof tenantIdOrData === 'object' && tenantIdOrData !== null) {
+      tenantId = tenantIdOrData.tenantId || 'default_tenant';
+      invoiceId = tenantIdOrData.invoiceId || tenantIdOrData.id || '';
+      if (tenantIdOrData.daysOverdue !== undefined) {
+        daysOverdue = tenantIdOrData.daysOverdue;
+      } else if (tenantIdOrData.dueDate) {
+        daysOverdue = this.calculateDaysOverdue(String(tenantIdOrData.dueDate));
+      } else {
+        daysOverdue = 0;
+      }
+      failureReason = typeof invoiceIdOrReason === 'string' ? invoiceIdOrReason : undefined;
+    } else {
+      tenantId = tenantIdOrData;
+      invoiceId = invoiceIdOrReason!;
+      daysOverdue = typeof daysOverdueOrReason === 'number' ? daysOverdueOrReason : 0;
+      failureReason = failureReasonParam;
+    }
+
     const invoice = await this.invoiceRepo.findById(invoiceId);
     if (!invoice || invoice.tenantId !== tenantId) {
       throw new NotFoundError('Invoice not found');
@@ -233,11 +256,11 @@ export class RecoveryService {
       requiresHumanApproval: numAmount > 500000,
     };
 
-    // Create recovery session
+    // Create recovery session - guardrail fires transition immediately to escalated
     const session = await this.recoveryRepo.createSession({
       tenantId,
       invoiceId,
-      status: stopReason ? 'stopped' : 'active',
+      status: stopReason ? 'escalated' : 'active',
       strategy: strategy as any,
       incidentLane,
       isHoldout,
@@ -253,12 +276,16 @@ export class RecoveryService {
       retryCount: 0,
     });
 
+    if (stopReason) {
+      await this.recoveryRepo.updateSessionStatus(session.id, 'escalated', { stopReason: stopReason as any });
+    }
+
     // Log initial audit entry
     await this.recoveryRepo.appendAuditLog({
       sessionId: session.id,
       tenantId,
       invoiceId,
-      action: stopReason ? 'session_stopped_at_creation' : 'session_started',
+      action: stopReason ? `session_escalated_${stopReason}` : 'session_started',
       actor: 'recovery_agent',
       aiDecision: {
         strategy,
@@ -266,7 +293,8 @@ export class RecoveryService {
         reasoning: aiReasoning,
       },
       amountAtRisk: String(invoice.invoiceAmount),
-      result: stopReason ? 'stopped' : 'pending',
+      result: stopReason ? 'escalated' : 'pending',
+      metadata: stopReason ? { stopReason, daysOverdue, ptpBroken } : undefined,
     });
 
     // Log event
@@ -309,7 +337,7 @@ export class RecoveryService {
     // Stopping rule: max retries
     const attemptCount = await this.recoveryRepo.countRetryAttempts(sessionId);
     if (attemptCount >= MAX_RETRY_COUNT) {
-      await this.recoveryRepo.updateSessionStatus(sessionId, 'stopped', {
+      await this.recoveryRepo.updateSessionStatus(sessionId, 'escalated', {
         stopReason: 'max_retries_reached',
         resolvedAt: new Date(),
       });
@@ -317,58 +345,66 @@ export class RecoveryService {
         sessionId,
         tenantId,
         invoiceId: session.invoiceId,
-        action: 'session_stopped',
+        action: 'session_escalated_max_retries',
         actor: 'recovery_agent',
-        result: 'stopped',
+        result: 'escalated',
         metadata: { reason: 'max_retries_reached', attemptCount },
       });
-      return { success: false, message: 'Stopped: maximum retry attempts reached' };
+      return { success: false, message: 'Escalated: maximum retry attempts reached' };
     }
 
-    // Holdout Guard: If this case is in the 15% holdout cohort, suppress intervention
-    if (session.isHoldout) {
-      await this.recoveryRepo.appendAuditLog({
-        sessionId,
-        tenantId,
-        invoiceId: session.invoiceId,
-        action: 'holdout_action_suppressed',
-        actor: 'holdout_guard',
-        result: 'stopped',
-        metadata: { reason: 'counterfactual_holdout_cohort', holdoutRatio: 0.15 },
-      });
-      return { success: false, message: 'Case is in the 15% holdout control group — automated action suppressed to measure incremental recovery' };
-    }
-
-    // PolicyGuard Validation: verify contract against dynamic business rules
-    const contract = session.recoveryContract as RecoveryContract | null;
-    if (contract) {
-      const policyCheck = PolicyGuard.validate(contract, {
-        retryCount: attemptCount,
-        lastContactedAt: session.lastActionAt,
-        optedOut: session.optedOut,
-        daysOverdue: session.createdAt ? this.calculateDaysOverdue(session.createdAt.toISOString()) : 0,
-        amountAtRisk: parseFloat(session.amountAtRisk) || 0,
-      });
-
-      if (!policyCheck.allowed) {
-        await this.recoveryRepo.updateSessionStatus(sessionId, 'stopped', {
-          stopReason: 'manual_override',
-        });
-        await this.recoveryRepo.appendAuditLog({
-          sessionId,
-          tenantId,
-          invoiceId: session.invoiceId,
-          action: 'action_blocked_by_policy_guard',
-          actor: 'policy_guard',
-          result: 'stopped',
-          metadata: { violations: policyCheck.violations, reason: policyCheck.blockedReason },
-        });
-        return { success: false, message: `Blocked by PolicyGuard: ${policyCheck.blockedReason}` };
+    // Acquire in-flight concurrency lock to prevent double dispatch
+    if (typeof this.recoveryRepo.acquireSessionLock === 'function') {
+      const lockAcquired = await this.recoveryRepo.acquireSessionLock(sessionId);
+      if (!lockAcquired) {
+        return { success: false, message: 'Session is currently locked by another worker process' };
       }
     }
 
     try {
-      // BUG-10 FIX: Branch on strategy
+      // Holdout Guard: If this case is in the 15% holdout cohort, suppress intervention
+      if (session.isHoldout) {
+        await this.recoveryRepo.appendAuditLog({
+          sessionId,
+          tenantId,
+          invoiceId: session.invoiceId,
+          action: 'holdout_action_suppressed',
+          actor: 'holdout_guard',
+          result: 'stopped',
+          metadata: { reason: 'counterfactual_holdout_cohort', holdoutRatio: 0.15 },
+        });
+        return { success: false, message: 'Case is in the 15% holdout control group — automated action suppressed to measure incremental recovery' };
+      }
+
+      // PolicyGuard Validation: verify contract against dynamic business rules
+      const contract = session.recoveryContract as RecoveryContract | null;
+      if (contract) {
+        const policyCheck = PolicyGuard.validate(contract, {
+          retryCount: attemptCount,
+          lastContactedAt: session.lastActionAt,
+          optedOut: session.optedOut,
+          daysOverdue: session.createdAt ? this.calculateDaysOverdue(session.createdAt.toISOString()) : 0,
+          amountAtRisk: parseFloat(session.amountAtRisk) || 0,
+        });
+
+        if (!policyCheck.allowed) {
+          await this.recoveryRepo.updateSessionStatus(sessionId, 'escalated', {
+            stopReason: 'manual_override',
+          });
+          await this.recoveryRepo.appendAuditLog({
+            sessionId,
+            tenantId,
+            invoiceId: session.invoiceId,
+            action: 'action_blocked_by_policy_guard',
+            actor: 'policy_guard',
+            result: 'escalated',
+            metadata: { violations: policyCheck.violations, reason: policyCheck.blockedReason },
+          });
+          return { success: false, message: `Blocked by PolicyGuard: ${policyCheck.blockedReason}` };
+        }
+      }
+
+      // Branch on strategy
       if (session.strategy === 'mandate_retry') {
         return await this._executeMandateRetry(session, tenantId, attemptCount);
       } else if (session.strategy === 'promise_follow_up') {
@@ -389,6 +425,10 @@ export class RecoveryService {
         metadata: { error: String(err) },
       });
       return { success: false, message: `Recovery action failed: ${String(err)}` };
+    } finally {
+      if (typeof this.recoveryRepo.releaseSessionLock === 'function') {
+        await this.recoveryRepo.releaseSessionLock(sessionId);
+      }
     }
   }
 
@@ -614,14 +654,9 @@ export class RecoveryService {
   /**
    * Mark a session as recovered (invoice has been paid).
    */
-  async markSessionRecovered(tenantId: string, invoiceId: string, amountRecovered: string): Promise<void> {
-    const session = await this.recoveryRepo.getSessionByInvoiceId(tenantId, invoiceId);
-    if (!session) return;
-
-    await this.recoveryRepo.updateSessionStatus(session.id, 'recovered', {
-      amountRecovered,
-      resolvedAt: new Date(),
-    });
+  async markSessionRecovered(tenantId: string, invoiceId: string, amountRecovered: string, idempotencyKey?: string): Promise<void> {
+    const session = await this.recoveryRepo.markSessionRecoveredAtomic(tenantId, invoiceId, amountRecovered);
+    if (!session) return; // Session was already recovered or didn't exist (atomic claim failed)
 
     await this.recoveryRepo.appendAuditLog({
       sessionId: session.id,
@@ -631,6 +666,7 @@ export class RecoveryService {
       actor: 'system',
       amountAtRisk: session.amountAtRisk,
       result: 'succeeded',
+      idempotencyKey,
       metadata: { amountRecovered },
     });
 
@@ -742,7 +778,9 @@ export class RecoveryService {
       const updatedPTPs = await this.recoveryRepo.getPTPByInvoice(ptp.tenantId, ptp.invoiceId);
       const totalBroken = updatedPTPs.filter((p) => p.status === 'broken').length;
       if (totalBroken >= MAX_PTP_BROKEN) {
-        const session = await this.recoveryRepo.getSessionByInvoiceId(ptp.tenantId, ptp.invoiceId);
+        const session = (ptp as any).sessionId
+          ? (await this.recoveryRepo.getSessionById((ptp as any).sessionId)) || (await this.recoveryRepo.getSessionByInvoiceId(ptp.tenantId, ptp.invoiceId))
+          : await this.recoveryRepo.getSessionByInvoiceId(ptp.tenantId, ptp.invoiceId);
         if (session) {
           await this.recoveryRepo.updateSessionStatus(session.id, 'escalated', {
             stopReason: 'ptp_broken_twice',
@@ -763,6 +801,39 @@ export class RecoveryService {
 
     logger.info('ptp_check_complete', { checked: overduePTPs.length, broken, escalated });
     return { checked: overduePTPs.length, broken, escalated };
+  }
+
+  /**
+   * Sweeper job to identify crashed/stale in-flight locks and safely resolve them by escalating to human review.
+   */
+  async sweepStaleLocks(staleMinutes = 15): Promise<{ swept: number }> {
+    const staleSessions = await this.recoveryRepo.getStaleLockedSessions(staleMinutes);
+    let swept = 0;
+
+    for (const session of staleSessions) {
+      await this.recoveryRepo.updateSessionStatus(session.id, 'escalated', {
+        stopReason: 'stale_lock_timeout' as any,
+      });
+      await this.recoveryRepo.releaseSessionLock(session.id);
+      await this.recoveryRepo.appendAuditLog({
+        sessionId: session.id,
+        tenantId: session.tenantId,
+        invoiceId: session.invoiceId,
+        action: 'escalated_stale_lock',
+        actor: 'system',
+        result: 'escalated',
+        metadata: {
+          staleMinutes,
+          lockedAt: session.lockedAt,
+        },
+      });
+      swept++;
+    }
+
+    if (swept > 0) {
+      logger.warn('recovery_stale_locks_swept', { swept, staleMinutes });
+    }
+    return { swept };
   }
 
   /**

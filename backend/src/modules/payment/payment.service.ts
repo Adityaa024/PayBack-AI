@@ -10,9 +10,9 @@ import { NotFoundError, ValidationError, AuthError } from '../../shared/errors/i
 import type { InvoicePaymentLink } from '../../db/index.js';
 
 // Lazy-imported to avoid circular dependency
-type RecoveryServiceLike = {
+interface RecoveryServiceLike {
   startRecoverySession(tenantId: string, invoiceId: string, daysOverdue: number, failureReason?: string): Promise<unknown>;
-  markSessionRecovered(tenantId: string, invoiceId: string, amountRecovered: string): Promise<void>;
+  markSessionRecovered(tenantId: string, invoiceId: string, amountRecovered: string, idempotencyKey?: string): Promise<void>;
 };
 
 interface RazorpayWebhookPayload {
@@ -385,7 +385,7 @@ export class PaymentService {
     if (result?.status === 'processed' && resolvedInvoiceId && this.recoveryService) {
       const paidInvoice = await this.invoiceRepo.findById(resolvedInvoiceId);
       if (paidInvoice) {
-        this.recoveryService.markSessionRecovered(tenantId, resolvedInvoiceId, String(paidInvoice.invoiceAmount))
+        this.recoveryService.markSessionRecovered(tenantId, resolvedInvoiceId, String(paidInvoice.invoiceAmount), finalEventId)
           .catch((err) => logger.warn('Recovery session mark recovered failed (non-fatal)', { err }));
       }
     }

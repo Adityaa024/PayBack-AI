@@ -137,6 +137,12 @@ export class PolicyGuard {
       violations.push('HUMAN_APPROVAL_REQUIRED: High-value threshold (> ₹5,00,000) requires explicit human approval before execution.');
     }
 
+    // 8. Economic Floor Check (Invoices < ₹100 are rejected as economically unviable for recovery intervention)
+    const amount = context.amountAtRisk !== undefined ? context.amountAtRisk : contract.amountAtRisk;
+    if (amount !== undefined && amount < 100) {
+      violations.push(`ECONOMIC_FLOOR_VIOLATION: Amount (₹${amount}) is below the ₹100 economic floor for automated recovery.`);
+    }
+
     if (violations.length > 0) {
       return {
         allowed: false,

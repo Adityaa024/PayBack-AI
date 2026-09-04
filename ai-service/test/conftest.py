@@ -1,10 +1,16 @@
 import os
+import sys
 import pytest
 from pathlib import Path
 from dotenv import load_dotenv
 
+# Ensure project root is in sys.path
+project_root = Path(__file__).resolve().parent.parent
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
+
 # Load .env file from ai-service root directory if available
-env_path = Path(__file__).resolve().parent.parent / ".env"
+env_path = project_root / ".env"
 if env_path.exists():
     load_dotenv(dotenv_path=env_path, override=False)
 

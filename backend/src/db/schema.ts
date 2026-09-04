@@ -813,6 +813,7 @@ export const recoveryStopReasonEnum = pgEnum('recovery_stop_reason', [
   'ptp_broken_twice',
   'invoice_paid',
   'over_90_days',
+  'stale_lock_timeout',
 ]);
 
 export const promiseToPayStatusEnum = pgEnum('promise_to_pay_status', [
@@ -848,6 +849,7 @@ export const recoverySessions = pgTable(
     stopReason: recoveryStopReasonEnum('stop_reason'),
     retryCount: integer('retry_count').notNull().default(0),
     lastActionAt: timestamp('last_action_at', { mode: 'date' }),
+    lockedAt: timestamp('locked_at', { mode: 'date' }),
     resolvedAt: timestamp('resolved_at', { mode: 'date' }),
     createdAt: timestamp('created_at', { mode: 'date' })
       .notNull()
@@ -896,6 +898,7 @@ export const paymentRetryAttempts = pgTable(
   (table) => [
     index('payment_retry_attempts_session_id_idx').on(table.sessionId),
     index('payment_retry_attempts_tenant_idx').on(table.tenantId),
+    uniqueIndex('payment_retry_attempts_session_attempt_uniq').on(table.sessionId, table.attemptNumber),
   ]
 );
 
@@ -986,6 +989,7 @@ export const recoveryAuditLog = pgTable(
     previousHash: varchar('previous_hash', { length: 64 }),
     hash: varchar('hash', { length: 64 }),
     metadata: jsonb('metadata'),
+    idempotencyKey: varchar('idempotency_key', { length: 128 }),
     createdAt: timestamp('created_at', { mode: 'date' })
       .notNull()
       .default(sql`CURRENT_TIMESTAMP`),
@@ -994,6 +998,7 @@ export const recoveryAuditLog = pgTable(
     index('recovery_audit_session_idx').on(table.sessionId),
     index('recovery_audit_tenant_created_idx').on(table.tenantId, table.createdAt),
     index('recovery_audit_invoice_idx').on(table.invoiceId),
+    uniqueIndex('recovery_audit_idempotency_uniq').on(table.idempotencyKey).where(sql`${table.idempotencyKey} IS NOT NULL`),
   ]
 );
 

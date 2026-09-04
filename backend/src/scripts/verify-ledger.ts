@@ -1,7 +1,10 @@
-import { db } from '../db/index.js';
+import { createDatabaseClient } from '../db/index.js';
+import { config } from '../config/env.js';
 import { recoveryAuditLog } from '../db/schema.js';
 import { eq, asc } from 'drizzle-orm';
 import crypto from 'crypto';
+
+const db = createDatabaseClient({ connectionString: config.DATABASE_URL });
 
 async function verifyLedger() {
   const tenantId = process.argv[2];

@@ -4,8 +4,15 @@ import pytest
 from pathlib import Path
 
 # The agents are not allowed to use any of these libraries directly.
-# All Razorpay interaction must go through the Node.js PolicyGuard.
-BANNED_MODULES = {'requests', 'httpx', 'aiohttp', 'urllib', 'urllib3', 'razorpay'}
+# All Razorpay interaction and database writes must go through the Node.js PolicyGuard.
+BANNED_MODULES = {
+    # HTTP and payment providers
+    'requests', 'httpx', 'aiohttp', 'urllib', 'urllib3', 'razorpay', 'stripe', 'paypal',
+    # Database drivers and ORMs
+    'sqlalchemy', 'psycopg2', 'asyncpg', 'sqlite3', 'pymysql', 'tortoise', 'peewee', 'motor', 'pymongo',
+    # Direct process execution
+    'subprocess',
+}
 
 def check_file_for_banned_imports(filepath: Path):
     with open(filepath, 'r', encoding='utf-8') as f:
@@ -27,7 +34,8 @@ def check_file_for_banned_imports(filepath: Path):
 
 def test_structural_safety_no_banned_imports():
     """
-    Enforces that the diagnosis/LLM layer cannot call a payment provider directly.
+    Enforces that the diagnosis/LLM layer cannot touch money, write to database, or call payment providers.
+    Zero execution authority is enforced at the AST/compiler level.
     Only the deterministic policy engine (Node backend) can authorize an action.
     """
     project_root = Path(__file__).parent.parent.parent
@@ -40,3 +48,7 @@ def test_structural_safety_no_banned_imports():
 
     for py_file in python_files:
         check_file_for_banned_imports(py_file)
+
+if __name__ == "__main__":
+    test_structural_safety_no_banned_imports()
+    print("PASS: Structural safety verified — 0 banned execution/DB imports in AI agents.")
