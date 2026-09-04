@@ -8,13 +8,13 @@ An enterprise-grade accounts receivable automation platform with an AI Revenue R
 
 ## 📈 Proof of Yield (Evaluation Harness)
 
-We don't just claim AI recovery; we prove it mathematically. We built a synthetic batch evaluation harness (`ai-service/scripts/run_evaluation.py`) that simulates 1000 failed invoices. It enforces a strict **20% Hash-Based Holdout Cohort (Control Arm)** to measure *true incremental lift*.
+We don't just claim AI recovery; we prove it mathematically. We built a synthetic batch evaluation harness (`ai-service/scripts/run_evaluation.py`) that simulates 1000 failed invoices. It enforces a strict **20% Hash-Based Holdout Cohort (Control Arm)** to measure _true incremental lift_.
 
-| Arm | Cases Eligible | Contacts Made | Intervention Cost | Net Recovered | Incremental Lift |
-|-----|----------------|---------------|-------------------|---------------|------------------|
-| **Control (Do Nothing)** | ₹424,846 | 0 | ₹0.00 | ₹83,881 | Baseline |
-| **Naive (Always Contact)** | ₹1,836,144 | 811 | ₹1,216.50 | ₹571,354 | **₹208,826** |
-| **PayBack-AI Agent** | ₹1,836,144 | 972 | ₹1,458.00 | ₹938,201 | **₹575,674** |
+| Arm                        | Cases Eligible | Contacts Made | Intervention Cost | Net Recovered | Incremental Lift |
+| -------------------------- | -------------- | ------------- | ----------------- | ------------- | ---------------- |
+| **Control (Do Nothing)**   | ₹424,846       | 0             | ₹0.00             | ₹83,881       | Baseline         |
+| **Naive (Always Contact)** | ₹1,836,144     | 811           | ₹1,216.50         | ₹571,354      | **₹208,826**     |
+| **PayBack-AI Agent**       | ₹1,836,144     | 972           | ₹1,458.00         | ₹938,201      | **₹575,674**     |
 
 PayBack-AI yields the highest **Incremental Lift** because it uses smart tone escalation and routing, while strictly obeying 6 hard stopping rules. Read the full evaluation methodology in [EVALUATION.md](EVALUATION.md) and our honest bug log in [FAILURES.md](FAILURES.md).
 
@@ -22,20 +22,20 @@ PayBack-AI yields the highest **Incremental Lift** because it uses smart tone es
 
 ## 🏆 Hackathon Highlights
 
-| Criteria | Implementation |
-|---|---|
-| **A/B Testing & Smart Yield** | Live analytics proving *Incremental Holdout Revenue* vs Treatment cohort |
-| **Multi-Channel Stepper** | Visual interactive escalation timeline (Email → SMS → Voice → Internal) |
-| **Hackathon Demo Reset** | Instant 1-click database wipe and re-seed for flawless live judging |
-| **Voice-First AI Simulation** | Browser-native Hinglish voice negotiation powered by Web Speech API |
-| **Measured money recovered** | Real-time ₹ recovered per batch on the Recovery Dashboard |
-| **Batch processing** | `POST /api/recovery/run` scans all at-risk invoices and starts sessions |
-| **Compliant escalation** | 5-Stage Tone Matrix + Razorpay mandate retry (T+1, T+3, T+7) |
-| **Stopping rules** | 6 hard stops: 90-day cap, 3-retry max, PTP-broken-twice, DLQ, mandate-cap, invoice-paid |
-| **Audit trail** | Immutable `recovery_audit_log` table with every AI decision + Razorpay ref |
-| **Hash-Chained Ledger** | Cryptographic sequence verification (`verify-ledger.ts`) to prevent tampering |
-| **Merchant YAML Policy** | Absolute control via `ai-service/config/merchant_policies.yaml` (Differentiator) |
-| **Razorpay Test APIs** | Payment links, mandate retry, subscription status, payment.failed webhook |
+| Criteria                      | Implementation                                                                          |
+| ----------------------------- | --------------------------------------------------------------------------------------- |
+| **A/B Testing & Smart Yield** | Live analytics proving _Incremental Holdout Revenue_ vs Treatment cohort                |
+| **Multi-Channel Stepper**     | Visual interactive escalation timeline (Email → SMS → Voice → Internal)                 |
+| **Hackathon Demo Reset**      | Instant 1-click database wipe and re-seed for flawless live judging                     |
+| **Voice-First AI Simulation** | Browser-native Hinglish voice negotiation powered by Web Speech API                     |
+| **Measured money recovered**  | Real-time ₹ recovered per batch on the Recovery Dashboard                               |
+| **Batch processing**          | `POST /api/recovery/run` scans all at-risk invoices and starts sessions                 |
+| **Compliant escalation**      | 5-Stage Tone Matrix + Razorpay mandate retry (T+1, T+3, T+7)                            |
+| **Stopping rules**            | 6 hard stops: 90-day cap, 3-retry max, PTP-broken-twice, DLQ, mandate-cap, invoice-paid |
+| **Audit trail**               | Immutable `recovery_audit_log` table with every AI decision + Razorpay ref              |
+| **Hash-Chained Ledger**       | Cryptographic sequence verification (`verify-ledger.ts`) to prevent tampering           |
+| **Merchant YAML Policy**      | Absolute control via `ai-service/config/merchant_policies.yaml` (Differentiator)        |
+| **Razorpay Test APIs**        | Payment links, mandate retry, subscription status, payment.failed webhook               |
 
 ---
 
@@ -44,18 +44,18 @@ PayBack-AI yields the highest **Incremental Lift** because it uses smart tone es
 ```mermaid
 graph TD
     A[React Recovery Dashboard] <-->|REST API| B[Express Backend]
-    
+
     B -->|Detect at-risk| C{Recovery Engine}
     C -->|AI Strategy| D[Python FastAPI AI Service]
     C -->|Razorpay Test API| E[Payment Link Refresh]
     C -->|Razorpay Test API| F[Mandate Retry Sequencer]
     C -->|DB| G[(PostgreSQL)]
-    
+
     D --> H[RecoveryAgent - Root Cause + Strategy]
     D --> I[PaymentRetryAgent - Failure Classification]
     D --> J[MandateSequencerAgent - T+1/3/7 Plan]
     D --> K[PromiseTrackerAgent - PTP Extraction]
-    
+
     E -->|payment.failed| C
     E -->|payment.captured| L[Mark Session Recovered]
 ```
@@ -65,6 +65,7 @@ graph TD
 ## Recovery Workflows
 
 ### 1. Payment Failure → Root Cause → Recovery Action
+
 - Razorpay `payment.failed` webhook automatically triggers a recovery session
 - `PaymentRetryAgent` classifies failure (card decline, insufficient funds, network error, etc.)
 - Fresh Razorpay payment link generated with 48h expiry for urgency
@@ -72,18 +73,21 @@ graph TD
 - Hard stop after 3 retry attempts → DLQ
 
 ### 2. Checkout Abandonment Recovery
+
 - Portal views without payment logged as `checkout_abandonment_signals`
 - Recovery session started after 30 minutes of inactivity
 - `RecoveryAgent` selects `soft_reminder` or `payment_link_refresh` strategy
 - Audit entry created with every action
 
 ### 3. Failed Subscription Recovery (Mandate Retry Sequencer)
+
 - `MandateSequencerAgent` plans 3-slot retry: T+24h, T+72h, T+168h
 - Each slot calls `Razorpay POST /v1/subscriptions/{id}/retry` (test API)
 - Hard stop after all 3 slots exhausted → `human_review` escalation
 - Customer notified at each slot with tone-matched message
 
 ### 4. B2B Receivables Chase + Promise-to-Pay Tracker
+
 - Overdue invoices scanned every 6 hours for recovery sessions
 - Inbound dispute/reply emails analyzed by `PromiseTrackerAgent`
 - PTP records created with promised date + amount extracted by LLM
@@ -92,14 +96,14 @@ graph TD
 
 ### 5. Stopping Rules (Compliant Escalation)
 
-| Condition | Stop Action |
-|---|---|
-| Days overdue > 90 | Legal Stop — no automated comms |
-| Retry count ≥ 3 | DLQ + human review |
-| PTP broken ≥ 2 times | Escalate to dispute flow |
-| Mandate retries ≥ 3 | Stop mandate sequence |
-| Invoice marked Paid | Session closed as `recovered` |
-| DLQ threshold reached | Session escalated |
+| Condition             | Stop Action                     |
+| --------------------- | ------------------------------- |
+| Days overdue > 90     | Legal Stop — no automated comms |
+| Retry count ≥ 3       | DLQ + human review              |
+| PTP broken ≥ 2 times  | Escalate to dispute flow        |
+| Mandate retries ≥ 3   | Stop mandate sequence           |
+| Invoice marked Paid   | Session closed as `recovered`   |
+| DLQ threshold reached | Session escalated               |
 
 ---
 
@@ -108,13 +112,13 @@ graph TD
 ```mermaid
 graph TD
     A[React Frontend] <-->|REST API / Auth| B[Express Backend API]
-    
+
     B <-->|Drizzle ORM| C[(PostgreSQL Database)]
     B <-->|Session / Caching| D[(Redis Cache)]
     B <-->|Service Auth| E[FastAPI AI-ML Service]
     B -->|Email Dispatch| G[SendGrid / SMTP]
     B <-->|Webhooks / Payments| H[Razorpay Test API]
-    
+
     E <-->|Inference| F[Groq LLaMA 3.x LLM]
 ```
 
@@ -125,18 +129,21 @@ graph TD
 ### 1. AI Revenue Recovery Engine (NEW — Razorpay Buildathon)
 
 **Backend (`backend/src/modules/recovery/`)**
+
 - `recovery.repository.ts` — CRUD for 5 new recovery tables
 - `recovery.service.ts` — Full lifecycle: detect → strategy → execute → audit → close
 - `recovery.controller.ts` / `recovery.routes.ts` — REST API (`/api/recovery/*`)
 - Cron: broken-promise check daily at 10 AM UTC
 
 **AI Service (`ai-service/src/agents/`)**
+
 - `recovery_agent.py` — Root cause analysis + strategy selection with hard stopping rules
 - `payment_retry_agent.py` — Failure classification + tone-escalated outreach
 - `mandate_sequencer_agent.py` — T+1/T+3/T+7 retry planning with 3-attempt cap
 - `promise_tracker_agent.py` — LLM extraction of PTP dates and amounts from emails
 
 **Database (5 new tables)**
+
 - `recovery_sessions` — Per-invoice workflow lifecycle
 - `payment_retry_attempts` — Per-attempt Razorpay link + status
 - `promise_to_pay` — AI-extracted debtor commitments
@@ -144,6 +151,7 @@ graph TD
 - `recovery_audit_log` — Immutable append-only action audit trail
 
 **Frontend (`frontend/src/pages/RecoveryDashboard.tsx`)**
+
 - Hero metrics: ₹ at risk, ₹ recovered, recovery rate %, active sessions
 - 7-day recovery trend chart (AreaChart)
 - Strategy distribution pie chart (AI-selected interventions)
@@ -153,6 +161,7 @@ graph TD
 - Stopping rules panel
 
 ### 2. Multi-Tenant Backend (backend/)
+
 - **Authentication**: JWT-based session security with bcryptjs and MFA
 - **Invoice & Collections**: Automated workflows, 5-Stage Tone Escalation
 - **Payment Gateway**: Razorpay adapter — payment links, webhook validation, mandate retry
@@ -160,12 +169,14 @@ graph TD
 - **Idempotency Guard**: 20-hour window per invoice
 
 ### 3. React SPA Frontend (frontend/)
+
 - **Recovery Dashboard**: Live ₹ recovered, audit trail, strategy charts
 - **Dashboard**: At-a-glance revenue at risk callout → links to Recovery
 - **Invoice Portal**: Debtor-facing payment portal
 - **Agent Controls**: Autopilot run monitoring
 
 ### 4. FastAPI AI-ML Engine (ai-service/)
+
 - **Recovery Endpoints**: `/agents/recovery`, `/agents/payment-retry`, `/agents/mandate-sequence`, `/agents/promise-extract`
 - **Dispute Agent**: `/agents/dispute`, `/agents/dispute/draft`
 - **Risk Scorer**: ML + rule-based default scoring
@@ -175,13 +186,13 @@ graph TD
 
 ## Razorpay Test API Integrations
 
-| Feature | API Call | Notes |
-|---|---|---|
-| Recovery payment link | `POST /v1/payment_links` | 48h expiry for urgency |
-| Mandate retry | `POST /v1/subscriptions/{id}/retry` | Hard cap: 3 attempts |
-| Cancel stale link | `POST /v1/payment_links/{id}/cancel` | Before regenerating |
-| Payment failure | `payment.failed` webhook | Auto-triggers recovery |
-| Payment success | `payment.captured` webhook | Auto-closes session |
+| Feature               | API Call                             | Notes                  |
+| --------------------- | ------------------------------------ | ---------------------- |
+| Recovery payment link | `POST /v1/payment_links`             | 48h expiry for urgency |
+| Mandate retry         | `POST /v1/subscriptions/{id}/retry`  | Hard cap: 3 attempts   |
+| Cancel stale link     | `POST /v1/payment_links/{id}/cancel` | Before regenerating    |
+| Payment failure       | `payment.failed` webhook             | Auto-triggers recovery |
+| Payment success       | `payment.captured` webhook           | Auto-closes session    |
 
 ---
 
@@ -199,6 +210,7 @@ cd frontend && npm install && npm run dev
 ```
 
 **Environment variables** (copy `.env.example` to `.env` in each service):
+
 - `RAZORPAY_KEY_ID` / `RAZORPAY_KEY_SECRET` — test keys (`rzp_test_*`)
 - `LLM_API_KEY` — Groq API key
 - `DATABASE_URL` — PostgreSQL connection string
@@ -238,5 +250,3 @@ cd frontend && npm install && npm run dev
 ```
 
 ---
-
-
