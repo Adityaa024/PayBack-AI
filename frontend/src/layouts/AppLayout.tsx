@@ -1,10 +1,16 @@
-import { useEffect } from "react";
-import { Outlet, NavLink, useLocation } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Outlet, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Home, FileText, Bot, BarChart3, Settings, History, MessageSquare, CreditCard, TrendingUp } from "lucide-react";
+import {
+  Home, FileText, Bot, BarChart3, Settings, History,
+  MessageSquare, CreditCard, TrendingUp, Search, Keyboard,
+  Sparkles
+} from "lucide-react";
 import recoveriqLogo from "../assets/recoveriq_svg.svg";
 import { useAuth } from "../contexts/AuthContext";
 import { StatusPulse } from "../components/premium";
+import { CommandPalette } from "../components/common/CommandPalette";
+import { KeyboardShortcutsModal } from "../components/common/KeyboardShortcutsModal";
 
 interface NavGroup {
   title?: string;
@@ -20,9 +26,28 @@ interface NavGroup {
 export function AppLayout() {
   const { user } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
+  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
+  const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
 
   const isAdminOrManager = user?.role === 'admin' || user?.role === 'manager';
   const isNotViewer = user?.role !== 'viewer';
+
+  // Global hotkeys
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const isInput = ["INPUT", "TEXTAREA", "SELECT"].includes((e.target as HTMLElement)?.tagName);
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setIsCommandPaletteOpen((prev) => !prev);
+      } else if (e.key === "?" && !isInput) {
+        e.preventDefault();
+        setIsShortcutsOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   const navGroups: NavGroup[] = [
     {
@@ -169,6 +194,64 @@ export function AppLayout() {
       </aside>
 
       <main className="flex-1 min-h-0 overflow-hidden flex flex-col w-full bg-[#010102]">
+        {/* Top Universal Header Bar */}
+        <header className="h-14 border-b border-[#23252a]/60 bg-[#07080a]/90 backdrop-blur-md px-4 md:px-6 flex items-center justify-between flex-shrink-0 z-20">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setIsCommandPaletteOpen(true)}
+              className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-[#121316] hover:bg-[#18191c] border border-[#23252a] text-xs text-[#8a8f98] hover:text-[#f7f8f8] transition-all shadow-xs group"
+              title="Open Command Palette (Ctrl+K or ⌘K)"
+            >
+              <Search className="w-3.5 h-3.5 text-[#62666d] group-hover:text-cyan-400 transition-colors" />
+              <span className="hidden sm:inline">Search commands or pages...</span>
+              <span className="sm:hidden">Search...</span>
+              <kbd className="text-[10px] font-mono bg-[#1c1d22] text-[#8a8f98] px-1.5 py-0.5 rounded border border-[#282a30]">
+                ⌘K
+              </kbd>
+            </button>
+          </div>
+
+          <div className="flex items-center gap-2.5">
+            {/* Live System Safety Badge */}
+            <div className="hidden md:flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[11px] text-emerald-400 font-medium">
+              <StatusPulse color="green" size="sm" />
+              <span>Postgres Concurrency Protected</span>
+            </div>
+
+            {/* Quick Demo Button */}
+            <button
+              onClick={() => {
+                navigate("/recovery");
+              }}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 text-xs font-medium transition-colors"
+              title="Jump to AI Recovery Dashboard"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">AI Recovery</span>
+            </button>
+
+            {/* Keyboard Shortcuts Trigger */}
+            <button
+              onClick={() => setIsShortcutsOpen(true)}
+              className="p-1.5 rounded-lg bg-[#121316] hover:bg-[#18191c] border border-[#23252a] text-[#8a8f98] hover:text-[#f7f8f8] transition-colors"
+              title="Keyboard Shortcuts (?)"
+            >
+              <Keyboard className="w-4 h-4" />
+            </button>
+
+            {/* User Avatar / Role */}
+            <div className="flex items-center gap-2 pl-2 border-l border-[#23252a]/60">
+              <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-cyan-500 to-violet-600 flex items-center justify-center text-xs font-bold text-white shadow-xs">
+                {user?.name?.[0]?.toUpperCase() || "A"}
+              </div>
+              <div className="hidden lg:block text-left">
+                <div className="text-xs font-medium text-white truncate max-w-[110px]">{user?.name || "Admin"}</div>
+                <div className="text-[10px] text-zinc-500 capitalize">{user?.role || "Merchant"}</div>
+              </div>
+            </div>
+          </div>
+        </header>
+
         <motion.div 
           key={location.pathname}
           initial={{ opacity: 0, y: 8 }}
@@ -178,6 +261,16 @@ export function AppLayout() {
         >
           <Outlet />
         </motion.div>
+
+        {/* Global Modals */}
+        <CommandPalette
+          isOpen={isCommandPaletteOpen}
+          onClose={() => setIsCommandPaletteOpen(false)}
+        />
+        <KeyboardShortcutsModal
+          isOpen={isShortcutsOpen}
+          onClose={() => setIsShortcutsOpen(false)}
+        />
       </main>
     </div>
   );

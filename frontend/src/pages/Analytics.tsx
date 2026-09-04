@@ -3,11 +3,11 @@ import { analyticsService } from '../services/analytics';
 import { invoiceService } from '../services/invoice';
 import { 
   XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
-  AreaChart, Area, BarChart, Bar, Legend, CartesianAxis
+  AreaChart, Area
 } from 'recharts';
 import { 
   DollarSign, Clock, AlertCircle, Loader2, BarChart3, TrendingUp, 
-  ShieldAlert, CheckCircle2, Activity, CreditCard, Sparkles, Filter, Users
+  ShieldAlert, CheckCircle2, Activity, CreditCard, Sparkles, Users
 } from 'lucide-react';
 import { recoveryService } from '../services/recovery';
 
@@ -27,7 +27,7 @@ export function Analytics() {
     queryFn: () => invoiceService.getInvoices({ limit: 200 }),
   });
 
-  const { data: experimentMetrics, isLoading: isExperimentLoading } = useQuery({
+  const { data: experimentMetrics } = useQuery({
     queryKey: ['analytics-experiment-metrics'],
     queryFn: () => recoveryService.getExperimentMetrics(),
   });

@@ -23,7 +23,7 @@
     "ai",
     "automation"
   ],
-  "author": "Suresh Jakhar",
+  "author": "PayBack-AI",
   "license": "ISC",
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
