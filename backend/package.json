@@ -24,7 +24,7 @@
     "automation"
   ],
   "author": "PayBack-AI",
-  "license": "ISC",
+  "private": true,
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
     "@types/cors": "^2.8.19",
