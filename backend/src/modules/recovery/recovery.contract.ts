@@ -93,6 +93,7 @@ export interface PolicyContext {
   lastContactedAt?: Date | string | null;
   optedOut?: boolean;
   hasDispute?: boolean;
+  ptpBroken?: number;
   invoiceStatus?: string;
   daysOverdue?: number;
   amountAtRisk?: number;
@@ -138,6 +139,11 @@ export class PolicyGuard {
     // 3. Active Dispute / Refund Signal
     if (context.hasDispute) {
       violations.push('DISPUTE_ACTIVE: Active dispute or refund inquiry pending; routed to human review.');
+    }
+
+    // 3b. Promise-to-Pay Broken Twice
+    if (context.ptpBroken !== undefined && context.ptpBroken >= 2) {
+      violations.push('PTP_BROKEN_TWICE: Debtor broke two or more consecutive payment commitments; escalated to human review.');
     }
 
     // 4. Maximum Attempt Ceiling
