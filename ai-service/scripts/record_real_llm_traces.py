@@ -33,23 +33,43 @@ BATCH_FILE = ROOT_DIR / "reports" / "simulated_batch.json"
 OUTPUT_TRACES_FILE = ROOT_DIR / "reports" / "real_llm_traces.json"
 
 
-def generate_real_provider_trace_sample(sample_size: int = 50):
+def generate_real_provider_trace_sample(sample_size: int = 50, dry_run: bool = False):
     """
-    Generates and verifies recorded LLM provider traces for a documented sample.
-    If GROQ_API_KEY or OPENAI_API_KEY is present, queries provider directly.
-    Otherwise, generates verified provider-trace records adhering to Groq/Llama-3.3-70b
-    token schemas and exact prompt hashes.
+    Records genuine LLM provider traces from live provider API for a documented sample.
+    STRICT INTEGRITY ENFORCEMENT:
+    Requires GROQ_API_KEY or OPENAI_API_KEY. Synthetic provider IDs or fabricated live traces
+    are strictly prohibited by evaluation integrity standards.
     """
+    groq_key = os.environ.get("GROQ_API_KEY")
+    openai_key = os.environ.get("OPENAI_API_KEY")
+
+    if not groq_key and not openai_key:
+        if dry_run:
+            print("[NOTICE] No live provider key detected. Real LLM arm remains gated offline.")
+            return False
+        raise RuntimeError(
+            "Real LLM trace recording requires a live provider API key (GROQ_API_KEY or OPENAI_API_KEY). "
+            "Generating synthetic provider IDs or fake 'live' traces is strictly prohibited by evaluation integrity safeguards. "
+            "To evaluate offline, the real_llm_policy arm must remain gated."
+        )
+
     with open(BATCH_FILE, "r", encoding="utf-8") as f:
         cases = json.load(f)
 
     selected_cases = cases[:sample_size]
     recorder = LLMTraceRecorder()
 
-    model = "groq/llama-3.3-70b-versatile"
-    provider = "groq"
+    model = "groq/llama-3.3-70b-versatile" if groq_key else "gpt-4o-mini"
+    provider = "groq" if groq_key else "openai"
+    api_key = groq_key or openai_key
+    endpoint = (
+        "https://api.groq.com/openai/v1/chat/completions"
+        if groq_key
+        else "https://api.openai.com/v1/chat/completions"
+    )
+    provider_model = "llama-3.3-70b-versatile" if groq_key else "gpt-4o-mini"
 
-    print(f"Recording real LLM provider traces for {sample_size} documented benchmark cases...")
+    print(f"Recording genuine {provider} provider traces for {sample_size} documented benchmark cases...")
 
     for i, c in enumerate(selected_cases):
         case_id = c["invoice_id"]
@@ -81,63 +101,56 @@ def generate_real_provider_trace_sample(sample_size: int = 50):
         full_prompt = f"{RECOVERY_SYSTEM_PROMPT}\n\n{user_prompt}"
         prompt_hash = compute_prompt_hash(full_prompt)
 
-        # Provider request ID matching Groq API format
-        req_id = f"req_groq_{hashlib.sha256(f'{case_id}_{i}'.encode()).hexdigest()[:24]}"
+        # Make genuine provider HTTP request
+        import urllib.request
+        import urllib.error
 
-        # Diagnose nuanced root cause based on exact lane
-        if lane == "subscription_rescue":
-            strat = "mandate_retry"
-            root_cause = "subscription_lapsed"
-            conf = 0.94
-            prob = 0.78
-            delay = 48
-            reason = f"Automated subscription mandate failed for {inv_no}. Scheduling intelligent retry window outside banking downtime."
-            hint = "Suggest backup UPI or card mandate if primary fails."
-        elif lane == "checkout_dropoff":
-            strat = "payment_link_refresh"
-            root_cause = "checkout_abandoned"
-            conf = 0.91
-            prob = 0.72
-            delay = 4
-            reason = f"Debtor viewed checkout portal but abandoned session for {inv_no}. Generating expedited 1-click payment link."
-            hint = "Highlight preserved session and simplified UPI payment."
-        elif lane == "b2b_receivables":
-            strat = "firm_escalation" if days > 45 else "soft_reminder"
-            root_cause = "behavioral_delay"
-            conf = 0.89
-            prob = 0.65
-            delay = 48
-            reason = f"Commercial invoice {inv_no} is {days} days overdue. Initiating structured B2B corporate receivables protocol."
-            hint = "Attach PDF statement and GST details for AP review."
-        else:
-            strat = "payment_link_refresh"
-            root_cause = "payment_method_failed"
-            conf = 0.95
-            prob = 0.84
-            delay = 2
-            reason = f"Instant UPI/card degradation failure for {inv_no}. Refreshing payment link with multi-rail fallback."
-            hint = "Direct debtor to alternative payment gateway."
-
-        parsed_data = {
-            "incident_lane": lane,
-            "root_cause": root_cause,
-            "strategy": strat,
-            "confidence": conf,
-            "reasoning": reason,
-            "estimated_recovery_probability": prob,
-            "recommended_delay_hours": delay,
-            "stopping_condition": "Stop immediately upon payment_captured webhook or customer STOP opt-out",
-            "personalization_hint": hint,
-            "voice_script_hinglish": "Namaste, aapka pending invoice pay karne ke liye link bhej rahe hain.",
+        req_body = {
+            "model": provider_model,
+            "messages": [
+                {"role": "system", "content": RECOVERY_SYSTEM_PROMPT},
+                {"role": "user", "content": user_prompt},
+            ],
+            "temperature": 0.2,
+            "response_format": {"type": "json_object"},
         }
 
-        # Verify schema validity
-        decision_obj = RecoveryDecision(**parsed_data)
-        raw_json = json.dumps(parsed_data, indent=2)
+        req = urllib.request.Request(
+            endpoint,
+            data=json.dumps(req_body).encode("utf-8"),
+            headers={
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json",
+                "User-Agent": "PayBack-AI-Benchmark/1.0",
+            },
+            method="POST",
+        )
 
-        prompt_tokens = 680 + (i % 45)
-        completion_tokens = 95 + (i % 20)
-        latency = 220.0 + (i * 3.5) % 150
+        t_start = time.perf_counter()
+        try:
+            with urllib.request.urlopen(req, timeout=45) as resp:
+                resp_data = json.loads(resp.read().decode("utf-8"))
+        except Exception as err:
+            raise RuntimeError(
+                f"Live provider call failed for case {case_id} on {provider}: {err}. "
+                "Fake provider IDs or synthetic traces are prohibited."
+            ) from err
+        latency = (time.perf_counter() - t_start) * 1000.0
+
+        req_id = resp_data.get("id")
+        if not req_id or not isinstance(req_id, str):
+            raise RuntimeError(f"Provider returned invalid response ID for case {case_id}")
+
+        raw_json = resp_data["choices"][0]["message"]["content"]
+        usage = resp_data.get("usage", {})
+        prompt_tokens = usage.get("prompt_tokens", 0)
+        completion_tokens = usage.get("completion_tokens", 0)
+
+        try:
+            parsed_data = json.loads(raw_json)
+            decision_obj = RecoveryDecision(**parsed_data)
+        except Exception as err:
+            raise RuntimeError(f"Model output schema validation failed for case {case_id}: {err}") from err
 
         cost_usd, cost_inr = calculate_llm_cost(model, prompt_tokens, completion_tokens)
 
@@ -167,4 +180,5 @@ def generate_real_provider_trace_sample(sample_size: int = 50):
 
 
 if __name__ == "__main__":
-    generate_real_provider_trace_sample(50)
+    dry_run = "--dry-run" in sys.argv or "--check-status" in sys.argv
+    generate_real_provider_trace_sample(50, dry_run=dry_run)

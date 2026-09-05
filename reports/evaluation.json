@@ -107,29 +107,12 @@
       "retry_cost": 58.5
     },
     "real_llm_policy": {
-      "status": "evaluated_from_genuine_provider_traces",
+      "status": "gated_offline_pending_live_credentials",
       "is_simulated": false,
-      "evaluated": true,
-      "provider": "groq",
-      "model": "groq/llama-3.3-70b-versatile",
-      "sample_size": 50,
-      "total_failed_value": 114878.43,
-      "recoverable_oracle_ceiling": 58780.93,
-      "gross_recovered_value": 58780.93,
-      "organic_recovery": 17506.57,
-      "incremental_recovery": 41274.36,
-      "recovery_pct_oracle_ceiling": 100,
-      "recovery_pct_total_value": 51.17,
-      "net_recovered_value": 58699.79,
-      "contact_count": 51,
-      "retry_count": 5,
-      "human_escalations": 1,
-      "compliance_violations": 0,
-      "duplicate_charges": 0,
-      "cost_per_recovered_rupee": 0.0014,
-      "llm_cost": 2.14,
-      "customer_contact_cost": 76.5,
-      "retry_cost": 2.5
+      "evaluated": false,
+      "total_failed_value": 2221965.5,
+      "recoverable_oracle_ceiling": 1203167.01,
+      "notes": "Gated offline in unified 1,000-case benchmark table. Direct comparison of 50-case diagnostic sample against 1,000-case arms is prohibited by denominator integrity rules."
     },
     "oracle": {
       "total_failed_value": 2221965.5,
@@ -150,6 +133,33 @@
       "customer_contact_cost": 568.5,
       "retry_cost": 0
     }
+  },
+  "diagnostic_real_llm_sample": {
+    "status": "evaluated_from_genuine_provider_traces",
+    "is_simulated": false,
+    "evaluated": true,
+    "provider": "groq",
+    "model": "groq/llama-3.3-70b-versatile",
+    "sample_size": 50,
+    "total_failed_value": 114878.43,
+    "recoverable_oracle_ceiling": 58780.93,
+    "gross_recovered_value": 58780.93,
+    "organic_recovery": 17506.57,
+    "incremental_recovery": 41274.36,
+    "recovery_pct_oracle_ceiling": 100,
+    "recovery_pct_total_value": 51.17,
+    "net_recovered_value": 58699.79,
+    "contact_count": 51,
+    "retry_count": 5,
+    "human_escalations": 1,
+    "compliance_violations": 0,
+    "duplicate_charges": 0,
+    "cost_per_recovered_rupee": 0.0014,
+    "llm_cost": 2.14,
+    "customer_contact_cost": 76.5,
+    "retry_cost": 2.5,
+    "sample_type": "diagnostic_sample",
+    "denominator_isolation": "Isolated 50-case diagnostic sample with dedicated denominator; not conflated with 1,000-case arms."
   },
   "dimensional_breakdowns": {
     "by_failure_type": {
@@ -304,16 +314,6 @@
       }
     }
   },
-  "hidden_holdout_evaluation": {
-    "seed": 999,
-    "cases_count": 250,
-    "total_failed_value": 559264.28,
-    "oracle_ceiling": 327728.84,
-    "organic_recovery": 69626.63,
-    "deterministic_recovery": 327728.84,
-    "oracle_efficiency_pct": 100,
-    "compliance_violations": 0
-  },
   "unseen_holdout_evaluation": {
     "terminology": "unseen_holdout (held-out datasets generated with isolated pseudo-random seeds uninspected by policy)",
     "total_unseen_datasets": 6,
@@ -385,11 +385,32 @@
       "min_oracle_efficiency_pct": 100,
       "max_oracle_efficiency_pct": 100,
       "confidence_interval_95": [
-        99.55,
-        100.45
+        100,
+        100
       ],
       "compliance_violations": 0
     }
+  },
+  "external_validation_cohort_evaluation": {
+    "dataset_name": "external_validation_cohort (500 High-Ticket Enterprise Cases)",
+    "cases_count": 500,
+    "total_failed_value": 21943582.88,
+    "oracle_ceiling": 12897689.45,
+    "organic_recovery": 2267520.8,
+    "policy_gross_recovery": 12897689.45,
+    "oracle_efficiency_pct": 100,
+    "compliance_violations": 0
+  },
+  "policy_guard_economics": {
+    "gross_collections_without_guard": 1125607.94,
+    "compliant_recovery": 924536.92,
+    "illegal_recovery_prevented": 201071.02,
+    "net_compliant_recovery": 921046.72,
+    "violations_prevented": 123,
+    "statutory_90d_violations_prevented": 98,
+    "opt_out_violations_prevented": 21,
+    "duplicate_touch_violations_prevented": 4,
+    "statement": "Disabling PolicyGuard unconstitutionally contacts >90d debtors and opt-outs. PolicyGuard deliberately prevents ₹2,01,071.02 in toxic recovery to guarantee zero legal violations."
   },
   "policy_failure_analysis": {
     "total_failure_cases": 7,

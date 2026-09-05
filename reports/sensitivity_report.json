@@ -166,26 +166,26 @@
     "compliance_window_sweep": [
       {
         "statutory_cutoff_days": 30,
-        "gross_recovered_inr": 655733.94,
-        "incremental_lift_inr": 303224.5,
+        "gross_recovered_inr": 655912.81,
+        "incremental_lift_inr": 303403.37,
         "compliance_safety": "Over-conservative"
       },
       {
         "statutory_cutoff_days": 60,
-        "gross_recovered_inr": 988230.37,
-        "incremental_lift_inr": 635189.93,
+        "gross_recovered_inr": 983502.36,
+        "incremental_lift_inr": 630459.92,
         "compliance_safety": "Balanced"
       },
       {
         "statutory_cutoff_days": 90,
-        "gross_recovered_inr": 1274984.79,
-        "incremental_lift_inr": 921440.85,
+        "gross_recovered_inr": 1273238.12,
+        "incremental_lift_inr": 919692.18,
         "compliance_safety": "Balanced"
       },
       {
         "statutory_cutoff_days": 120,
-        "gross_recovered_inr": 1360241.62,
-        "incremental_lift_inr": 1006550.68,
+        "gross_recovered_inr": 1360377.97,
+        "incremental_lift_inr": 1006686.53,
         "compliance_safety": "Legal Risk (>90d)"
       }
     ],
@@ -224,53 +224,53 @@
     "dataset_seed_sweep": [
       {
         "seed": 42,
-        "gross_recovered_inr": 1274984.79,
-        "incremental_lift_inr": 921440.85
+        "gross_recovered_inr": 1273238.12,
+        "incremental_lift_inr": 919692.18
       },
       {
         "seed": 43,
-        "gross_recovered_inr": 1263406.07,
-        "incremental_lift_inr": 931605.31
+        "gross_recovered_inr": 1241239.55,
+        "incremental_lift_inr": 909427.29
       },
       {
         "seed": 44,
-        "gross_recovered_inr": 1301915.72,
-        "incremental_lift_inr": 906160.71
+        "gross_recovered_inr": 1305996.36,
+        "incremental_lift_inr": 910247.85
       },
       {
         "seed": 45,
-        "gross_recovered_inr": 1187551.88,
-        "incremental_lift_inr": 881745.29
+        "gross_recovered_inr": 1184131.81,
+        "incremental_lift_inr": 878322.72
       },
       {
         "seed": 46,
-        "gross_recovered_inr": 1257484.61,
-        "incremental_lift_inr": 906504.69
+        "gross_recovered_inr": 1262871.38,
+        "incremental_lift_inr": 911891.96
       },
       {
         "seed": 47,
-        "gross_recovered_inr": 1258724.6,
-        "incremental_lift_inr": 969044.79
+        "gross_recovered_inr": 1258933.05,
+        "incremental_lift_inr": 969250.74
       },
       {
         "seed": 48,
-        "gross_recovered_inr": 1292844.79,
-        "incremental_lift_inr": 969477.25
+        "gross_recovered_inr": 1286464.79,
+        "incremental_lift_inr": 963095.25
       },
       {
         "seed": 49,
-        "gross_recovered_inr": 1278805.23,
-        "incremental_lift_inr": 946809.3
+        "gross_recovered_inr": 1260133.76,
+        "incremental_lift_inr": 928123.83
       },
       {
         "seed": 50,
-        "gross_recovered_inr": 1286798.97,
-        "incremental_lift_inr": 970116.44
+        "gross_recovered_inr": 1276931.31,
+        "incremental_lift_inr": 960237.28
       },
       {
         "seed": 51,
-        "gross_recovered_inr": 1331964.96,
-        "incremental_lift_inr": 941060.24
+        "gross_recovered_inr": 1312366.04,
+        "incremental_lift_inr": 921454.32
       }
     ],
     "llm_error_rate_sweep": [
