@@ -13,7 +13,7 @@ PayBack-AI is a compliance-first revenue recovery engine for the exact problem d
 
 The platform is designed to recover lost value across payment degradation, subscription churn, checkout drop-off, and receivables follow-up while preserving legal and operational boundaries. We evaluate the system on a unified benchmark, report both oracle-ceiling efficiency and total-failed-value conversion, and validate results across repeated seeds and unseen holdout cohorts. The result is a production-grade recovery workflow that is measurable, reproducible, and audit-safe.
 
-Our strongest differentiator is not vanity metrics — it is the combination of measured recovery, stop-rule compliance, deterministic control, and operational traceability. Live-provider diagnostics are isolated and clearly labeled as separate from the canonical benchmark, ensuring that all claims remain honest, defensible, and grounded in real system validation.
+The main proof of performance is established by our canonical 1,000-case benchmark and multi-seed evaluation. Live-provider traces are kept strictly in a separate diagnostic section and are explicitly audited and labeled as diagnostic probes—not as a winning leaderboard claim. This ensures that all claims remain honest, defensible, and grounded in real system validation.
 
 ---
 
@@ -175,13 +175,16 @@ PayBack-AI evaluates recovery across a **100% unified complete dataset (1,000 ca
 | **Cost per Recovered Rupee (₹)** | ₹0.0000 | ₹0.0020 | ₹0.0022 | **₹0.0013** | **₹0.0013** | Gated | ₹0.0005 |
 | **LLM Inference Cost (₹)** | ₹0.00 | ₹0.00 | ₹0.00 | ₹0.00 | ₹44.36 | Gated | ₹0.00 |
 
-*Denominator Integrity Rule (Arm 6 Gating)*: Arm 6 (`real_llm_policy`) is kept strictly gated offline in the canonical 1,000-case benchmark table to prevent invalid cross-cohort comparison between a 50-case diagnostic sample ($N=50$) and the 1,000-case benchmark ($N=1,000$).
+*Canonical Leaderboard Proof*: Headline performance and recovery rankings are strictly established by Arm 4 (PayBack-AI Deterministic) and Arm 5 (PayBack-AI Simulated LLM) on the unified 1,000-case dataset ($N=1,000$, Seed 42). Arm 6 (`real_llm_policy`) is kept strictly gated offline in the canonical benchmark table to prevent invalid cross-cohort comparison between a 50-case diagnostic sample ($N=50$) and the 1,000-case benchmark ($N=1,000$).
 *Note on Arm 5 (`simulated_llm_policy`)*: Arm 5 represents a rule-based synthetic heuristic approximation of LLM reasoning, evaluated for algorithmic baseline comparison; it does NOT represent live model inference.
 
 ---
 
 ### 5.1 Real LLM Provider Diagnostic Sample (Isolated 50-Case Exploratory Probe)
 *Evaluated with its own dedicated denominator ($N=50$, ₹1,14,878.43 total exposure) strictly segregated from the canonical 1,000-case ranking:*
+
+> [!IMPORTANT]
+> **Methodological Isolation Notice**: The canonical 1,000-case benchmark above is the primary proof of system performance. This 50-case section is purely an exploratory diagnostic integration probe for JSON schema validation and offline replay error-handling. It is **not** part of the headline leaderboard ranking or model superiority claims.
 
 > [!WARNING]
 > **Diagnostic Sample Caution & Statistical Limitations ($N=50$)**:
