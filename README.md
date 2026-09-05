@@ -87,15 +87,15 @@ The Razorpay Buildathon judging rubric evaluates four core dimensions. Here is h
 
 ### 🖥️ Enterprise Recovery Control Tower UI Showcase
 
-| Desktop Operations View (1440×900) | Mobile Operator View (375×812) |
+| Modern Light-Theme Login & 1-Click Judge Demo | Recovery Command Center & Operations Dashboard |
 |:---:|:---:|
-| ![Recovery Control Tower Desktop](docs/assets/dashboard_desktop.png) | ![Recovery Control Tower Mobile](docs/assets/dashboard_mobile.png) |
+| ![Light Theme Login Page](docs/assets/login_light_theme.png) | ![Recovery Control Tower Desktop](docs/assets/dashboard_desktop.png) |
 
-| Incident Remediation & Triage Modal | Multi-Tenant Operations Dashboard |
+| Proof Lab & Audit Trust Center (`/audit`) | Case Remediation & Multi-Agent Diagnosis |
 |:---:|:---:|
-| ![Incident Remediation Modal](docs/assets/incidents_remediation.png) | ![Multi-Tenant Control Tower](docs/assets/control_tower_dashboard.png) |
+| ![Audit Trust Center](docs/assets/audit_trust_center.png) | ![Case Remediation Detail View](docs/assets/incidents_remediation.png) |
 
-*Live AR Operations Dashboard displaying real-time recovery velocity, causal incident breakdown, stopping-rule telemetry, and immutable audit logs.*
+*Live production UI captured from [https://pay-back-ai.vercel.app](https://pay-back-ai.vercel.app) displaying real-time recovery velocity, causal incident breakdown, stopping-rule telemetry, and immutable audit logs.*
 
 ---
 
