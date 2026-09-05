@@ -1,8 +1,8 @@
 {
-  "benchmark_total_incremental_lift": 924470.39,
-  "sum_of_ablation_increments": 924470.39,
+  "benchmark_total_incremental_lift": 921440.85,
+  "sum_of_ablation_increments": 921440.85,
   "invariant_verified": true,
-  "layers": [
+  "telescoping_forward_ablation": [
     {
       "layer": "1. Base (Do-Nothing Baseline)",
       "description": "Natural baseline recovery of uncontacted debt (0 contacts)",
@@ -15,7 +15,7 @@
       "description": "Actively engaging eligible overdue accounts vs passive write-off",
       "marginal_lift_inr": 263590.21,
       "cumulative_lift_inr": 263590.21,
-      "percent_of_total_lift": 28.51
+      "percent_of_total_lift": 28.61
     },
     {
       "layer": "3. + Retry Timing",
@@ -43,28 +43,226 @@
       "description": "8 stopping rules eliminating wasted outreach on opt-outs and >90d debt",
       "marginal_lift_inr": -44043.35,
       "cumulative_lift_inr": 219546.86,
-      "percent_of_total_lift": -4.76
+      "percent_of_total_lift": -4.78
     },
     {
       "layer": "7. + Deterministic Classification",
       "description": "Rule-based routing to causal incident lanes (84.8% diagnostic accuracy)",
       "marginal_lift_inr": 647104.36,
       "cumulative_lift_inr": 866651.22,
-      "percent_of_total_lift": 70.0
+      "percent_of_total_lift": 70.23
     },
     {
       "layer": "8. + LLM Classification & Planning",
       "description": "LLM disambiguation (96.8% accuracy) + adaptive mandate retry sequence",
-      "marginal_lift_inr": 42658.07,
-      "cumulative_lift_inr": 909309.29,
-      "percent_of_total_lift": 4.61
+      "marginal_lift_inr": 42841.14,
+      "cumulative_lift_inr": 909492.36,
+      "percent_of_total_lift": 4.65
     },
     {
       "layer": "8. + LLM Classification & Planning",
       "description": "LLM disambiguation (96.8% accuracy) + adaptive mandate retry sequence",
-      "marginal_lift_inr": 15161.1,
-      "cumulative_lift_inr": 924470.39,
-      "percent_of_total_lift": 1.64
+      "marginal_lift_inr": 11948.49,
+      "cumulative_lift_inr": 921440.85,
+      "percent_of_total_lift": 1.3
     }
-  ]
+  ],
+  "layers": [
+    {
+      "layer": "1. Base (Do-Nothing Baseline)",
+      "description": "Natural baseline recovery of uncontacted debt (0 contacts)",
+      "marginal_lift_inr": 0.0,
+      "cumulative_lift_inr": 0.0,
+      "percent_of_total_lift": 0.0
+    },
+    {
+      "layer": "2. + Coverage Outreach",
+      "description": "Actively engaging eligible overdue accounts vs passive write-off",
+      "marginal_lift_inr": 263590.21,
+      "cumulative_lift_inr": 263590.21,
+      "percent_of_total_lift": 28.61
+    },
+    {
+      "layer": "3. + Retry Timing",
+      "description": "Quiet hours suppression (10pm-8am) and time-boxed retry schedules",
+      "marginal_lift_inr": 0.0,
+      "cumulative_lift_inr": 263590.21,
+      "percent_of_total_lift": 0.0
+    },
+    {
+      "layer": "4. + Channel Selection",
+      "description": "Channel matching: WhatsApp for UPI/D2C vs Email statement for B2B",
+      "marginal_lift_inr": 0.0,
+      "cumulative_lift_inr": 263590.21,
+      "percent_of_total_lift": 0.0
+    },
+    {
+      "layer": "5. + Dynamic Cooldowns",
+      "description": "24h-48h cooldown enforcement to eliminate spam penalties and debtor churn",
+      "marginal_lift_inr": 0.0,
+      "cumulative_lift_inr": 263590.21,
+      "percent_of_total_lift": 0.0
+    },
+    {
+      "layer": "6. + PolicyGuard Safety",
+      "description": "8 stopping rules eliminating wasted outreach on opt-outs and >90d debt",
+      "marginal_lift_inr": -44043.35,
+      "cumulative_lift_inr": 219546.86,
+      "percent_of_total_lift": -4.78
+    },
+    {
+      "layer": "7. + Deterministic Classification",
+      "description": "Rule-based routing to causal incident lanes (84.8% diagnostic accuracy)",
+      "marginal_lift_inr": 647104.36,
+      "cumulative_lift_inr": 866651.22,
+      "percent_of_total_lift": 70.23
+    },
+    {
+      "layer": "8. + LLM Classification & Planning",
+      "description": "LLM disambiguation (96.8% accuracy) + adaptive mandate retry sequence",
+      "marginal_lift_inr": 42841.14,
+      "cumulative_lift_inr": 909492.36,
+      "percent_of_total_lift": 4.65
+    },
+    {
+      "layer": "8. + LLM Classification & Planning",
+      "description": "LLM disambiguation (96.8% accuracy) + adaptive mandate retry sequence",
+      "marginal_lift_inr": 11948.49,
+      "cumulative_lift_inr": 921440.85,
+      "percent_of_total_lift": 1.3
+    }
+  ],
+  "leave_one_feature_out_ablation": [
+    {
+      "feature": "Coverage Outreach",
+      "flag_key": "enable_coverage",
+      "lift_without_feature": 0.0,
+      "marginal_drop_when_removed": 921440.85,
+      "percent_of_total_lift": 100.0,
+      "isolated_causal_contribution": 921440.85
+    },
+    {
+      "feature": "Retry Timing",
+      "flag_key": "enable_retry_timing",
+      "lift_without_feature": 798505.9,
+      "marginal_drop_when_removed": 122934.95,
+      "percent_of_total_lift": 13.34,
+      "isolated_causal_contribution": 122934.95
+    },
+    {
+      "feature": "Channel Selection",
+      "flag_key": "enable_channel_selection",
+      "lift_without_feature": 716549.26,
+      "marginal_drop_when_removed": 204891.59,
+      "percent_of_total_lift": 22.24,
+      "isolated_causal_contribution": 204891.59
+    },
+    {
+      "feature": "Dynamic Cooldowns",
+      "flag_key": "enable_dynamic_cooldowns",
+      "lift_without_feature": 839484.21,
+      "marginal_drop_when_removed": 81956.64,
+      "percent_of_total_lift": 8.89,
+      "isolated_causal_contribution": 81956.64
+    },
+    {
+      "feature": "PolicyGuard Safety",
+      "flag_key": "enable_policy_guard",
+      "lift_without_feature": 1119491.36,
+      "marginal_drop_when_removed": -198050.51,
+      "percent_of_total_lift": -21.49,
+      "isolated_causal_contribution": -198050.51
+    },
+    {
+      "feature": "Deterministic Routing",
+      "flag_key": "enable_deterministic_classification",
+      "lift_without_feature": 899230.84,
+      "marginal_drop_when_removed": 22210.01,
+      "percent_of_total_lift": 2.41,
+      "isolated_causal_contribution": 22210.01
+    },
+    {
+      "feature": "LLM Classification",
+      "flag_key": "enable_llm_classification",
+      "lift_without_feature": 872928.43,
+      "marginal_drop_when_removed": 48512.42,
+      "percent_of_total_lift": 5.26,
+      "isolated_causal_contribution": 48512.42
+    },
+    {
+      "feature": "LLM Adaptive Planning",
+      "flag_key": "enable_llm_planning",
+      "lift_without_feature": 909492.36,
+      "marginal_drop_when_removed": 11948.49,
+      "percent_of_total_lift": 1.3,
+      "isolated_causal_contribution": 11948.49
+    }
+  ],
+  "order_permutation_sensitivity": [
+    {
+      "feature": "Coverage Outreach",
+      "flag_key": "enable_coverage",
+      "mean_marginal_lift": 645194.35,
+      "min_marginal_lift": 262852.21,
+      "max_marginal_lift": 979106.2,
+      "order_sensitivity_range": 716253.99
+    },
+    {
+      "feature": "Retry Timing",
+      "flag_key": "enable_retry_timing",
+      "mean_marginal_lift": 46100.61,
+      "min_marginal_lift": 0.0,
+      "max_marginal_lift": 122934.95,
+      "order_sensitivity_range": 122934.95
+    },
+    {
+      "feature": "Channel Selection",
+      "flag_key": "enable_channel_selection",
+      "mean_marginal_lift": 20489.16,
+      "min_marginal_lift": 0.0,
+      "max_marginal_lift": 204891.59,
+      "order_sensitivity_range": 204891.59
+    },
+    {
+      "feature": "Dynamic Cooldowns",
+      "flag_key": "enable_dynamic_cooldowns",
+      "mean_marginal_lift": 31553.31,
+      "min_marginal_lift": 0.0,
+      "max_marginal_lift": 81956.64,
+      "order_sensitivity_range": 81956.64
+    },
+    {
+      "feature": "PolicyGuard Safety",
+      "flag_key": "enable_policy_guard",
+      "mean_marginal_lift": -32974.86,
+      "min_marginal_lift": -198050.51,
+      "max_marginal_lift": 0.0,
+      "order_sensitivity_range": 198050.51
+    },
+    {
+      "feature": "Deterministic Routing",
+      "flag_key": "enable_deterministic_classification",
+      "mean_marginal_lift": 8045.89,
+      "min_marginal_lift": 0.0,
+      "max_marginal_lift": 22210.01,
+      "order_sensitivity_range": 22210.01
+    },
+    {
+      "feature": "LLM Classification",
+      "flag_key": "enable_llm_classification",
+      "mean_marginal_lift": 202415.19,
+      "min_marginal_lift": 0.0,
+      "max_marginal_lift": 680277.98,
+      "order_sensitivity_range": 680277.98
+    },
+    {
+      "feature": "LLM Adaptive Planning",
+      "flag_key": "enable_llm_planning",
+      "mean_marginal_lift": 617.2,
+      "min_marginal_lift": -738.0,
+      "max_marginal_lift": 7647.98,
+      "order_sensitivity_range": 8385.98
+    }
+  ],
+  "methodology_note": "Forward telescoping sum demonstrates sequential component lift (sum = final lift). Leave-One-Feature-Out (LOFO) isolates true order-independent causal drop when each component is removed. Order permutations report variance across 10 random feature ordering sequences."
 }

@@ -69,7 +69,39 @@ def test_all_ablation_layers_present():
         assert any(kw.lower() in name.lower() for name in layer_names), f"Missing required ablation layer for: {kw}"
 
 
+def test_leave_one_feature_out_lofo_present():
+    """Proves Leave-One-Feature-Out (LOFO) order-independent ablation results exist for all 8 features."""
+    with open(ABLATION_FILE, "r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    assert "leave_one_feature_out_ablation" in data, "LOFO ablation section missing"
+    lofo = data["leave_one_feature_out_ablation"]
+    assert len(lofo) == 8, f"Expected 8 LOFO features, found {len(lofo)}"
+
+    for item in lofo:
+        assert "feature" in item
+        assert "marginal_drop_when_removed" in item
+        assert "isolated_causal_contribution" in item
+
+
+def test_order_permutation_sensitivity_present():
+    """Proves order permutation sensitivity measurements exist across features."""
+    with open(ABLATION_FILE, "r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    assert "order_permutation_sensitivity" in data, "Order permutation section missing"
+    perms = data["order_permutation_sensitivity"]
+    assert len(perms) == 8, f"Expected 8 permutation feature measurements, found {len(perms)}"
+
+    for item in perms:
+        assert "feature" in item
+        assert "mean_marginal_lift" in item
+        assert "order_sensitivity_range" in item
+
+
 if __name__ == "__main__":
     test_ablation_telescoping_sum_invariant()
     test_all_ablation_layers_present()
+    test_leave_one_feature_out_lofo_present()
+    test_order_permutation_sensitivity_present()
     print("ALL ABLATION INTEGRITY TESTS PASSED!")

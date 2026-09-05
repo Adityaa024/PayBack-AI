@@ -749,7 +749,7 @@ export function RecoveryDashboard() {
                   <span className="font-bold text-emerald-800">97.0% resilience via outbox</span>
                 </div>
                 <div className="flex justify-between py-1">
-                  <span>Hidden Holdout (Seed 999, 250 cases):</span>
+                  <span>Unseen Holdout (Seed 999, 250 cases):</span>
                   <span className="font-bold text-emerald-700">99.40% generalization</span>
                 </div>
               </div>

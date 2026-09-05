@@ -90,7 +90,7 @@ Every top-tier hackathon submission encounters reality gaps. This document logs 
 **Date:** September 5, 2026
 **What happened:** In earlier iterations of the benchmark, the `do_nothing_baseline` only evaluated the 189 holdout cases (eligible ₹432k failed debt), while intervention arms evaluated the 811 non-holdout cases (eligible ₹1.789M failed debt).
 **Why it happened:** The control cohort was implemented as an in-batch partition (`is_holdout` flag), which caused the loop to skip holdout cases for intervention arms and skip intervention cases for the control arm. This introduced denominator inconsistency when quoting recovery numbers across arms side-by-side.
-**The Fix:** Unified the benchmark evaluation across all 1,000 cases for every arm. The uncontacted `do_nothing` arm now evaluates natural recovery across all 1,000 cases (₹2,221,965.50 failed debt), guaranteeing that Total Failed Value and Oracle Ceiling are 100.00% identical across all benchmark arms. For true out-of-sample generalization testing, we introduced an isolated hidden holdout dataset of 250 cases (Seed 999) that the agent prompts and heuristic tuning cannot inspect.
+**The Fix:** Unified the benchmark evaluation across all 1,000 cases for every arm. The uncontacted `do_nothing` arm now evaluates natural recovery across all 1,000 cases (₹2,221,965.50 failed debt), guaranteeing that Total Failed Value and Oracle Ceiling are 100.00% identical across all benchmark arms. For true out-of-sample generalization testing, we introduced an isolated unseen holdout dataset of 250 cases (Seed 999) and 5 multi-seed holdouts (Seeds 101–505) that the agent prompts and heuristic tuning cannot inspect.
 
 ### 13. Ablation Additivity & The Telescoping Sum Requirement
 **Date:** September 5, 2026

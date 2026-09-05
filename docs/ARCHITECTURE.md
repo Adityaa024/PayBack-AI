@@ -92,7 +92,7 @@ API Request -> RecoveryService -> PolicyGuard -> Transactional Outbox -> Provide
 
 - **Unified Denominator**: Every arm evaluated across all 1,000 cases ($N=1,000$, Failed Debt: ₹2,221,965.50, Oracle Ceiling: ₹1,203,167.01).
 - **Multi-Seed Stability**: 10 deterministic seeds (42–51) calculating mean, median, min, max, std, and 95% confidence intervals.
-- **Hidden Holdout Generalization**: 250 cases generated with uninspected seed (999) verifying policy robustness on unseen distributions.
-- **Ablation Additivity**: 8 discrete layers evaluated sequentially proving telescoping sum $\sum \Delta \text{Incremental Lift} = \text{Final Lift}$ ($< 10^{-4}$ tolerance).
+- **Unseen Holdout Generalization**: Multi-seed holdouts (seeds 101–505 & 999, 1,500 total cases) verifying policy robustness on unseen distributions with 100.00% mean Oracle efficiency.
+- **Ablation Additivity & LOFO**: 8 discrete layers evaluated with forward telescoping sum and Leave-One-Feature-Out (LOFO) order-independent causal attribution.
 - **10-Parameter Sensitivity Sweeps**: Automated sweeps across failure rates, recovery probabilities, contact/retry costs, annoyance penalties, salary cycles, compliance windows, LLM error rates, provider outages, and seeds.
-- **Automated Verification**: Single master command (`python scripts/verify_all.py`) runs all 12 stages and halts CI on any metric mismatch.
+- **Automated Verification**: Single master command (`python scripts/verify_all.py`) runs all 13 stages and halts CI on any metric mismatch.

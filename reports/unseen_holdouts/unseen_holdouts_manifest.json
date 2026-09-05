@@ -1,0 +1,32 @@
+{
+  "seed_101": {
+    "seed": 101,
+    "cases": 250,
+    "total_value": 561374.26,
+    "path": "reports/unseen_holdouts/holdout_seed_101.json"
+  },
+  "seed_202": {
+    "seed": 202,
+    "cases": 250,
+    "total_value": 552066.53,
+    "path": "reports/unseen_holdouts/holdout_seed_202.json"
+  },
+  "seed_303": {
+    "seed": 303,
+    "cases": 250,
+    "total_value": 559471.57,
+    "path": "reports/unseen_holdouts/holdout_seed_303.json"
+  },
+  "seed_404": {
+    "seed": 404,
+    "cases": 250,
+    "total_value": 560816.61,
+    "path": "reports/unseen_holdouts/holdout_seed_404.json"
+  },
+  "seed_505": {
+    "seed": 505,
+    "cases": 250,
+    "total_value": 582331.66,
+    "path": "reports/unseen_holdouts/holdout_seed_505.json"
+  }
+}

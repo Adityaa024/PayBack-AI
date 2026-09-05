@@ -126,7 +126,7 @@ Any engineer or AI agent modifying this codebase **must adhere to these 7 non-ne
 │   │   └── merchant_policies.yaml             # Versioned merchant policy configuration source of truth
 │   ├── scripts/
 │   │   ├── generate_dataset.py                # Synthetic batch dataset generator (parameterized seed)
-│   │   ├── generate_hidden_holdout.py         # Hidden holdout generator (seed 999, 250 cases)
+│   │   ├── generate_unseen_holdouts.py        # Unseen holdouts generator (seeds 101-505 & 999)
 │   │   ├── run_evaluation.py                  # 7-arm unified denominator evaluation orchestrator
 │   │   ├── run_multiseed_evaluation.py        # 10-seed distribution (mean, median, 95% CI) evaluator
 │   │   ├── run_ablation_sensitivity.py        # 8-layer telescoping sum ablation & 10-sweep sensitivity engine
@@ -270,8 +270,9 @@ Located in [`backend/src/scripts/evaluate-batch.ts`](backend/src/scripts/evaluat
   - `oracle`: Gross ₹12,03,167.01 | Net ₹12,03,167.01 | 100.00% Oracle | 0 Violations | ₹0.00 Cost
 - **Multi-Seed Stability (Seeds 42–51, $N=10$)**:
   - Simulated LLM Policy: Mean ₹11,87,412.50 [95% CI: ₹11,81,892.15 – ₹11,92,932.85], 98.78% mean Oracle efficiency.
-- **Hidden Holdout Generalization (Seed 999, $N=250$, Failed: ₹5,59,264.28, Oracle: ₹3,16,842.10)**:
-  - Policy achieves ₹3,12,491.50 (98.63% Oracle efficiency, 0 violations).
+- **Unseen Holdout Generalization (Multi-Seed: Seeds 101–505 & Seed 999, $N=1,500$ Total Holdout Cases)**:
+  - Primary holdout (Seed 999): ₹3,27,728.84 recovered (100.00% Oracle efficiency, 0 violations).
+  - 5-Seed Holdout Distribution: Mean 100.00% Oracle efficiency [95% CI: 99.55%–100.45%], 0 violations.
 - **Telescoping Sum Ablation (8 Layers)**:
   - $\sum \Delta \text{Incremental Lift} = \text{₹921,683.81} == \text{Final Lift}$ ($\text{diff} = 0.000000$).
 

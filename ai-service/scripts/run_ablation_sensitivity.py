@@ -223,11 +223,83 @@ def run_ablation_study(cases, decisions_map):
     print(f"Ablation Check: sum(increments) = INR {sum_increments:,.2f} | final lift = INR {final_incremental_lift:,.2f} | diff = {diff:.6f}")
     assert diff < 1e-4, f"Ablation invariant violated! sum({sum_increments}) != final({final_incremental_lift})"
 
+    # ── Leave-One-Feature-Out (LOFO) Ablation (Order-Independent) ────────
+    all_features = [
+        ("enable_coverage", "Coverage Outreach"),
+        ("enable_retry_timing", "Retry Timing"),
+        ("enable_channel_selection", "Channel Selection"),
+        ("enable_dynamic_cooldowns", "Dynamic Cooldowns"),
+        ("enable_policy_guard", "PolicyGuard Safety"),
+        ("enable_deterministic_classification", "Deterministic Routing"),
+        ("enable_llm_classification", "LLM Classification"),
+        ("enable_llm_planning", "LLM Adaptive Planning"),
+    ]
+
+    full_flags = {k: True for k, _ in all_features}
+    full_res = evaluate_ablation_layer(cases, full_flags, decisions_map)
+    full_lift = full_res["incremental_lift"]
+
+    lofo_results = []
+    for flag_key, feature_name in all_features:
+        ablated_flags = {**full_flags, flag_key: False}
+        ablated_res = evaluate_ablation_layer(cases, ablated_flags, decisions_map)
+        marginal_impact = round(full_lift - ablated_res["incremental_lift"], 2)
+        pct_of_total = round((marginal_impact / full_lift) * 100, 2) if full_lift > 0 else 0
+        lofo_results.append({
+            "feature": feature_name,
+            "flag_key": flag_key,
+            "lift_without_feature": ablated_res["incremental_lift"],
+            "marginal_drop_when_removed": marginal_impact,
+            "percent_of_total_lift": pct_of_total,
+            "isolated_causal_contribution": marginal_impact,
+        })
+
+    # ── Order Permutation Sensitivity (Path-Dependency Variance) ────────
+    import random
+    rng = random.Random(42)
+    feature_keys = [k for k, _ in all_features]
+    permutation_lifts = {k: [] for k in feature_keys}
+
+    for perm_idx in range(10):
+        shuffled = list(feature_keys)
+        rng.shuffle(shuffled)
+        cur_flags = {k: False for k in feature_keys}
+        prev_l = 0.0
+        for fkey in shuffled:
+            cur_flags[fkey] = True
+            res = evaluate_ablation_layer(cases, cur_flags, decisions_map)
+            step_marg = res["incremental_lift"] - prev_l
+            permutation_lifts[fkey].append(step_marg)
+            prev_l = res["incremental_lift"]
+
+    permutation_summary = []
+    for fkey, fname in all_features:
+        lifts = permutation_lifts[fkey]
+        mean_lift = round(sum(lifts) / len(lifts), 2)
+        min_lift = round(min(lifts), 2)
+        max_lift = round(max(lifts), 2)
+        permutation_summary.append({
+            "feature": fname,
+            "flag_key": fkey,
+            "mean_marginal_lift": mean_lift,
+            "min_marginal_lift": min_lift,
+            "max_marginal_lift": max_lift,
+            "order_sensitivity_range": round(max_lift - min_lift, 2),
+        })
+
     report = {
         "benchmark_total_incremental_lift": final_incremental_lift,
         "sum_of_ablation_increments": round(sum_increments, 2),
         "invariant_verified": True,
-        "layers": ablation_layers,
+        "telescoping_forward_ablation": ablation_layers,
+        "layers": ablation_layers,  # backward compatibility
+        "leave_one_feature_out_ablation": lofo_results,
+        "order_permutation_sensitivity": permutation_summary,
+        "methodology_note": (
+            "Forward telescoping sum demonstrates sequential component lift (sum = final lift). "
+            "Leave-One-Feature-Out (LOFO) isolates true order-independent causal drop when each component is removed. "
+            "Order permutations report variance across 10 random feature ordering sequences."
+        ),
     }
 
     with open(ABLATION_OUTPUT, "w", encoding="utf-8") as f:
