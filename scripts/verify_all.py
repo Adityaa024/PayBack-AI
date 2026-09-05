@@ -3,9 +3,12 @@
 PayBack-AI — One-Command Verification Workflow
 Executes:
 1. Structural safety AST audit (zero banned execution/DB imports in AI agents)
-2. Backend recovery test suite (Unit, Integration, Concurrency, Outbox, PolicyGuard, Ledger Tamper)
-3. Deterministic Evaluation Harness & Reproducibility Verification
-4. Generates an evidence-backed verification report
+2. Backend recovery test suite (15 suites: Unit, Concurrency, Ledger, Outbox, PolicyGuard, Parity, Adversarial)
+3. Deterministic Batch Generation
+4. Multi-Arm Empirical Evaluation (6 benchmark arms side-by-side)
+5. Ablation & Sensitivity Sweeps
+6. Deterministic Reproducibility Verification
+7. Oracle Ceiling Self-Check Assertion (100.00% exact match)
 """
 
 import subprocess
@@ -35,7 +38,6 @@ def run_step(name: str, cmd: list, cwd: Path) -> bool:
     print(f"\n[RUN] {name} ...")
     start = time.time()
     try:
-        # Use shell=True on Windows for npm/npx
         use_shell = sys.platform == 'win32'
         res = subprocess.run(
             cmd,
@@ -84,8 +86,8 @@ def main():
     else:
         failed_steps.append(step1[0])
 
-    # Step 2: All 11 Recovery Test Suites (Unit, Concurrency, Ledger, Outbox, Policy)
-    step2 = ("Vitest Recovery Test Suites (67+ tests)", ["npx", "vitest", "run", "test/modules/recovery/"], BACKEND_DIR)
+    # Step 2: All 15 Recovery Test Suites (Unit, Concurrency, Ledger, Outbox, PolicyGuard, Parity, Adversarial)
+    step2 = ("Vitest Recovery & Adversarial Suites (93+ tests)", ["npx", "vitest", "run", "test/modules/recovery/"], BACKEND_DIR)
     if run_step(*step2):
         passed_steps.append(step2[0])
     else:
@@ -98,26 +100,33 @@ def main():
     else:
         failed_steps.append(step3[0])
 
-    # Step 4: Empirical A/B Evaluation Calculation
-    step4 = ("A/B Evaluation & Lift Report Generation", [sys.executable, "scripts/run_evaluation.py"], AI_SERVICE_DIR)
+    # Step 4: 6-Arm Multi-Agent Batch Evaluation
+    step4 = ("6-Arm Empirical Benchmark Evaluation", [sys.executable, "scripts/run_evaluation.py"], AI_SERVICE_DIR)
     if run_step(*step4):
         passed_steps.append(step4[0])
     else:
         failed_steps.append(step4[0])
 
-    # Step 5: Reproducibility Baseline Verification
-    step5 = ("Deterministic Reproducibility Verification", [sys.executable, "scripts/verify_reproduce.py"], AI_SERVICE_DIR)
+    # Step 5: Ablation & Sensitivity Sweeps
+    step5 = ("Ablation & Sensitivity Analysis Sweeps", [sys.executable, "scripts/run_ablation_sensitivity.py"], AI_SERVICE_DIR)
     if run_step(*step5):
         passed_steps.append(step5[0])
     else:
         failed_steps.append(step5[0])
 
-    # Step 6: Oracle Ceiling Self-Check Assertion (recoverx benchmark)
-    step6 = ("Evaluation Harness Oracle Ceiling Self-Check", [sys.executable, "test/test_oracle_ceiling.py"], AI_SERVICE_DIR)
+    # Step 6: Reproducibility Baseline Verification
+    step6 = ("Deterministic Reproducibility Verification", [sys.executable, "scripts/verify_reproduce.py"], AI_SERVICE_DIR)
     if run_step(*step6):
         passed_steps.append(step6[0])
     else:
         failed_steps.append(step6[0])
+
+    # Step 7: Oracle Ceiling Self-Check Assertion (recoverx benchmark)
+    step7 = ("Evaluation Harness Oracle Ceiling Self-Check", [sys.executable, "test/test_oracle_ceiling.py"], AI_SERVICE_DIR)
+    if run_step(*step7):
+        passed_steps.append(step7[0])
+    else:
+        failed_steps.append(step7[0])
 
     # Read latest evaluation report
     eval_json_path = REPORTS_DIR / 'evaluation.json'
@@ -138,16 +147,21 @@ def main():
         print(f"  [FAIL] {f}")
 
     if eval_summary:
-        print("\nLatest Verified Empirical Lift (20% Holdout Control Arm):")
-        ai = eval_summary.get('ai', {})
-        naive = eval_summary.get('naive', {})
-        ctrl = eval_summary.get('control', {})
-        orc = eval_summary.get('oracle_ceiling', {})
+        print("\nLatest Verified 6-Arm Benchmark Lift (20% Holdout Control Arm):")
+        arms = eval_summary.get('arms', {})
+        orc = arms.get('oracle_ceiling', {})
+        ctrl = arms.get('do_nothing_baseline', {})
+        fixed = arms.get('fixed_retry_baseline', {})
+        contact = arms.get('contact_only_baseline', {})
+        det = arms.get('deterministic_policy', {})
+        llm = arms.get('simulated_llm_policy', {})
 
-        print(f"  * Oracle Ceiling (Max Realizable): INR {orc.get('amount', 0):,.2f} ({orc.get('ceiling_percent_of_failed_value', 0)}% of total debt)")
-        print(f"  * Control (Baseline - 0 Action):   Recovered INR {ctrl.get('recovered', 0):,.2f} ({ctrl.get('recovery_rate_total_pct', 0)}% of debt)")
-        print(f"  * Naive Baseline:                 Incremental Lift INR {naive.get('incremental', 0):,.2f} (Contacts: {naive.get('contacts', 0)}, Eff: {naive.get('oracle_efficiency_pct', 0)}%)")
-        print(f"  * PayBack-AI Multi-Agent:        Incremental Lift INR {ai.get('incremental', 0):,.2f} (Contacts: {ai.get('contacts', 0)}, Eff: {ai.get('oracle_efficiency_pct', 0)}%, Diag Acc: {ai.get('diagnostic_accuracy_pct', 0)}%)")
+        print(f"  1. Oracle Ceiling (Max Realizable): INR {orc.get('gross_recovered_value', 0):,.2f} ({orc.get('recovery_pct_total_value', 0)}% of debt, 100.00% ceiling)")
+        print(f"  2. Do-Nothing Control (0 Action):   Recovered INR {ctrl.get('gross_recovered_value', 0):,.2f} ({ctrl.get('recovery_pct_total_value', 0)}% organic)")
+        print(f"  3. Fixed Retry (Blind 2-touch):    Lift INR {fixed.get('incremental_recovery', 0):,.2f} (Contacts: {fixed.get('contact_count', 0)}, Violations: {fixed.get('compliance_violations', 0)})")
+        print(f"  4. Contact-Only (Day 1):           Lift INR {contact.get('incremental_recovery', 0):,.2f} (Contacts: {contact.get('contact_count', 0)}, Violations: {contact.get('compliance_violations', 0)})")
+        print(f"  5. PayBack-AI Deterministic:       Lift INR {det.get('incremental_recovery', 0):,.2f} (Eff: {det.get('recovery_pct_oracle_ceiling', 0)}%, Violations: {det.get('compliance_violations', 0)})")
+        print(f"  6. PayBack-AI Simulated LLM:       Lift INR {llm.get('incremental_recovery', 0):,.2f} (Eff: {llm.get('recovery_pct_oracle_ceiling', 0)}%, Cost: INR {llm.get('llm_cost', 0):.2f})")
 
     if failed_steps:
         print(f"\n[FAILED] Verification failed on {len(failed_steps)} step(s).")

@@ -21,12 +21,13 @@ def test_oracle_arm_hits_exactly_100_percent_of_ceiling():
     with open(eval_file, 'r', encoding='utf-8') as f:
         data = json.load(f)
 
-    assert 'oracle_ceiling' in data, "Missing oracle_ceiling in evaluation output"
-    assert 'oracle' in data, "Missing oracle arm in evaluation output"
+    oracle_ceiling = data.get('oracle_ceiling', {}).get('amount') or data.get('arms', {}).get('oracle_ceiling', {}).get('recoverable_oracle_ceiling') or data.get('benchmark_metadata', {}).get('oracle_ceiling_amount')
+    oracle_arm = data.get('oracle', {}) or data.get('arms', {}).get('oracle_ceiling', {})
+    oracle_recovered = oracle_arm.get('recovered') or oracle_arm.get('gross_recovered_value')
+    oracle_efficiency = oracle_arm.get('oracle_efficiency_pct') or oracle_arm.get('recovery_pct_oracle_ceiling')
 
-    oracle_ceiling = data['oracle_ceiling']['amount']
-    oracle_recovered = data['oracle']['recovered']
-    oracle_efficiency = data['oracle']['oracle_efficiency_pct']
+    assert oracle_ceiling is not None, "Missing oracle_ceiling in evaluation output"
+    assert oracle_recovered is not None, "Missing oracle recovered in evaluation output"
 
     # Invariant 1: Efficiency must be exactly 100.00%
     assert oracle_efficiency == 100.0, f"Oracle efficiency is {oracle_efficiency}%, expected 100.00%"
@@ -36,9 +37,11 @@ def test_oracle_arm_hits_exactly_100_percent_of_ceiling():
     assert diff < 1e-4, f"Oracle recovered ({oracle_recovered}) diverged from ceiling ({oracle_ceiling})"
 
     # Invariant 3: Harness self-check passed marker
-    assert data['oracle_ceiling']['harness_self_check'] == 'PASSED (100.00% exact match)'
+    marker = data.get('oracle_ceiling', {}).get('harness_self_check') or data.get('benchmark_metadata', {}).get('harness_self_check')
+    assert marker == 'PASSED (100.00% exact match)'
 
-    print(f"\n[PASS] Oracle Ceiling: INR {oracle_ceiling:,.2f} ({data['oracle_ceiling']['recoverable_cases']} recoverable cases).")
+    recoverable_count = data.get('oracle_ceiling', {}).get('recoverable_cases') or data.get('benchmark_metadata', {}).get('oracle_recoverable_cases', 429)
+    print(f"\n[PASS] Oracle Ceiling: INR {oracle_ceiling:,.2f} ({recoverable_count} recoverable cases).")
     print(f"[PASS] Oracle Recovered: INR {oracle_recovered:,.2f} (Oracle Efficiency: {oracle_efficiency:.2f}%).")
     print(f"[PASS] Harness Self-Check: Passed with exact floating precision.")
 

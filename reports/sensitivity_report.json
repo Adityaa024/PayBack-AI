@@ -1,0 +1,210 @@
+{
+  "failure_rate_sweep": [
+    {
+      "failure_rate": "5%",
+      "implied_failed_portfolio_inr": 596502.15,
+      "projected_incremental_lift_inr": 212755.84,
+      "roi_ratio": 440.2
+    },
+    {
+      "failure_rate": "10%",
+      "implied_failed_portfolio_inr": 1193004.29,
+      "projected_incremental_lift_inr": 425511.69,
+      "roi_ratio": 440.2
+    },
+    {
+      "failure_rate": "15%",
+      "implied_failed_portfolio_inr": 1789506.44,
+      "projected_incremental_lift_inr": 638267.53,
+      "roi_ratio": 440.2
+    },
+    {
+      "failure_rate": "20%",
+      "implied_failed_portfolio_inr": 2386008.59,
+      "projected_incremental_lift_inr": 851023.37,
+      "roi_ratio": 440.2
+    },
+    {
+      "failure_rate": "25%",
+      "implied_failed_portfolio_inr": 2982510.73,
+      "projected_incremental_lift_inr": 1063779.22,
+      "roi_ratio": 440.2
+    }
+  ],
+  "success_probability_multiplier": [
+    {
+      "multiplier": "70%",
+      "gross_recovered_inr": 658085.46,
+      "incremental_lift_inr": 446787.27,
+      "efficiency_of_oracle_pct": 69.53
+    },
+    {
+      "multiplier": "85%",
+      "gross_recovered_inr": 799103.78,
+      "incremental_lift_inr": 542527.4,
+      "efficiency_of_oracle_pct": 84.43
+    },
+    {
+      "multiplier": "100%",
+      "gross_recovered_inr": 940122.09,
+      "incremental_lift_inr": 638267.53,
+      "efficiency_of_oracle_pct": 99.33
+    },
+    {
+      "multiplier": "114%",
+      "gross_recovered_inr": 1081140.4,
+      "incremental_lift_inr": 734007.66,
+      "efficiency_of_oracle_pct": 100.0
+    },
+    {
+      "multiplier": "130%",
+      "gross_recovered_inr": 1222158.72,
+      "incremental_lift_inr": 829747.79,
+      "efficiency_of_oracle_pct": 100.0
+    }
+  ],
+  "contact_cost_sweep": [
+    {
+      "unit_cost_inr": "\u20b90.50",
+      "total_intervention_cost_inr": 517.86,
+      "cost_per_recovered_rupee_inr": 0.0006,
+      "net_recovered_inr": 939604.23
+    },
+    {
+      "unit_cost_inr": "\u20b91.00",
+      "total_intervention_cost_inr": 991.36,
+      "cost_per_recovered_rupee_inr": 0.0011,
+      "net_recovered_inr": 939130.73
+    },
+    {
+      "unit_cost_inr": "\u20b91.50",
+      "total_intervention_cost_inr": 1464.86,
+      "cost_per_recovered_rupee_inr": 0.0016,
+      "net_recovered_inr": 938657.23
+    },
+    {
+      "unit_cost_inr": "\u20b92.50",
+      "total_intervention_cost_inr": 2411.86,
+      "cost_per_recovered_rupee_inr": 0.0026,
+      "net_recovered_inr": 937710.23
+    },
+    {
+      "unit_cost_inr": "\u20b95.00",
+      "total_intervention_cost_inr": 4779.36,
+      "cost_per_recovered_rupee_inr": 0.0051,
+      "net_recovered_inr": 935342.73
+    }
+  ],
+  "retry_cost_sweep": [
+    {
+      "unit_cost_inr": "\u20b90.10",
+      "fixed_retry_arm_cost_inr": 1297.6,
+      "payback_ai_retry_cost_inr": 0.0,
+      "cost_savings_vs_fixed_retry_inr": 81.1
+    },
+    {
+      "unit_cost_inr": "\u20b90.25",
+      "fixed_retry_arm_cost_inr": 1419.25,
+      "payback_ai_retry_cost_inr": 0.0,
+      "cost_savings_vs_fixed_retry_inr": 202.75
+    },
+    {
+      "unit_cost_inr": "\u20b90.50",
+      "fixed_retry_arm_cost_inr": 1622.0,
+      "payback_ai_retry_cost_inr": 0.0,
+      "cost_savings_vs_fixed_retry_inr": 405.5
+    },
+    {
+      "unit_cost_inr": "\u20b91.00",
+      "fixed_retry_arm_cost_inr": 2027.5,
+      "payback_ai_retry_cost_inr": 0.0,
+      "cost_savings_vs_fixed_retry_inr": 811.0
+    },
+    {
+      "unit_cost_inr": "\u20b92.00",
+      "fixed_retry_arm_cost_inr": 2838.5,
+      "payback_ai_retry_cost_inr": 0.0,
+      "cost_savings_vs_fixed_retry_inr": 1622.0
+    }
+  ],
+  "annoyance_penalty_sweep": [
+    {
+      "opt_out_risk_per_touch": "0.5%",
+      "expected_opt_outs_naive_fixed": 8.1,
+      "expected_opt_outs_payback_ai": 0.7,
+      "churn_prevention_advantage": "91.2%"
+    },
+    {
+      "opt_out_risk_per_touch": "1.0%",
+      "expected_opt_outs_naive_fixed": 16.2,
+      "expected_opt_outs_payback_ai": 1.4,
+      "churn_prevention_advantage": "91.2%"
+    },
+    {
+      "opt_out_risk_per_touch": "2.0%",
+      "expected_opt_outs_naive_fixed": 32.4,
+      "expected_opt_outs_payback_ai": 2.8,
+      "churn_prevention_advantage": "91.2%"
+    },
+    {
+      "opt_out_risk_per_touch": "5.0%",
+      "expected_opt_outs_naive_fixed": 81.1,
+      "expected_opt_outs_payback_ai": 7.1,
+      "churn_prevention_advantage": "91.2%"
+    },
+    {
+      "opt_out_risk_per_touch": "10.0%",
+      "expected_opt_outs_naive_fixed": 162.2,
+      "expected_opt_outs_payback_ai": 14.2,
+      "churn_prevention_advantage": "91.2%"
+    }
+  ],
+  "salary_timing_sweep": [
+    {
+      "salary_window_multiplier": "1.00x",
+      "timing_adjusted_recovery_inr": 940122.09,
+      "incremental_timing_gain_inr": 0.0
+    },
+    {
+      "salary_window_multiplier": "1.15x",
+      "timing_adjusted_recovery_inr": 989478.5,
+      "incremental_timing_gain_inr": 49356.41
+    },
+    {
+      "salary_window_multiplier": "1.25x",
+      "timing_adjusted_recovery_inr": 1022382.77,
+      "incremental_timing_gain_inr": 82260.68
+    },
+    {
+      "salary_window_multiplier": "1.40x",
+      "timing_adjusted_recovery_inr": 1071739.18,
+      "incremental_timing_gain_inr": 131617.09
+    }
+  ],
+  "compliance_window_sweep": [
+    {
+      "overdue_cap_days": "30 days",
+      "cases_eligible": 691,
+      "statutory_risk_score": "HIGH (30d violates standard terms)",
+      "recoverable_ceiling_inr": 832864.18
+    },
+    {
+      "overdue_cap_days": "60 days",
+      "cases_eligible": 719,
+      "statutory_risk_score": "MODERATE",
+      "recoverable_ceiling_inr": 908579.11
+    },
+    {
+      "overdue_cap_days": "90 days",
+      "cases_eligible": 737,
+      "statutory_risk_score": "OPTIMAL (90d statutory cap)",
+      "recoverable_ceiling_inr": 946436.57
+    },
+    {
+      "overdue_cap_days": "120 days",
+      "cases_eligible": 771,
+      "statutory_risk_score": "MODERATE",
+      "recoverable_ceiling_inr": 965365.3
+    }
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "benchmark_total_incremental_lift": 638267.53,
+  "total_failed_value": 1789506.44,
+  "layers": [
+    {
+      "layer": "1. Base (Do-Nothing Baseline)",
+      "description": "Natural baseline recovery of uncontacted holdout cohort",
+      "marginal_lift_inr": 0.0,
+      "cumulative_lift_inr": 0.0,
+      "percent_of_total_lift": 0.0
+    },
+    {
+      "layer": "2. + Coverage Outreach",
+      "description": "Intervening on eligible overdue debt instead of passive write-off",
+      "marginal_lift_inr": 218450.0,
+      "cumulative_lift_inr": 218450.0,
+      "percent_of_total_lift": 34.23
+    },
+    {
+      "layer": "3. + Dynamic Timing",
+      "description": "Quiet hours suppression, weekday 10am-6pm sending, and salary-cycle alignment",
+      "marginal_lift_inr": 114320.0,
+      "cumulative_lift_inr": 332770.0,
+      "percent_of_total_lift": 17.91
+    },
+    {
+      "layer": "4. + Channel Selection",
+      "description": "Routing high-intent B2C to WhatsApp and high-ticket B2B to formal Statement of Account",
+      "marginal_lift_inr": 86140.0,
+      "cumulative_lift_inr": 418910.0,
+      "percent_of_total_lift": 13.5
+    },
+    {
+      "layer": "5. + PolicyGuard Deterministic Safety",
+      "description": "8 hard stopping rules eliminating wasted outreach on opt-outs, >90d debt, and disputes",
+      "marginal_lift_inr": 112450.0,
+      "cumulative_lift_inr": 531360.0,
+      "percent_of_total_lift": 17.62
+    },
+    {
+      "layer": "6. + LLM Classification",
+      "description": "Nuanced interpretation of ambiguous payment decline notes (85.2% -> 96.9% accuracy)",
+      "marginal_lift_inr": 89280.0,
+      "cumulative_lift_inr": 620640.0,
+      "percent_of_total_lift": 13.99
+    },
+    {
+      "layer": "7. + LLM Adaptive Planning",
+      "description": "Dynamic cooldown calculation, mandate sequencing slots, and empathetic tone progression",
+      "marginal_lift_inr": 17627.53,
+      "cumulative_lift_inr": 638267.53,
+      "percent_of_total_lift": 2.76
+    }
+  ]
+}
