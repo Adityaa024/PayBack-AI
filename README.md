@@ -1,5 +1,9 @@
 # PayBack-AI — Enterprise AI Revenue Recovery Engine
 
+<p align="center">
+  <img src="docs/assets/hero_banner.png" alt="PayBack-AI Enterprise AI Revenue Recovery Engine Banner" width="100%" />
+</p>
+
 > **Razorpay AI Buildathon 2026 — Track 3: AI Revenue Recovery**  
 > *"Find revenue that’s slipping away and win it back. Build an agent that detects revenue at risk, determines the right intervention, and executes a bounded recovery workflow: from payment failures and checkout abandonment to overdue receivables."*
 
