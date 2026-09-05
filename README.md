@@ -138,7 +138,7 @@ PayBack-AI evaluates recovery across a **100% unified complete dataset (1,000 ca
 ---
 
 ### 🔬 Marginal Feature Contribution Analysis (Leave-One-Feature-Out / LOFO)
-Modeled on `iamsiddhesh-dev/recoup`, we evaluate both forward telescoping additivity and LOFO marginal feature contribution across 8 architecture components on the full 1,000 cases:
+We evaluate both forward telescoping additivity and LOFO marginal feature contribution across 8 architecture components on the full 1,000 cases:
 
 | Layer / Feature | Lift Without Feature (₹) | Raw Gross Without Feature (₹) | Marginal Drop When Removed (₹) | % of Total Lift | Behavioral Role & Mechanism |
 |---|---|---|---|---|---|
@@ -168,7 +168,7 @@ Modeled on `iamsiddhesh-dev/recoup`, we evaluate both forward telescoping additi
 **Order-Permutation Sensitivity (10 Random Permutations)**: Tested 10 randomized feature insertion sequences to quantify order-dependent path variance. Forward telescoping sum satisfies $\Delta = 0.000000 < 10^{-4}$, proving that component increments sum exactly to final lift.
 
 ### 🔍 Policy Failure Analysis (Where Policy Fails While Oracle Succeeds)
-In accordance with radical transparency standards modeled on `piyush2676/recoverx`, we document every case where Oracle succeeded but PayBack-AI failed:
+In accordance with radical transparency and failure analysis standards, we document every case where Oracle succeeded but PayBack-AI failed:
 - **Total Underperforming Cases**: Exactly 7 out of 1,000 cases (0.7% defect rate)
 - **Total Missed Capital**: ₹18,321.41
 - **Root Cause**: Ambiguous decline text (e.g. `'Payment overdue - standard account notification'`) where the model diagnosed `b2b_receivables` instead of the specific incident lane, routing to soft reminders rather than lane-matched resolution.
@@ -230,7 +230,7 @@ graph TD
 ## 🛡️ Deep Dives: Reliability & Adversarial Correctness
 
 ### 1. Mid-Flight Chaos & Force-Kill Crash Testing (`chaos-crash.test.ts`)
-Modeled on `piyush2676/recoverx`, we test unexpected worker process termination between "action executed" and "outcome recorded":
+To test crash resilience and idempotent resumption, we test unexpected worker process termination between "action executed" and "outcome recorded":
 - The worker executes payment link generation and **force-kills itself with `process.exit(1)` mid-flight** without committing completion or releasing the lock.
 - Resumption tests verify that **0 duplicate links and 0 double charges** occur.
 - Reports which active defense layer intercepted the race:

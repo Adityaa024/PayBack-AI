@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Test Suite: Evaluation Harness Oracle Ceiling Self-Check
-Reference: piyush2676/recoverx
+Integrity Standard: Clairvoyant Upper Bound Self-Check Assertion
 
 Asserts that the Oracle arm collects EXACTLY 100% of its own ceiling.
 Guarantees that the evaluation harness's definition of 'recoverable' and its

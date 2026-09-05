@@ -22,7 +22,7 @@ import { EventService } from '../../../src/modules/event/event.service.js';
 import { PaymentGatewayFactory } from '../../../src/modules/payment/gateway.factory.js';
 import { RazorpayAdapter } from '../../../src/modules/payment/adapters/razorpay.adapter.js';
 
-describe('Adversarial Chaos & Crash Test: Process Force-Kill Mid-Flight (recoverx pattern)', () => {
+describe('Adversarial Chaos & Crash Test: Process Force-Kill Mid-Flight (Mid-Flight Crash Recovery Pattern)', () => {
   let db: any;
   let recoveryRepo: RecoveryRepository;
   let paymentRepo: PaymentRepository;
@@ -221,7 +221,7 @@ describe('Adversarial Chaos & Crash Test: Process Force-Kill Mid-Flight (recover
 
     // Print honest diagnostic defense layer report
     console.log('\n======================================================================');
-    console.log('  CHAOS CRASH TEST DEFENSE ATTRIBUTION REPORT (recoverx pattern)');
+    console.log('  CHAOS CRASH TEST DEFENSE ATTRIBUTION REPORT (Mid-Flight Crash Recovery Pattern)');
     console.log('======================================================================');
     console.log(`Process Status: Hard killed mid-flight (process.exit(1)).`);
     console.log(`Defense Layers Fired: ${defenseLayersCaught.join(' -> ')}`);

@@ -6,7 +6,7 @@ Generated automatically by executing the real multi-agent decision engine and Ty
 ---
 
 ## 1. Evaluation Integrity: Unified Denominator & Shared Oracle Ceiling
-*Modeled on `piyush2676/recoverx` and `Ovais-Maker/razorpay-buildathon-recoup`*
+*Rigorous Empirical Evaluation Standards & Zero-Denominator-Drift Methodology*
 
 ### Denominator Consistency
 All benchmark arms are evaluated on the **exact same complete dataset of 1,000 cases (Seed 42)**, eliminating denominator inconsistencies from split holdouts.

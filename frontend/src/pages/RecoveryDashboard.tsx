@@ -50,7 +50,7 @@ export function RecoveryDashboard() {
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(searchParams.get("id") || null);
   const [activeDrawerTab, setActiveDrawerTab] = useState<"overview" | "timeline" | "policy_explanation" | "evidence" | "llm_trace" | "audit">("overview");
 
-  // Real-Time Demo Flow Stepper (ReVora pattern)
+  // Real-Time Demo Flow Stepper
   const [demoStep, setDemoStep] = useState<number>(0);
   const [isDemoRunning, setIsDemoRunning] = useState<boolean>(false);
 
@@ -267,7 +267,7 @@ export function RecoveryDashboard() {
         </div>
       </div>
 
-      {/* ── 5 Top Executive KPI Cards (ReVora & Recoup pattern) ────────────── */}
+      {/* ── 5 Top Executive KPI Cards ────────────── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
         <div className="p-4 rounded-lg bg-white border border-stone-200 shadow-2xs">
           <span className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider block">
@@ -331,7 +331,7 @@ export function RecoveryDashboard() {
         </div>
       </div>
 
-      {/* ── Interactive Real-Time Demo Stepper (ReVora pattern) ───────────── */}
+      {/* ── Interactive Real-Time Demo Stepper ───────────── */}
       <div className="p-4 rounded-lg bg-white border border-stone-200 shadow-2xs space-y-3">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-stone-200 pb-2.5">
           <div className="flex items-center gap-2">
@@ -570,7 +570,7 @@ export function RecoveryDashboard() {
           </div>
         </div>
       ) : (
-        /* ── BENCHMARK & FUNNEL VIEW (ReVora & Recoup pattern) ───────────── */
+        /* ── BENCHMARK & FUNNEL VIEW ───────────── */
         <div className="space-y-5">
           {/* Recovery Funnel Card */}
           <div className="p-5 rounded-lg bg-white border border-stone-200 shadow-2xs space-y-3">
@@ -855,7 +855,7 @@ export function RecoveryDashboard() {
               </div>
             )}
 
-            {/* Tab 2: Case Timeline (ReVora pattern) */}
+            {/* Tab 2: Case Timeline */}
             {activeDrawerTab === "timeline" && (
               <div className="space-y-3 text-xs">
                 <div className="font-bold text-stone-900 uppercase tracking-wider text-[11px]">
