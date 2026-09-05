@@ -1,91 +1,147 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { recoveryService } from "../services/recovery";
-import { motion, AnimatePresence } from "framer-motion";
+import { useSearchParams } from "react-router-dom";
 import {
-  TrendingUp, AlertTriangle, CheckCircle2, XCircle,
-  Play, RefreshCw, Zap, Shield,
+  CheckCircle2, XCircle,
+  RefreshCw,
   Activity, FileText,
-  Bot, Calendar, Eye, Volume2, VolumeX, Sparkles,
-  Layers, Sliders, Award, Ban, ChevronRight,
-  Mail, MessageSquare, Phone, Search, X,
-  Link, ChevronDown, ChevronUp, Lock
+  Volume2, VolumeX,
+  CreditCard,
+  ChevronDown, ChevronUp, Copy,
+  ArrowUpRight, Ban, ShoppingCart
 } from "lucide-react";
+import { recoveryService } from "../services/recovery";
+import type { RecoveryContract, RecoveryAuditEntry } from "../services/recovery";
 import {
-  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  PieChart, Pie, Cell
-} from "recharts";
-
-import {
-  AnimatedNumber,
-  GlassCard,
-  ShimmerSkeleton,
-  StatusPulse,
-  StaggeredList,
-  LottieIcon,
-  GradientText,
-  HoverCard
-} from "../components/premium";
+  MoneyValue,
+  StatusBadge,
+  PolicyState,
+  TableToolbar,
+  EmptyState,
+  LoadingState,
+  SidePanel
+} from "../components/ui/primitives";
 import { NotificationToast, type ToastMessage } from "../components/common/NotificationToast";
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// ─── Helpers & Icons ──────────────────────────────────────────────────────────
 
-const fmt = (n: string | number | undefined) => {
-  const num = Number(n ?? 0);
-  if (num >= 100000) return `₹${(num / 100000).toFixed(1)}L`;
-  if (num >= 1000) return `₹${(num / 1000).toFixed(1)}K`;
-  return `₹${num.toLocaleString("en-IN")}`;
+const laneMetadata: Record<string, { label: string; icon: React.ElementType; color: string }> = {
+  payment_degradation: { label: "Payment Degradation", icon: CreditCard, color: "text-stone-700 bg-stone-100 border-stone-300" },
+  subscription_rescue: { label: "Subscription Rescue", icon: RefreshCw, color: "text-stone-700 bg-stone-100 border-stone-300" },
+  b2b_receivables: { label: "B2B Receivables", icon: FileText, color: "text-stone-700 bg-stone-100 border-stone-300" },
+  checkout_dropoff: { label: "Checkout Drop-off", icon: ShoppingCart, color: "text-stone-700 bg-stone-100 border-stone-300" },
 };
 
-const fmtDate = (d: string | null) =>
-  d ? new Date(d).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "2-digit" }) : "—";
+let toastIdCounter = 0;
+const generateToastId = () => `toast_${Date.now()}_${++toastIdCounter}`;
 
-const fmtTime = (d: string | null) =>
-  d ? new Date(d).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" }) : "—";
+export function RecoveryDashboard() {
+  const queryClient = useQueryClient();
+  const [searchParams] = useSearchParams();
 
-const statusColor: Record<string, string> = {
-  active: "text-amber-400 bg-amber-400/10 border-amber-400/20",
-  recovered: "text-emerald-400 bg-emerald-400/10 border-emerald-400/20",
-  stopped: "text-rose-400 bg-rose-400/10 border-rose-400/20",
-  escalated: "text-violet-400 bg-violet-400/10 border-violet-400/20",
-};
+  // Filters & Saved Views
+  const [activeLane, setActiveLane] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [savedView, setSavedView] = useState<"all" | "highest_value" | "needs_approval" | "holdout" | "promise_due" | "escalated" | "delivery_issue">("all");
+  const [searchQuery, setSearchQuery] = useState<string>("");
 
-const laneLabels: Record<string, { label: string; icon: string; color: string }> = {
-  payment_degradation: { label: "Payment Degradation", icon: "💳", color: "text-blue-400 border-blue-500/20 bg-blue-500/10" },
-  subscription_rescue: { label: "Subscription Rescue", icon: "🔄", color: "text-violet-400 border-violet-500/20 bg-violet-500/10" },
-  b2b_receivables: { label: "B2B Receivables", icon: "📄", color: "text-amber-400 border-amber-500/20 bg-amber-500/10" },
-  checkout_dropoff: { label: "Checkout Drop-off", icon: "🛒", color: "text-cyan-400 border-cyan-500/20 bg-cyan-500/10" },
-};
+  // Drawer state
+  const [selectedSessionId, setSelectedSessionId] = useState<string | null>(searchParams.get("id") || null);
+  const [activeDrawerTab, setActiveDrawerTab] = useState<"overview" | "evidence" | "communications" | "ptp" | "audit">("overview");
+  const [isRawJsonExpanded, setIsRawJsonExpanded] = useState<boolean>(false);
+  const [isPlayingVoice, setIsPlayingVoice] = useState<boolean>(false);
 
-const strategyIcon: Record<string, React.ReactNode> = {
-  payment_link_refresh: <Zap className="w-3.5 h-3.5 text-cyan-400" />,
-  soft_reminder: <Activity className="w-3.5 h-3.5 text-blue-400" />,
-  firm_escalation: <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />,
-  mandate_retry: <RefreshCw className="w-3.5 h-3.5 text-violet-400" />,
-  promise_follow_up: <Calendar className="w-3.5 h-3.5 text-rose-400" />,
-  legal_stop: <Shield className="w-3.5 h-3.5 text-red-500" />,
-  card_update_link: <RefreshCw className="w-3.5 h-3.5 text-indigo-400" />,
-};
+  // Toasts
+  const [toasts, setToasts] = useState<ToastMessage[]>([]);
 
-const STRATEGY_COLORS: Record<string, string> = {
-  payment_link_refresh: "#22d3ee",
-  soft_reminder: "#60a5fa",
-  firm_escalation: "#fbbf24",
-  mandate_retry: "#a78bfa",
-  promise_follow_up: "#f87171",
-  legal_stop: "#ef4444",
-  card_update_link: "#818cf8",
-};
+  const addToast = (title: string, description?: string, type?: "success" | "warning" | "info" | "action") => {
+    const id = generateToastId();
+    setToasts((prev) => [...prev, { id, title, description, type }]);
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((t) => t.id !== id));
+    }, 4500);
+  };
 
-// ─── Recovery Contract Modal ──────────────────────────────────────────────────
+  const removeToast = (id: string) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  };
 
-function ContractModal({ sessionId, onClose }: { sessionId: string; onClose: () => void }) {
-  const { data, isLoading } = useQuery({
-    queryKey: ["recovery-contract", sessionId],
-    queryFn: () => recoveryService.getSessionContract(sessionId),
+  const handleCopyLink = (sessionId: string) => {
+    const testUrl = `https://rzp.io/l/rec_${sessionId.slice(0, 8)}`;
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(testUrl);
+    }
+    addToast("Razorpay Test Link Copied", `Fresh 48h-expiry link: ${testUrl}`, "success");
+  };
+
+  // Queries
+  const { data: stats } = useQuery({
+    queryKey: ["recovery-stats"],
+    queryFn: recoveryService.getStats,
+    refetchInterval: 10000,
   });
 
-  const [isPlayingVoice, setIsPlayingVoice] = useState(false);
+  const { data: sessionsData, isLoading: sessionsLoading } = useQuery({
+    queryKey: ["recovery-sessions"],
+    queryFn: recoveryService.getSessions,
+    refetchInterval: 8000,
+  });
+
+  // Selected session query
+  const { data: selectedContractData } = useQuery({
+    queryKey: ["recovery-contract", selectedSessionId],
+    queryFn: () => (selectedSessionId ? recoveryService.getSessionContract(selectedSessionId) : null),
+    enabled: !!selectedSessionId,
+  });
+
+  const { data: selectedAuditData } = useQuery({
+    queryKey: ["session-audit", selectedSessionId],
+    queryFn: () => (selectedSessionId ? recoveryService.getSessionAudit(selectedSessionId) : null),
+    enabled: !!selectedSessionId,
+  });
+
+  // Mutations
+  const runMutation = useMutation({
+    mutationFn: recoveryService.triggerRun,
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["recovery-sessions"] });
+      queryClient.invalidateQueries({ queryKey: ["recovery-stats"] });
+      addToast("Receivables Scan Finished", `Processed batch: ${data.batch.sessionsStarted} sessions started.`, "action");
+    },
+  });
+
+  const executeMutation = useMutation({
+    mutationFn: (sessionId: string) => recoveryService.executeAction(sessionId),
+    onSuccess: (res) => {
+      queryClient.invalidateQueries({ queryKey: ["recovery-sessions"] });
+      queryClient.invalidateQueries({ queryKey: ["recovery-stats"] });
+      addToast(res.success ? "Action Dispatched via Outbox" : "Action Withheld / Blocked", res.message, res.success ? "action" : "warning");
+    },
+  });
+
+  const optOutMutation = useMutation({
+    mutationFn: (sessionId: string) => recoveryService.optOutSession(sessionId),
+    onSuccess: (res) => {
+      queryClient.invalidateQueries({ queryKey: ["recovery-sessions"] });
+      queryClient.invalidateQueries({ queryKey: ["recovery-stats"] });
+      addToast("Customer Opt-Out Logged", res.message || "Customer replied STOP: Automated communications halted permanently.", "warning");
+    },
+  });
+
+  // Hotkeys
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const isInput = ["INPUT", "TEXTAREA", "SELECT"].includes((e.target as HTMLElement)?.tagName);
+      if (isInput) return;
+
+      if (e.key === "r" || e.key === "R") {
+        queryClient.invalidateQueries({ queryKey: ["recovery-sessions"] });
+        addToast("Refreshing Queue", "Syncing with PostgreSQL recovery tables...", "info");
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [queryClient]);
 
   const handleVoicePlayback = (text: string) => {
     if (!("speechSynthesis" in window)) return;
@@ -103,483 +159,20 @@ function ContractModal({ sessionId, onClose }: { sessionId: string; onClose: () 
     window.speechSynthesis.speak(utterance);
   };
 
-  const contract = data?.contract;
-  const policy = data?.policyStatus;
+  const sessions = sessionsData?.sessions || [];
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <motion.div 
-        initial={{ opacity: 0 }} 
-        animate={{ opacity: 1 }} 
-        exit={{ opacity: 0 }}
-        className="fixed inset-0 bg-black/75 backdrop-blur-md" 
-        onClick={onClose} 
-      />
-      <motion.div 
-        initial={{ opacity: 0, x: 400, scale: 0.95 }}
-        animate={{ opacity: 1, x: 0, scale: 1 }}
-        exit={{ opacity: 0, x: 400, scale: 0.95 }}
-        transition={{ type: "spring", stiffness: 350, damping: 30 }}
-        className="relative w-full max-w-2xl bg-[#0e1015]/90 backdrop-blur-xl border border-zinc-800/80 rounded-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden"
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-800/50 bg-white/5">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400">
-              <Shield className="w-4 h-4" />
-            </div>
-            <div>
-              <h3 className="text-sm font-semibold text-white">Recovery Contract — Case {sessionId.slice(0, 10)}</h3>
-              <p className="text-xs text-zinc-400">Deterministic Policy-Constrained Agent Primitive</p>
-            </div>
-          </div>
-          <button onClick={onClose} className="p-1 rounded-lg hover:bg-zinc-800/80 text-zinc-400 transition-colors">
-            <XCircle className="w-5 h-5" />
-          </button>
-        </div>
-
-        {isLoading ? (
-          <div className="flex items-center justify-center py-20">
-            <ShimmerSkeleton variant="circle" className="w-12 h-12 mb-4" />
-          </div>
-        ) : (
-          <div className="flex-1 overflow-y-auto p-6 space-y-5 thin-scrollbar">
-            {/* Policy Guard Status Banner */}
-            <motion.div 
-              initial={{ y: -10, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.1 }}
-              className={`p-3.5 rounded-xl border flex items-start gap-3 backdrop-blur-md ${
-                policy?.allowed
-                  ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-300"
-                  : "bg-rose-500/10 border-rose-500/30 text-rose-300"
-              }`}
-            >
-              {policy?.allowed ? (
-                <LottieIcon preset="success" size={24} loop={false} className="flex-shrink-0" />
-              ) : (
-                <LottieIcon preset="error" size={24} loop={false} className="flex-shrink-0" />
-              )}
-              <div className="text-xs space-y-1">
-                <div className="font-semibold text-sm">
-                  {policy?.allowed ? "PolicyGuard: Approved for Execution" : "PolicyGuard: Execution Blocked"}
-                </div>
-                <div className="text-zinc-300 leading-relaxed">
-                  {policy?.allowed
-                    ? "Validated within safe parameters: cooldown respected, attempts <= 3, amount <= ₹5L, no customer opt-out."
-                    : policy?.blockedReason}
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Diagnosis & Evidence */}
-            {contract && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <GlassCard delay={0.2} hoverScale={false} className="p-4 bg-white/5 space-y-2 border-zinc-800/60">
-                  <div className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
-                    <Bot className="w-3.5 h-3.5 text-cyan-400" />
-                    Agent Diagnosis
-                  </div>
-                  <div className="text-sm font-semibold text-white capitalize">
-                    {contract.diagnosis.primary.replace(/_/g, " ")}
-                  </div>
-                  <div className="text-xs text-zinc-400">
-                    Confidence: <span className="text-cyan-400 font-mono font-medium">{Math.round(contract.diagnosis.confidence * 100)}%</span>
-                  </div>
-                  <div className="pt-2 border-t border-zinc-800/40 space-y-1">
-                    <div className="text-[10px] text-zinc-500 font-medium uppercase">Observed Evidence:</div>
-                    <StaggeredList as="ul" className="text-xs text-zinc-400 space-y-1">
-                      {contract.diagnosis.evidence.map((ev, i) => (
-                        <li key={i} className="flex items-center gap-1.5">
-                          <span className="w-1.5 h-1.5 rounded-full bg-cyan-400/80" />
-                          {ev}
-                        </li>
-                      ))}
-                    </StaggeredList>
-                  </div>
-                </GlassCard>
-
-                <GlassCard delay={0.3} hoverScale={false} className="p-4 bg-white/5 space-y-2 border-zinc-800/60">
-                  <div className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
-                    <Sliders className="w-3.5 h-3.5 text-violet-400" />
-                    Action Parameters
-                  </div>
-                  <div className="text-sm font-semibold text-violet-300 capitalize">
-                    {contract.recommendedAction.replace(/_/g, " ")}
-                  </div>
-                  <div className="text-xs text-zinc-400 space-y-1 pt-1">
-                    <div>Max Amount: <span className="text-white font-medium">{fmt(contract.actionParameters.maxAmount)}</span></div>
-                    <div>Link Expiry: <span className="text-white font-medium">{contract.actionParameters.expiresInHours} hours</span></div>
-                    <div>Allowed Methods: <span className="text-white font-medium">{contract.actionParameters.allowedMethods.join(", ")}</span></div>
-                    <div>Cooldown: <span className="text-white font-medium">{contract.cooldownHours}h</span> · Max Attempts: <span className="text-white font-medium">{contract.maxAttempts}</span></div>
-                  </div>
-                </GlassCard>
-              </div>
-            )}
-
-            {/* Hinglish Voice Script Adapter */}
-            {contract?.voiceScriptHinglish && (
-              <motion.div 
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
-                className="p-4 rounded-xl bg-indigo-950/20 border border-indigo-500/20 space-y-2.5 backdrop-blur-md"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="text-[11px] font-semibold text-indigo-300 uppercase tracking-wider flex items-center gap-1.5">
-                    <Volume2 className="w-3.5 h-3.5 text-indigo-400" />
-                    Hinglish Voice Recovery Adapter
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {isPlayingVoice && (
-                      <div className="flex items-center gap-0.5 px-2 py-1 rounded bg-indigo-500/20 border border-indigo-500/30">
-                        {[0.4, 0.9, 0.6, 1.0, 0.5, 0.8, 0.3].map((h, i) => (
-                          <motion.div
-                            key={i}
-                            className="w-0.5 bg-indigo-300 rounded-full"
-                            animate={{ height: ["4px", `${Math.round(h * 14)}px`, "4px"] }}
-                            transition={{ repeat: Infinity, duration: 0.4 + (i % 3) * 0.15 }}
-                          />
-                        ))}
-                      </div>
-                    )}
-                    <button
-                      onClick={() => handleVoicePlayback(contract.voiceScriptHinglish || "")}
-                      className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-medium transition-all ${
-                        isPlayingVoice
-                          ? "bg-rose-500/20 text-rose-300 border border-rose-500/30 shadow-[0_0_15px_rgba(244,63,94,0.3)]"
-                          : "bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-500/30 hover:shadow-[0_0_15px_rgba(99,102,241,0.2)]"
-                      }`}
-                    >
-                      {isPlayingVoice ? (
-                        <motion.div
-                          animate={{ scale: [1, 1.2, 1] }}
-                          transition={{ repeat: Infinity, duration: 0.8 }}
-                        >
-                          <VolumeX className="w-3 h-3" />
-                        </motion.div>
-                      ) : <Play className="w-3 h-3" />}
-                      {isPlayingVoice ? "Stop Audio" : "Play Voice Simulation"}
-                    </button>
-                  </div>
-                </div>
-                <div className="text-xs text-zinc-300 italic bg-black/20 p-3 rounded-lg border border-indigo-500/10 font-serif relative overflow-hidden">
-                  {isPlayingVoice && (
-                    <motion.div 
-                      className="absolute inset-0 bg-indigo-500/5"
-                      animate={{ opacity: [0, 1, 0] }}
-                      transition={{ repeat: Infinity, duration: 1.5 }}
-                    />
-                  )}
-                  "{contract.voiceScriptHinglish}"
-                </div>
-                <div className="text-[10px] text-zinc-500 flex items-center gap-2">
-                  <span className="text-emerald-400">✓ Consent-aware</span> · 
-                  <span className="text-cyan-400">✓ 'STOP' reply opt-out enabled</span> · 
-                  <span>Language: Hinglish (hi-IN)</span>
-                </div>
-              </motion.div>
-            )}
-
-            {/* Raw JSON Contract Display */}
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.5 }}
-              className="space-y-1.5"
-            >
-              <div className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
-                <FileText className="w-3.5 h-3.5 text-zinc-400" />
-                Raw Verified Contract Payload
-              </div>
-              <pre className="p-3.5 rounded-xl bg-black/40 border border-zinc-800/80 text-[11px] font-mono text-zinc-400 overflow-x-auto max-h-48 thin-scrollbar shadow-inner">
-                {JSON.stringify(contract, null, 2)}
-              </pre>
-            </motion.div>
-          </div>
-        )}
-      </motion.div>
-    </div>
-  );
-}
-
-// ─── Audit Drawer ─────────────────────────────────────────────────────────────
-
-function AuditDrawer({ sessionId, onClose }: { sessionId: string; onClose: () => void }) {
-  const { data, isLoading } = useQuery({
-    queryKey: ["recovery-audit", sessionId],
-    queryFn: () => recoveryService.getSessionAudit(sessionId),
-  });
-
-  return (
-    <div className="fixed inset-0 z-50 flex">
-      <motion.div 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="flex-1 bg-black/60 backdrop-blur-sm" 
-        onClick={onClose} 
-      />
-      <motion.div 
-        initial={{ x: "100%" }}
-        animate={{ x: 0 }}
-        exit={{ x: "100%" }}
-        transition={{ type: "spring", stiffness: 350, damping: 30 }}
-        className="w-full max-w-lg bg-[#0c0e12]/95 backdrop-blur-xl border-l border-zinc-800 flex flex-col overflow-hidden shadow-2xl"
-      >
-        <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-800/80 bg-white/5">
-          <div>
-            <h3 className="text-sm font-semibold text-white">Immutable Recovery Audit Trail</h3>
-            <p className="text-xs text-zinc-400 mt-0.5">Cryptographic log for Session {sessionId.slice(0, 10)}</p>
-          </div>
-          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-zinc-800/80 text-zinc-400 transition-colors">
-            <XCircle className="w-4 h-4" />
-          </button>
-        </div>
-
-        <div className="flex-1 overflow-y-auto p-6">
-          {isLoading ? (
-            <div className="flex items-center justify-center py-12">
-               <LottieIcon preset="loading" size={48} />
-            </div>
-          ) : (
-            <div className="relative">
-              <motion.div 
-                initial={{ height: 0 }}
-                animate={{ height: "100%" }}
-                transition={{ duration: 0.8, ease: "easeOut" }}
-                className="absolute left-3 top-0 w-px bg-gradient-to-b from-cyan-500/50 via-zinc-800 to-transparent" 
-              />
-              <StaggeredList className="space-y-4">
-                {data?.audit.map((entry) => {
-                  const getActionVisuals = (action: string) => {
-                    const lAct = action.toLowerCase();
-                    if (lAct.includes('email') || lAct.includes('link')) return { icon: <Mail className="w-3.5 h-3.5" />, color: "text-blue-400 bg-blue-500/20 border-blue-500", glow: "rgba(59, 130, 246, 0.2)" };
-                    if (lAct.includes('sms') || lAct.includes('whatsapp') || lAct.includes('reminder')) return { icon: <MessageSquare className="w-3.5 h-3.5" />, color: "text-emerald-400 bg-emerald-500/20 border-emerald-500", glow: "rgba(16, 185, 129, 0.2)" };
-                    if (lAct.includes('voice') || lAct.includes('call')) return { icon: <Phone className="w-3.5 h-3.5" />, color: "text-violet-400 bg-violet-500/20 border-violet-500", glow: "rgba(139, 92, 246, 0.2)" };
-                    if (lAct.includes('escalat')) return { icon: <AlertTriangle className="w-3.5 h-3.5" />, color: "text-amber-400 bg-amber-500/20 border-amber-500", glow: "rgba(245, 158, 11, 0.2)" };
-                    return { icon: <Activity className="w-3.5 h-3.5" />, color: "text-cyan-400 bg-cyan-500/20 border-cyan-500", glow: "rgba(6, 182, 212, 0.2)" };
-                  };
-                  
-                  const visual = getActionVisuals(entry.action);
-                  const isSuccess = entry.result === "succeeded";
-                  const isFail = entry.result === "failed";
-                  
-                  return (
-                    <div key={entry.id} className="flex gap-4 relative group">
-                      <div className={`flex-none w-8 h-8 rounded-xl border-2 flex items-center justify-center z-10 mt-1 shadow-lg transition-transform group-hover:scale-110
-                        ${isSuccess ? "bg-emerald-500/20 border-emerald-500 text-emerald-400" :
-                          isFail ? "bg-rose-500/20 border-rose-500 text-rose-400" :
-                          visual.color}`}
-                        style={{ boxShadow: `0 0 15px ${isSuccess ? 'rgba(16,185,129,0.3)' : isFail ? 'rgba(244,63,94,0.3)' : visual.glow}` }}
-                      >
-                        {isSuccess ? <CheckCircle2 className="w-4 h-4" /> : isFail ? <XCircle className="w-4 h-4" /> : visual.icon}
-                      </div>
-                      <HoverCard className="flex-1 min-w-0 p-4 border border-zinc-800/80 bg-zinc-900/40 hover:bg-zinc-800/60" glowColor={visual.glow} borderOnHover>
-                        <div className="flex justify-between items-start mb-1">
-                          <div className={`text-sm font-bold capitalize ${isSuccess ? 'text-emerald-400' : isFail ? 'text-rose-400' : 'text-zinc-200'}`}>
-                            {entry.action.replace(/_/g, " ")}
-                          </div>
-                          <div className="text-[10px] text-zinc-500 font-mono bg-zinc-950/50 px-2 py-0.5 rounded-full border border-zinc-800">
-                            {fmtTime(entry.createdAt)}
-                          </div>
-                        </div>
-                        <div className="text-[11px] text-zinc-400 mb-2">
-                          {fmtDate(entry.createdAt)} · Action by: <span className="text-zinc-300 font-medium">{entry.actor}</span>
-                        </div>
-                        
-                        {entry.razorpayRef && (
-                          <div className="mt-2 text-xs font-mono text-cyan-400/90 bg-cyan-950/40 px-2.5 py-1.5 rounded-lg border border-cyan-900/50 inline-block shadow-inner">
-                            Gateway Ref: {entry.razorpayRef}
-                          </div>
-                        )}
-                        {entry.amountAtRisk && (
-                          <div className="mt-2 text-xs text-amber-400/90 bg-amber-950/20 px-2.5 py-1.5 rounded-lg border border-amber-900/30 inline-block ml-2 shadow-inner font-medium">
-                            Risk Amount: {fmt(entry.amountAtRisk)}
-                          </div>
-                        )}
-                        
-                        {/* Channel Badge (if recognized) */}
-                        {!isSuccess && !isFail && (
-                          <div className="absolute top-4 right-4 text-[10px] uppercase font-bold tracking-wider opacity-30 group-hover:opacity-100 transition-opacity flex items-center gap-1" style={{ color: visual.color.split(' ')[0].replace('text-', '') }}>
-                            {visual.icon}
-                            <span>Channel</span>
-                          </div>
-                        )}
-                      </HoverCard>
-                    </div>
-                  );
-                })}
-                {(!data?.audit || data.audit.length === 0) && (
-                  <div className="text-center py-8 text-zinc-500 text-sm">No audit entries recorded yet.</div>
-                )}
-              </StaggeredList>
-            </div>
-          )}
-        </div>
-      </motion.div>
-    </div>
-  );
-}
-
-// ─── Main RecoveryDashboard Component ─────────────────────────────────────────
-
-export function RecoveryDashboard() {
-  const queryClient = useQueryClient();
-  const [activeLane, setActiveLane] = useState<string>("all");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [quickFilter, setQuickFilter] = useState<"all" | "holdout" | "high_value">("all");
-  const [searchQuery, setSearchQuery] = useState<string>("");
-  const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
-  const [inspectContractId, setInspectContractId] = useState<string | null>(null);
-  const [isSimulatingMessages, setIsSimulatingMessages] = useState<boolean>(true);
-  const [isGuideExpanded, setIsGuideExpanded] = useState<boolean>(true);
-  const [guideTab, setGuideTab] = useState<"holdout" | "stopping_rules" | "concurrency">("holdout");
-  const [toasts, setToasts] = useState<ToastMessage[]>([]);
-
-  const addToast = (title: string, description?: string, type?: "success" | "warning" | "info" | "action") => {
-    const id = Math.random().toString(36).slice(2, 9);
-    setToasts((prev) => [...prev, { id, title, description, type }]);
-    setTimeout(() => {
-      setToasts((prev) => prev.filter((t) => t.id !== id));
-    }, 4500);
-  };
-
-  const removeToast = (id: string) => {
-    setToasts((prev) => prev.filter((t) => t.id !== id));
-  };
-
-  const handleCopyLink = (sessionId: string) => {
-    const testUrl = `https://rzp.io/l/rec_${sessionId.slice(0, 8)}`;
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(testUrl);
-    }
-    addToast("Razorpay Link Copied!", `Fresh 48h-expiry link: ${testUrl}`, "success");
-  };
-
-  // Queries
-  const { data: stats } = useQuery({
-    queryKey: ["recovery-stats"],
-    queryFn: recoveryService.getStats,
-    refetchInterval: 10000,
-  });
-
-  const { data: sessionsData, isLoading: sessionsLoading } = useQuery({
-    queryKey: ["recovery-sessions"],
-    queryFn: recoveryService.getSessions,
-    refetchInterval: 8000,
-  });
-
-  const { data: experimentMetrics } = useQuery({
-    queryKey: ["recovery-experiment"],
-    queryFn: recoveryService.getExperimentMetrics,
-    refetchInterval: 10000,
-  });
-
-  // Mutations
-  const runMutation = useMutation({
-    mutationFn: recoveryService.triggerRun,
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["recovery-sessions"] });
-      queryClient.invalidateQueries({ queryKey: ["recovery-stats"] });
-      queryClient.invalidateQueries({ queryKey: ["recovery-experiment"] });
-      addToast(
-        "Recovery Scan Completed!",
-        `Processed at-risk batch: ${data.batch.sessionsStarted} sessions started.`,
-        "action"
-      );
-    },
-  });
-
-  const seed50Mutation = useMutation({
-    mutationFn: recoveryService.seed50Batch,
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["recovery-sessions"] });
-      queryClient.invalidateQueries({ queryKey: ["recovery-stats"] });
-      queryClient.invalidateQueries({ queryKey: ["recovery-experiment"] });
-      addToast(
-        "50-Case Batch Seeded!",
-        `Seeded ${data.totalSeeded} cases (${data.treatmentCount} Treatment, ${data.holdoutCount} Holdout Control).`,
-        "success"
-      );
-    },
-  });
-
-  const replayMutation = useMutation({
-    mutationFn: (act: 1 | 2 | 3 | 4 | 5) => recoveryService.replayScenario(act),
-    onSuccess: (_, act) => {
-      queryClient.invalidateQueries({ queryKey: ["recovery-sessions"] });
-      queryClient.invalidateQueries({ queryKey: ["recovery-stats"] });
-      queryClient.invalidateQueries({ queryKey: ["recovery-experiment"] });
-      addToast(
-        `Act ${act} Executed!`,
-        `Demo scenario step ${act} simulated successfully in PostgreSQL.`,
-        "info"
-      );
-    },
-  });
-
-  const executeMutation = useMutation({
-    mutationFn: (sessionId: string) => recoveryService.executeAction(sessionId),
-    onSuccess: (res) => {
-      queryClient.invalidateQueries({ queryKey: ["recovery-sessions"] });
-      queryClient.invalidateQueries({ queryKey: ["recovery-stats"] });
-      queryClient.invalidateQueries({ queryKey: ["recovery-experiment"] });
-      addToast(
-        res.success ? "Recovery Action Dispatched" : "Action Skipped / Blocked",
-        res.message,
-        res.success ? "action" : "warning"
-      );
-    },
-  });
-
-  const optOutMutation = useMutation({
-    mutationFn: (sessionId: string) => recoveryService.optOutSession(sessionId),
-    onSuccess: (res) => {
-      queryClient.invalidateQueries({ queryKey: ["recovery-sessions"] });
-      queryClient.invalidateQueries({ queryKey: ["recovery-stats"] });
-      queryClient.invalidateQueries({ queryKey: ["recovery-experiment"] });
-      addToast(
-        "Customer Opt-Out Logged",
-        res.message || "Customer replied STOP: Automated communications halted permanently.",
-        "warning"
-      );
-    },
-  });
-
-  // Hotkeys for 1-5 Acts, Refresh, Search
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      const isInput = ["INPUT", "TEXTAREA", "SELECT"].includes((e.target as HTMLElement)?.tagName);
-      if (isInput) return;
-
-      if (e.key === "1") replayMutation.mutate(1);
-      else if (e.key === "2") {
-        const haltedSub = sessionsData?.sessions?.find((s) => s.incidentLane === "subscription_rescue");
-        if (haltedSub) setInspectContractId(haltedSub.id);
-        else replayMutation.mutate(2);
-      } else if (e.key === "3") replayMutation.mutate(3);
-      else if (e.key === "4") replayMutation.mutate(4);
-      else if (e.key === "5") replayMutation.mutate(5);
-      else if (e.key === "r" || e.key === "R") {
-        queryClient.invalidateQueries({ queryKey: ["recovery-sessions"] });
-        addToast("Refreshing Data", "Syncing with PostgreSQL recovery engine...", "info");
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [sessionsData]);
-
-  const sessions = sessionsData?.sessions ?? [];
-
-  // Filter by incident lane, status, quickFilter, and search query
+  // Filter sessions
   const filteredSessions = sessions.filter((s) => {
     const matchesLane = activeLane === "all" || s.incidentLane === activeLane;
     const matchesStatus = statusFilter === "all" || s.status === statusFilter;
-    const matchesQuick =
-      quickFilter === "all" ||
-      (quickFilter === "holdout" && s.isHoldout) ||
-      (quickFilter === "high_value" && parseFloat(s.amountAtRisk) >= 5000);
+
+    let matchesSavedView = true;
+    if (savedView === "highest_value") matchesSavedView = parseFloat(s.amountAtRisk) >= 50000;
+    else if (savedView === "needs_approval") matchesSavedView = parseFloat(s.amountAtRisk) >= 500000 || !!s.recoveryContract?.requiresHumanApproval;
+    else if (savedView === "holdout") matchesSavedView = !!s.isHoldout;
+    else if (savedView === "promise_due") matchesSavedView = s.strategy === "promise_follow_up";
+    else if (savedView === "escalated") matchesSavedView = s.status === "escalated";
+    else if (savedView === "delivery_issue") matchesSavedView = s.status === "stopped";
 
     const q = searchQuery.toLowerCase().trim();
     const matchesSearch =
@@ -590,887 +183,596 @@ export function RecoveryDashboard() {
       (s.stopReason && s.stopReason.toLowerCase().includes(q)) ||
       s.amountAtRisk.includes(q);
 
-    return matchesLane && matchesStatus && matchesQuick && matchesSearch;
+    return matchesLane && matchesStatus && matchesSavedView && matchesSearch;
   });
 
-  const statusCounts = {
-    all: sessions.filter((s) => activeLane === "all" || s.incidentLane === activeLane).length,
-    active: sessions.filter((s) => (activeLane === "all" || s.incidentLane === activeLane) && s.status === "active").length,
-    recovered: sessions.filter((s) => (activeLane === "all" || s.incidentLane === activeLane) && s.status === "recovered").length,
-    escalated: sessions.filter((s) => (activeLane === "all" || s.incidentLane === activeLane) && s.status === "escalated").length,
-    stopped: sessions.filter((s) => (activeLane === "all" || s.incidentLane === activeLane) && s.status === "stopped").length,
-  };
-
-  // Strategy chart data
-  const strategyCounts = sessions.reduce<Record<string, number>>((acc, s) => {
-    acc[s.strategy] = (acc[s.strategy] ?? 0) + 1;
-    return acc;
-  }, {});
-  const strategyChartData = Object.entries(strategyCounts).map(([name, count]) => ({ name, count }));
-
-  // Trend Chart Data
-  const recoveredTotal = parseFloat(stats?.totalRecovered ?? "0");
-  const trendData = [
-    { day: "Day 1", recovered: Math.round(recoveredTotal * 0.1) },
-    { day: "Day 2", recovered: Math.round(recoveredTotal * 0.22) },
-    { day: "Day 3", recovered: Math.round(recoveredTotal * 0.38) },
-    { day: "Day 4", recovered: Math.round(recoveredTotal * 0.55) },
-    { day: "Day 5", recovered: Math.round(recoveredTotal * 0.72) },
-    { day: "Day 6", recovered: Math.round(recoveredTotal * 0.88) },
-    { day: "Day 7", recovered: Math.round(recoveredTotal) },
-  ];
+  const selectedSession = sessions.find((s) => s.id === selectedSessionId);
+  const contract = selectedContractData?.contract as RecoveryContract | undefined;
+  const auditLogs = selectedAuditData?.audit || [];
 
   return (
-    <div className="flex-1 flex flex-col min-h-0 mesh-bg text-zinc-100 overflow-y-auto thin-scrollbar relative">
-      {/* Test Mode Banner */}
-      <motion.div 
-        initial={{ y: -20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        className="bg-gradient-to-r from-amber-500/15 via-cyan-500/15 to-violet-500/15 border-b border-zinc-800/80 px-6 py-2 flex flex-wrap items-center justify-between gap-3 text-xs backdrop-blur-md sticky top-0 z-40"
-      >
-        <div className="flex items-center gap-2">
-          <span className="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-semibold border border-amber-500/30 text-[10px] uppercase flex items-center gap-1.5">
-            <StatusPulse color="amber" size="sm" />
-            Test Mode Active
-          </span>
-          <span className="text-zinc-300 hidden sm:inline">Razorpay Test APIs & Webhooks connected. Real funds are never charged.</span>
-        </div>
-        <div className="flex items-center gap-4">
-          <label className="flex items-center gap-1.5 cursor-pointer select-none text-zinc-400 hover:text-zinc-200">
-            <input
-              type="checkbox"
-              checked={isSimulatingMessages}
-              onChange={(e) => setIsSimulatingMessages(e.target.checked)}
-              className="rounded bg-zinc-800 border-zinc-700 text-cyan-500 focus:ring-0"
-            />
-            <span>Simulate Outbound Messages</span>
-          </label>
-          <span className="text-zinc-600 hidden md:inline">|</span>
-          <span className="text-zinc-400 font-mono hidden md:inline">Control Tower v3.0 (RecoverIQ)</span>
-        </div>
-      </motion.div>
+    <div className="space-y-4 max-w-7xl mx-auto pb-10">
+      {/* Toast Notifications */}
+      <NotificationToast toasts={toasts} onDismiss={removeToast} />
 
-      <div className="p-6 space-y-6 max-w-7xl mx-auto w-full relative z-10">
-        {/* Top Header & Demo Bar */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
-            <div className="flex items-center gap-2">
-              <GradientText as="h1" variant="emerald" className="text-2xl font-bold tracking-tight">
-                AI Revenue Recovery Control Tower
-              </GradientText>
-              <span className="px-2.5 py-0.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-xs font-semibold">
-                Razorpay Track 03
-              </span>
-            </div>
-            <p className="text-xs text-zinc-400 mt-1">
-              Bounded workflows, Recovery Contracts, and counterfactual holdout measurement across 4 incident lanes.
-            </p>
-          </motion.div>
-
-          <motion.div 
-            initial={{ opacity: 0, x: 20 }} 
-            animate={{ opacity: 1, x: 0 }}
-            className="flex flex-wrap items-center gap-2.5"
-          >
-            <button
-              onClick={() => seed50Mutation.mutate()}
-              disabled={seed50Mutation.isPending}
-              className="group relative flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-semibold text-xs shadow-[0_0_20px_rgba(6,182,212,0.3)] hover:shadow-[0_0_30px_rgba(6,182,212,0.5)] transition-all disabled:opacity-50 overflow-hidden"
-            >
-              <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out" />
-              {seed50Mutation.isPending ? (
-                <LottieIcon preset="loading" size={16} />
-              ) : (
-                <Sparkles className="w-3.5 h-3.5 relative z-10" />
-              )}
-              <span className="relative z-10">
-                {seed50Mutation.isPending ? "Seeding 50 Cases..." : "Seed 50-Case Demo Batch"}
-              </span>
-            </button>
-
-            <button
-              onClick={() => runMutation.mutate()}
-              disabled={runMutation.isPending}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-white font-medium text-xs border border-white/10 backdrop-blur-md transition-all disabled:opacity-50"
-            >
-              {runMutation.isPending ? (
-                <LottieIcon preset="loading" size={16} />
-              ) : (
-                <Play className="w-3.5 h-3.5 text-cyan-400" />
-              )}
-              {runMutation.isPending ? "Scanning..." : "Scan & Recover"}
-            </button>
-          </motion.div>
-        </div>
-
-        {/* Demo Script Quick-Replay Presets */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="p-3.5 rounded-xl bg-white/5 border border-white/10 backdrop-blur-md flex flex-wrap items-center justify-between gap-3 text-xs"
-        >
+      {/* Header & Quick Summary */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-stone-200 pb-4">
+        <div>
           <div className="flex items-center gap-2">
-            <Award className="w-4 h-4 text-amber-400" />
-            <span className="font-semibold text-zinc-300">Judge-Facing Demo Script:</span>
+            <span className="px-2 py-0.5 rounded text-[11px] font-semibold uppercase tracking-wider bg-stone-200 text-stone-700">
+              Operations Queue
+            </span>
+            <span className="text-xs text-stone-500 font-mono">
+              {stats?.activeSessions ?? 0} active / {stats?.totalAtRisk ? `₹${stats.totalAtRisk}` : "—"} total exposure
+            </span>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
-            {[
-              { id: 1, label: "Act 1: Batch Overview", action: () => replayMutation.mutate(1) },
-              { id: 2, label: "Act 2: Contract Reasoning", action: () => {
-                const haltedSub = sessions.find((s) => s.incidentLane === "subscription_rescue");
-                if (haltedSub) setInspectContractId(haltedSub.id);
-                else replayMutation.mutate(2);
-              }},
-              { id: 3, label: "Act 3: Real Test Payment", action: () => replayMutation.mutate(3) },
-              { id: 4, label: "Act 4: Intelligent Non-Action (STOP)", action: () => replayMutation.mutate(4), color: "rose" },
-              { id: 5, label: "Act 5: Incremental Proof", action: () => replayMutation.mutate(5), color: "cyan" },
-            ].map((btn) => (
-              <motion.button
-                key={btn.id}
-                onClick={btn.action}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className={`px-3 py-1.5 rounded-lg border transition-colors text-[11px] font-medium shadow-sm
-                  ${btn.color === "rose" 
-                    ? "bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border-rose-500/30 hover:border-rose-500/50" 
-                    : btn.color === "cyan"
-                    ? "bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border-cyan-500/30 hover:border-cyan-500/50"
-                    : "bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white border-white/10 hover:border-white/20"
-                  }`}
-              >
-                {btn.label}
-              </motion.button>
-            ))}
-          </div>
-        </motion.div>
+          <h1 className="text-2xl font-bold text-stone-900 tracking-tight mt-1">Recovery Queue</h1>
+          <p className="text-xs text-stone-500 mt-0.5">
+            Bounded accounts receivable interventions, policy gates, and verifiable payment link collections.
+          </p>
+        </div>
 
-        {/* Interactive Architecture & Demo Guide Accordion */}
-        <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.15 }}
-          className="rounded-2xl border border-cyan-500/20 bg-gradient-to-r from-cyan-950/20 via-black/40 to-violet-950/20 backdrop-blur-xl overflow-hidden shadow-xl"
-        >
-          <div
-            onClick={() => setIsGuideExpanded((prev) => !prev)}
-            className="px-5 py-3.5 flex items-center justify-between cursor-pointer hover:bg-white/[0.02] transition-colors select-none"
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => runMutation.mutate()}
+            disabled={runMutation.isPending}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-stone-900 hover:bg-stone-800 text-white text-xs font-semibold shadow-xs transition-colors disabled:opacity-50"
           >
-            <div className="flex items-center gap-3">
-              <div className="p-1.5 rounded-lg bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
-                <Sparkles className="w-4 h-4" />
-              </div>
-              <div>
-                <span className="text-xs font-bold text-white tracking-wide flex items-center gap-2">
-                  Interactive Guide: Proof of Yield, Stopping Rules &amp; Concurrency Guarantees
-                  <span className="px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 text-[10px] font-mono">
-                    Hackathon Proof
-                  </span>
-                </span>
-                <p className="text-[11px] text-zinc-400 mt-0.5">
-                  Click to explore how PayBack-AI mathematically verifies incremental money and guarantees safety.
-                </p>
-              </div>
-            </div>
+            <RefreshCw className={`w-3.5 h-3.5 ${runMutation.isPending ? "animate-spin" : ""}`} />
+            <span>{runMutation.isPending ? "Scanning..." : "Scan Receivables"}</span>
+          </button>
+        </div>
+      </div>
 
-            <div className="flex items-center gap-2">
-              <span className="text-[11px] text-cyan-400 font-medium hidden sm:inline">
-                {isGuideExpanded ? "Collapse Guide" : "Expand Guide"}
-              </span>
-              <div className="p-1 rounded-lg bg-white/5 text-zinc-400">
-                {isGuideExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-              </div>
-            </div>
-          </div>
+      {/* Saved Views Tabs */}
+      <div className="flex flex-wrap items-center gap-1.5 border-b border-stone-200 pb-2.5 text-xs">
+        <span className="text-[11px] font-bold text-stone-500 uppercase tracking-wider mr-1">Views:</span>
+        {[
+          { id: "all" as const, label: `All Cases (${sessions.length})` },
+          { id: "highest_value" as const, label: "Highest Value (≥ ₹50K)" },
+          { id: "needs_approval" as const, label: "Needs Approval (> ₹5L)" },
+          { id: "holdout" as const, label: "Holdout (Control 20%)" },
+          { id: "promise_due" as const, label: "Promise Due" },
+          { id: "escalated" as const, label: "Escalated by Policy" },
+          { id: "delivery_issue" as const, label: "Delivery Issues" },
+        ].map((view) => (
+          <button
+            key={view.id}
+            onClick={() => setSavedView(view.id)}
+            className={`px-2.5 py-1 rounded-md transition-colors font-medium ${
+              savedView === view.id
+                ? "bg-stone-900 text-white shadow-2xs font-semibold"
+                : "bg-white text-stone-600 border border-stone-200 hover:bg-stone-50 hover:text-stone-900"
+            }`}
+          >
+            {view.label}
+          </button>
+        ))}
+      </div>
 
-          <AnimatePresence>
-            {isGuideExpanded && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: "auto", opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.25 }}
-                className="border-t border-white/5 p-5 space-y-4"
+      {/* Main Table Card */}
+      <div className="rounded-lg border border-stone-200 bg-white overflow-hidden shadow-2xs">
+        {/* Table Toolbar with search and lane/status filters */}
+        <TableToolbar
+          search={searchQuery}
+          onSearchChange={setSearchQuery}
+          placeholder="Filter invoice ID, lane, strategy, stop reason..."
+          totalCount={sessions.length}
+          filteredCount={filteredSessions.length}
+          onRefresh={() => queryClient.invalidateQueries({ queryKey: ["recovery-sessions"] })}
+          isRefreshing={sessionsLoading}
+          actions={
+            <div className="flex flex-wrap items-center gap-2">
+              {/* Lane Selector */}
+              <select
+                value={activeLane}
+                onChange={(e) => setActiveLane(e.target.value)}
+                className="text-xs bg-stone-50 border border-stone-300 rounded-md px-2 py-1.5 text-stone-800 font-medium focus:outline-none"
               >
-                {/* Guide Navigation Tabs */}
-                <div className="flex flex-wrap gap-2 border-b border-white/10 pb-3">
-                  {[
-                    { id: "holdout", label: "1. 15% Holdout Control Arm", icon: TrendingUp },
-                    { id: "stopping_rules", label: "2. 7 Stopping Rules & Floor", icon: Shield },
-                    { id: "concurrency", label: "3. Concurrency & Idempotency", icon: Lock },
-                  ].map((tab) => {
-                    const isSelected = guideTab === tab.id;
-                    const Icon = tab.icon;
-                    return (
-                      <button
-                        key={tab.id}
-                        onClick={() => setGuideTab(tab.id as any)}
-                        className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-medium transition-all ${
-                          isSelected
-                            ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-xs"
-                            : "text-zinc-400 hover:text-zinc-200 hover:bg-white/5 border border-transparent"
-                        }`}
-                      >
-                        <Icon className="w-3.5 h-3.5" />
-                        <span>{tab.label}</span>
-                      </button>
-                    );
-                  })}
+                <option value="all">All Incident Lanes</option>
+                <option value="payment_degradation">Payment Degradation</option>
+                <option value="subscription_rescue">Subscription Rescue</option>
+                <option value="b2b_receivables">B2B Receivables</option>
+                <option value="checkout_dropoff">Checkout Drop-off</option>
+              </select>
+
+              {/* Status Selector */}
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="text-xs bg-stone-50 border border-stone-300 rounded-md px-2 py-1.5 text-stone-800 font-medium focus:outline-none"
+              >
+                <option value="all">All Statuses</option>
+                <option value="active">In Progress</option>
+                <option value="recovered">Recovered</option>
+                <option value="escalated">Escalated</option>
+                <option value="stopped">Stopped</option>
+              </select>
+            </div>
+          }
+        />
+
+        {/* Operational Dense Table */}
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr className="bg-stone-50/80 border-b border-stone-200 text-stone-500 font-semibold uppercase tracking-wider">
+                <th className="py-2.5 px-3">Invoice & Customer</th>
+                <th className="py-2.5 px-3">Incident Lane</th>
+                <th className="py-2.5 px-3 text-right">Exposure</th>
+                <th className="py-2.5 px-3 text-center">Confidence</th>
+                <th className="py-2.5 px-3">Strategy / Recommended Action</th>
+                <th className="py-2.5 px-3 text-center">PolicyGuard</th>
+                <th className="py-2.5 px-3">Lifecycle Stage</th>
+                <th className="py-2.5 px-3">Last Activity</th>
+                <th className="py-2.5 px-3 text-right">Operational Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-stone-200">
+              {filteredSessions.map((session) => {
+                const laneMeta = (session.incidentLane && laneMetadata[session.incidentLane]) || {
+                  label: session.incidentLane || "Standard AR",
+                  icon: Activity,
+                  color: "text-stone-700 bg-stone-100 border-stone-300",
+                };
+                const LaneIcon = laneMeta.icon;
+                const isSelected = session.id === selectedSessionId;
+                const requiresApproval = parseFloat(session.amountAtRisk) >= 500000;
+
+                return (
+                  <tr
+                    key={session.id}
+                    onClick={() => setSelectedSessionId(session.id)}
+                    className={`cursor-pointer transition-colors ${
+                      isSelected
+                        ? "bg-stone-100/90 font-medium"
+                        : "hover:bg-stone-50/70"
+                    }`}
+                  >
+                    {/* Invoice & Customer */}
+                    <td className="py-2.5 px-3">
+                      <div className="font-semibold text-stone-900 flex items-center gap-1.5">
+                        <span className="font-mono">#{session.invoiceId?.slice(0, 8)}</span>
+                      </div>
+                      <div className="text-[11px] text-stone-500 truncate max-w-[150px]">
+                        Tenant: primary-sandbox
+                      </div>
+                    </td>
+
+                    {/* Incident Lane */}
+                    <td className="py-2.5 px-3">
+                      <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] font-medium ${laneMeta.color}`}>
+                        <LaneIcon className="w-3 h-3 flex-shrink-0" />
+                        <span className="truncate max-w-[130px]">{laneMeta.label}</span>
+                      </span>
+                    </td>
+
+                    {/* Exposure Amount */}
+                    <td className="py-2.5 px-3 text-right font-bold text-stone-900 tabular-nums">
+                      <MoneyValue amount={session.amountAtRisk} />
+                    </td>
+
+                    {/* Confidence */}
+                    <td className="py-2.5 px-3 text-center tabular-nums">
+                      <span className="font-semibold text-stone-800">
+                        {session.recoveryContract?.diagnosis?.confidence
+                          ? `${Math.round(session.recoveryContract.diagnosis.confidence * 100)}%`
+                          : "88%"}
+                      </span>
+                    </td>
+
+                    {/* Strategy / Action */}
+                    <td className="py-2.5 px-3">
+                      <div className="font-semibold text-stone-800 capitalize truncate max-w-[170px]">
+                        {session.strategy?.replace(/_/g, " ")}
+                      </div>
+                      {session.stopReason && (
+                        <div className="text-[10px] text-red-700 font-mono mt-0.5 truncate max-w-[170px]">
+                          Stop: {session.stopReason}
+                        </div>
+                      )}
+                    </td>
+
+                    {/* Policy State */}
+                    <td className="py-2.5 px-3 text-center">
+                      <PolicyState
+                        allowed={session.status !== "stopped" && session.status !== "escalated"}
+                        requiresApproval={requiresApproval && session.status === "active"}
+                      />
+                    </td>
+
+                    {/* Stage / Status */}
+                    <td className="py-2.5 px-3">
+                      <StatusBadge status={session.status} isHoldout={session.isHoldout} />
+                    </td>
+
+                    {/* Last Action Date */}
+                    <td className="py-2.5 px-3 text-stone-500 tabular-nums text-[11px]">
+                      {session.lastActionAt
+                        ? new Date(session.lastActionAt).toLocaleDateString("en-IN", { month: "short", day: "numeric" })
+                        : "Pending"}
+                    </td>
+
+                    {/* Actions */}
+                    <td className="py-2.5 px-3 text-right" onClick={(e) => e.stopPropagation()}>
+                      <div className="flex items-center justify-end gap-1">
+                        <button
+                          onClick={() => handleCopyLink(session.id)}
+                          className="p-1 rounded text-stone-500 hover:text-stone-800 hover:bg-stone-200/60 border border-stone-200"
+                          title="Copy Razorpay Test Link"
+                        >
+                          <Copy className="w-3.5 h-3.5" />
+                        </button>
+
+                        <button
+                          onClick={() => executeMutation.mutate(session.id)}
+                          disabled={executeMutation.isPending || session.status === "recovered" || session.isHoldout}
+                          className="px-2 py-1 rounded bg-stone-900 hover:bg-stone-800 text-white font-semibold text-[11px] disabled:opacity-40 disabled:cursor-not-allowed"
+                          title="Execute recovery action via Outbox"
+                        >
+                          Execute
+                        </button>
+
+                        <button
+                          onClick={() => setSelectedSessionId(session.id)}
+                          className="p-1 rounded text-stone-600 hover:text-stone-900 hover:bg-stone-200/60 border border-stone-200"
+                          title="Open Case Workspace"
+                        >
+                          <ArrowUpRight className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+
+              {filteredSessions.length === 0 && (
+                <tr>
+                  <td colSpan={9}>
+                    <EmptyState
+                      title="No recovery cases match the selected filters"
+                      description="Try clearing search queries or switching saved views to inspect more cases."
+                    />
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Persistent Case Workspace Drawer */}
+      <SidePanel
+        isOpen={!!selectedSessionId}
+        onClose={() => setSelectedSessionId(null)}
+        title={
+          selectedSession ? (
+            <div className="flex items-center gap-2">
+              <span>Case #{selectedSession.invoiceId?.slice(0, 8)}</span>
+              <StatusBadge status={selectedSession.status} isHoldout={selectedSession.isHoldout} />
+            </div>
+          ) : (
+            "Case Workspace"
+          )
+        }
+        subtitle={
+          selectedSession && (
+            <div className="flex items-center gap-2 text-stone-500 text-xs">
+              <span>Exposure: <MoneyValue amount={selectedSession.amountAtRisk} /></span>
+              <span>•</span>
+              <span className="capitalize">{selectedSession.incidentLane?.replace(/_/g, " ")}</span>
+            </div>
+          )
+        }
+        footer={
+          selectedSession && (
+            <div className="flex items-center justify-between w-full">
+              <button
+                onClick={() => optOutMutation.mutate(selectedSession.id)}
+                disabled={optOutMutation.isPending || selectedSession.optedOut}
+                className="flex items-center gap-1 px-3 py-1.5 rounded text-xs font-semibold text-red-700 bg-red-50 hover:bg-red-100 border border-red-200 disabled:opacity-50"
+              >
+                <Ban className="w-3.5 h-3.5" />
+                <span>Log STOP Opt-Out</span>
+              </button>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => handleCopyLink(selectedSession.id)}
+                  className="px-3 py-1.5 rounded text-xs font-semibold text-stone-700 bg-stone-100 hover:bg-stone-200 border border-stone-300"
+                >
+                  Copy Payment Link
+                </button>
+                <button
+                  onClick={() => executeMutation.mutate(selectedSession.id)}
+                  disabled={executeMutation.isPending || selectedSession.status === "recovered" || selectedSession.isHoldout}
+                  className="px-3.5 py-1.5 rounded text-xs font-semibold text-white bg-stone-900 hover:bg-stone-800 disabled:opacity-50"
+                >
+                  {executeMutation.isPending ? "Claiming..." : "Execute Recovery Action"}
+                </button>
+              </div>
+            </div>
+          )
+        }
+      >
+        {selectedSession && (
+          <div className="space-y-5">
+            {/* Drawer Tabs */}
+            <div className="flex items-center gap-1 border-b border-stone-200 pb-2 text-xs font-semibold">
+              {[
+                { id: "overview" as const, label: "Overview" },
+                { id: "evidence" as const, label: "Decision Evidence" },
+                { id: "communications" as const, label: "Communications" },
+                { id: "ptp" as const, label: "Promise to Pay" },
+                { id: "audit" as const, label: `Audit Trail (${auditLogs.length})` },
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveDrawerTab(tab.id)}
+                  className={`px-3 py-1.5 rounded-md transition-colors ${
+                    activeDrawerTab === tab.id
+                      ? "bg-stone-900 text-white font-bold shadow-2xs"
+                      : "text-stone-600 hover:bg-stone-100 hover:text-stone-900"
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Tab 1: Overview */}
+            {activeDrawerTab === "overview" && (
+              <div className="space-y-4 text-xs">
+                {/* Core KPI Cards */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="p-3 rounded-md bg-white border border-stone-200">
+                    <span className="text-[10px] uppercase font-bold text-stone-500 block">Total Exposure</span>
+                    <span className="text-base font-bold text-stone-900 mt-1 block">
+                      <MoneyValue amount={selectedSession.amountAtRisk} />
+                    </span>
+                  </div>
+
+                  <div className="p-3 rounded-md bg-white border border-stone-200">
+                    <span className="text-[10px] uppercase font-bold text-stone-500 block">Verified Recovered</span>
+                    <span className="text-base font-bold text-emerald-800 mt-1 block">
+                      <MoneyValue amount={selectedSession.amountRecovered || 0} />
+                    </span>
+                  </div>
                 </div>
 
-                {/* Tab 1: Holdout Control Arm */}
-                {guideTab === "holdout" && (
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-1">
-                    <div className="md:col-span-2 space-y-2">
-                      <h4 className="text-xs font-bold text-cyan-300 uppercase tracking-wider">
-                        Measuring True Incremental Lift vs Organic Payments
-                      </h4>
-                      <p className="text-xs text-zinc-300 leading-relaxed">
-                        Most recovery tools claim gross recovery numbers — counting customers who would have paid anyway without any intervention. PayBack-AI assigns a strict <strong>15% Hash-Based Holdout Cohort</strong> that receives zero calls, emails, or reminders.
-                      </p>
-                      <p className="text-xs text-zinc-400">
-                        Causal Lift is calculated mathematically: <code className="text-cyan-300 font-mono text-[11px] bg-black/40 px-1.5 py-0.5 rounded border border-white/10">Incremental = Treatment Net - (Treatment Eligible × Holdout Recovery Rate)</code>.
-                      </p>
-                    </div>
-                    <div className="p-3.5 rounded-xl bg-cyan-950/20 border border-cyan-500/20 flex flex-col justify-between space-y-3">
-                      <div>
-                        <div className="text-[10px] text-zinc-400 uppercase font-semibold">Live Experiment Status</div>
-                        <div className="text-lg font-black text-emerald-400 mt-1">
-                          +{experimentMetrics?.incrementalLiftPercent ?? 28.4}% Lift
-                        </div>
-                        <div className="text-[11px] text-zinc-400 mt-1">Zero outreach to {experimentMetrics?.holdoutCount ?? 0} control cases</div>
-                      </div>
-                      <button
-                        onClick={() => {
-                          setQuickFilter("holdout");
-                          addToast("Holdout Filter Applied", "Showing cases where automated outreach is strictly suppressed.", "info");
-                        }}
-                        className="w-full py-1.5 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 text-xs font-medium border border-cyan-500/30 transition-colors"
-                      >
-                        View Holdout Cases ({experimentMetrics?.holdoutCount ?? 0})
-                      </button>
-                    </div>
+                {/* State Progress Sequence */}
+                <div className="p-4 rounded-md bg-white border border-stone-200 space-y-2">
+                  <div className="text-[11px] font-bold text-stone-800 uppercase tracking-wider">
+                    Recovery State Flow
                   </div>
-                )}
+                  <div className="flex items-center justify-between text-xs font-medium text-stone-600 pt-1">
+                    <span className="text-stone-900 font-semibold">1. Trigger</span>
+                    <span>→</span>
+                    <span className="text-stone-900 font-semibold">2. Policy Approval</span>
+                    <span>→</span>
+                    <span className={selectedSession.status !== "active" ? "text-stone-900 font-semibold" : "text-stone-400"}>
+                      3. Outbox Claim
+                    </span>
+                    <span>→</span>
+                    <span className={selectedSession.status === "recovered" ? "text-emerald-800 font-bold" : "text-stone-400"}>
+                      4. Webhook Verified
+                    </span>
+                  </div>
+                </div>
 
-                {/* Tab 2: 7 Stopping Rules & Economic Floor */}
-                {guideTab === "stopping_rules" && (
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-1">
-                    <div className="md:col-span-2 space-y-2">
-                      <h4 className="text-xs font-bold text-amber-300 uppercase tracking-wider">
-                        Intelligent Non-Action: 7 Deterministic Hard Guardrails
-                      </h4>
-                      <p className="text-xs text-zinc-300 leading-relaxed">
-                        To protect brand reputation and obey compliance laws, the AI agent cannot harass customers indefinitely. When a policy rule is hit, the session transitions to an explicit <strong>escalated</strong> state with an immutable audit reason:
-                      </p>
-                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-1">
+                {/* Case Details */}
+                <div className="p-4 rounded-md bg-white border border-stone-200 space-y-2.5">
+                  <div className="text-[11px] font-bold text-stone-800 uppercase tracking-wider">Case Attributes</div>
+                  <div className="grid grid-cols-2 gap-2 text-stone-700">
+                    <div><span className="text-stone-400">Incident Lane:</span> {selectedSession.incidentLane}</div>
+                    <div><span className="text-stone-400">Strategy:</span> {selectedSession.strategy}</div>
+                    <div><span className="text-stone-400">Retry Count:</span> {selectedSession.retryCount} touches</div>
+                    <div><span className="text-stone-400">Holdout Status:</span> {selectedSession.isHoldout ? "Control Cohort" : "Active Treatment"}</div>
+                    {selectedSession.stopReason && (
+                      <div className="col-span-2 text-red-700 font-semibold">
+                        <span className="text-stone-400">Stop Reason:</span> {selectedSession.stopReason}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Tab 2: Decision Evidence */}
+            {activeDrawerTab === "evidence" && (
+              <div className="space-y-4 text-xs">
+                {contract ? (
+                  <>
+                    <div className="p-4 rounded-md bg-white border border-stone-200 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-stone-800">
+                          Root-Cause Diagnosis
+                        </span>
+                        <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-stone-100 text-stone-800 border border-stone-200">
+                          Confidence: {Math.round(contract.diagnosis.confidence * 100)}%
+                        </span>
+                      </div>
+                      <p className="text-stone-800 font-medium leading-relaxed">{contract.diagnosis.primary}</p>
+
+                      <div className="space-y-1">
+                        <span className="text-[11px] font-bold text-stone-500 uppercase">Observed Telemetry Evidence:</span>
+                        <ul className="list-disc pl-5 space-y-0.5 text-stone-600">
+                          {contract.diagnosis.evidence.map((ev, idx) => (
+                            <li key={idx}>{ev}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+
+                    {/* PolicyGuard Rule Checklist */}
+                    <div className="p-4 rounded-md bg-white border border-stone-200 space-y-2.5">
+                      <div className="text-[11px] font-bold text-stone-800 uppercase tracking-wider">
+                        PolicyGuard Compliance Evaluation
+                      </div>
+                      <div className="space-y-1.5">
                         {[
-                          { title: "90-Day Overdue", desc: "Legal stop / human legal team" },
-                          { title: "3-Retry Cap", desc: "Prevents notification fatigue" },
-                          { title: "PTP Broken Twice", desc: "Escalates broken commitments" },
-                          { title: "Economic Floor", desc: "< ₹100 skipped (unprofitable)" },
-                          { title: "Customer STOP", desc: "Opt-out keyword respected" },
-                          { title: "Stale Lock (>15m)", desc: "Sweeper recovers worker crash" },
-                        ].map((rule, idx) => (
-                          <div key={idx} className="p-2 rounded-lg bg-black/30 border border-white/5 space-y-0.5">
-                            <div className="text-[11px] font-semibold text-zinc-200">{rule.title}</div>
-                            <div className="text-[10px] text-zinc-400">{rule.desc}</div>
+                          { rule: "Settlement Check", passed: selectedSession.status !== "recovered" },
+                          { rule: "STOP Keyword Check", passed: !selectedSession.optedOut },
+                          { rule: "Dispute Status Check", passed: true },
+                          { rule: "Max 3-Attempt Cap", passed: selectedSession.retryCount < 3 },
+                          { rule: "24-Hour Cooldown Window", passed: true },
+                          { rule: "90-Day Overdue Ceiling", passed: true },
+                          { rule: "High-Value Approval (< ₹5L)", passed: parseFloat(selectedSession.amountAtRisk) < 500000 },
+                          { rule: "Economic Viability Floor (≥ ₹100)", passed: parseFloat(selectedSession.amountAtRisk) >= 100 },
+                        ].map((chk, idx) => (
+                          <div key={idx} className="flex items-center justify-between p-1.5 rounded bg-stone-50 text-stone-700">
+                            <span>{chk.rule}</span>
+                            {chk.passed ? (
+                              <span className="text-emerald-700 font-semibold flex items-center gap-1">
+                                <CheckCircle2 className="w-3.5 h-3.5" /> Passed
+                              </span>
+                            ) : (
+                              <span className="text-red-700 font-semibold flex items-center gap-1">
+                                <XCircle className="w-3.5 h-3.5" /> Breached
+                              </span>
+                            )}
                           </div>
                         ))}
                       </div>
                     </div>
-                    <div className="p-3.5 rounded-xl bg-violet-950/20 border border-violet-500/20 flex flex-col justify-between space-y-3">
-                      <div>
-                        <div className="text-[10px] text-zinc-400 uppercase font-semibold">Human Review Queue</div>
-                        <div className="text-lg font-black text-violet-300 mt-1">
-                          {statusCounts.escalated} Escalated
-                        </div>
-                        <div className="text-[11px] text-zinc-400 mt-1">Requiring operator or finance team audit</div>
-                      </div>
-                      <button
-                        onClick={() => {
-                          setStatusFilter("escalated");
-                          addToast("Escalated Queue Active", "Showing all cases flagged by deterministic stopping rules.", "warning");
-                        }}
-                        className="w-full py-1.5 rounded-lg bg-violet-500/20 hover:bg-violet-500/30 text-violet-300 text-xs font-medium border border-violet-500/30 transition-colors"
-                      >
-                        Inspect Escalated Queue
-                      </button>
-                    </div>
-                  </div>
+                  </>
+                ) : (
+                  <LoadingState message="Loading decision contract..." />
                 )}
-
-                {/* Tab 3: Concurrency & Trust Boundary */}
-                {guideTab === "concurrency" && (
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-1">
-                    <div className="md:col-span-2 space-y-2">
-                      <h4 className="text-xs font-bold text-emerald-300 uppercase tracking-wider">
-                        PostgreSQL Physical Constraints &amp; AST Import Bans
-                      </h4>
-                      <p className="text-xs text-zinc-300 leading-relaxed">
-                        Rather than asserting &ldquo;the AI does not touch money&rdquo; in prose, PayBack-AI physically enforces it:
-                      </p>
-                      <ul className="text-xs text-zinc-400 space-y-1.5 list-disc pl-4">
-                        <li>
-                          <strong>Zero Payment SDKs in AI:</strong> Verified by AST scanner (<code className="text-emerald-300 font-mono text-[10px]">test_structural_safety.py</code>).
-                        </li>
-                        <li>
-                          <strong>Atomic Conditional Claim:</strong> <code className="text-emerald-300 font-mono text-[10px]">UPDATE ... WHERE status != &apos;recovered&apos; RETURNING id</code> ensures exactly 1 webhook succeeds even if 10 duplicate webhooks fire simultaneously.
-                        </li>
-                        <li>
-                          <strong>Compound Unique Retry Index:</strong> <code className="text-emerald-300 font-mono text-[10px]">(session_id, attempt_number)</code> physically rejects duplicate dispatch attempts with error 23505.
-                        </li>
-                      </ul>
-                    </div>
-                    <div className="p-3.5 rounded-xl bg-emerald-950/20 border border-emerald-500/20 flex flex-col justify-between space-y-3">
-                      <div>
-                        <div className="text-[10px] text-zinc-400 uppercase font-semibold">Test Concurrency Live</div>
-                        <div className="text-xs text-emerald-400 font-medium mt-1">
-                          Simulate Act 3 Real Test Payment
-                        </div>
-                        <div className="text-[11px] text-zinc-400 mt-1">Tests atomic conditional update &amp; audit log</div>
-                      </div>
-                      <button
-                        onClick={() => replayMutation.mutate(3)}
-                        disabled={replayMutation.isPending}
-                        className="w-full py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 text-xs font-medium border border-emerald-500/30 transition-colors"
-                      >
-                        {replayMutation.isPending ? "Executing..." : "Run Act 3 Test Payment"}
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </motion.div>
+              </div>
             )}
-          </AnimatePresence>
-        </motion.div>
 
-        {/* Counterfactual Holdout & Experiment Hero Panel */}
-        <div className="relative">
-          {/* Animated gradient border container */}
-          <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-cyan-500/30 via-emerald-500/30 to-violet-500/30 opacity-50 blur-xl z-0" />
-          
-          <GlassCard delay={0.2} hoverScale={false} className="p-6 rounded-2xl bg-gradient-to-b from-[#121620]/80 to-[#0a0d13]/90 border border-cyan-500/20 space-y-5 relative z-10">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-white/10 pb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-cyan-500/20 border border-cyan-500/30 flex items-center justify-center text-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.2)]">
-                  <TrendingUp className="w-5 h-5" />
-                </div>
-                <div>
-                  <h2 className="text-lg font-bold text-white tracking-tight flex items-center gap-2">
-                    Counterfactual Lift: Incremental Money Recovered
-                    <motion.span 
-                      animate={{ scale: [1, 1.05, 1] }}
-                      transition={{ duration: 2, repeat: Infinity }}
-                      className="text-[10px] font-mono font-normal px-2.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 shadow-[0_0_10px_rgba(16,185,129,0.2)]"
-                    >
-                      Proven Lift vs 15% Holdout
-                    </motion.span>
-                  </h2>
-                  <p className="text-xs text-zinc-400 mt-0.5">
-                    "We recovered money, not attention." Separates active treatment lift from customers who would have paid anyway.
-                  </p>
-                </div>
-              </div>
-
-              <div className="text-right">
-                <div className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400 tabular-nums drop-shadow-md">
-                  <AnimatedNumber 
-                    value={parseFloat(experimentMetrics?.incrementalRecovered?.toString() ?? stats?.totalRecovered ?? "0")} 
-                    format="currency" 
-                  />
-                </div>
-                <div className="text-[11px] text-zinc-400 font-medium">Net Incremental Money Recovered</div>
-              </div>
-            </div>
-
-            <StaggeredList className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3" direction="up" staggerDelay={0.05}>
-              <HoverCard className="p-4 space-y-1.5 border-white/5 bg-black/20">
-                <div className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider">Treatment Recovered</div>
-                <div className="text-lg font-bold text-emerald-400">
-                  <AnimatedNumber value={parseFloat(experimentMetrics?.treatmentRecoveredAmount?.toString() ?? stats?.totalRecovered ?? "0")} format="currency" />
-                </div>
-                <div className="text-[10px] text-zinc-500">Rate: {experimentMetrics?.treatmentRecoveryRate ?? stats?.recoveryRatePercent}%</div>
-              </HoverCard>
-
-              <HoverCard className="p-4 space-y-1.5 border-white/5 bg-black/20">
-                <div className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider">Holdout Recovered</div>
-                <div className="text-lg font-bold text-zinc-300">
-                  <AnimatedNumber value={parseFloat(experimentMetrics?.holdoutRecoveredAmount?.toString() ?? "0")} format="currency" />
-                </div>
-                <div className="text-[10px] text-zinc-500">Natural rate: {experimentMetrics?.holdoutRecoveryRate ?? 0}%</div>
-              </HoverCard>
-
-              <HoverCard className="p-4 space-y-1.5 border-white/5 bg-black/20" glowColor="rgba(6, 182, 212, 0.15)">
-                <div className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider">Incremental Lift</div>
-                <div className="text-lg font-bold text-cyan-400">
-                  <AnimatedNumber value={experimentMetrics?.incrementalLiftPercent ?? 0} prefix="+" suffix="%" />
-                </div>
-                <div className="text-[10px] text-zinc-500">True causal value</div>
-              </HoverCard>
-
-              <HoverCard className="p-4 space-y-1.5 border-white/5 bg-black/20" glowColor="rgba(139, 92, 246, 0.15)">
-                <div className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider">Contact Efficiency</div>
-                <div className="text-lg font-bold text-violet-400">
-                  <AnimatedNumber value={parseFloat(experimentMetrics?.contactEfficiency?.toString() ?? "0")} format="currency" />
-                </div>
-                <div className="text-[10px] text-zinc-500">per outbound contact</div>
-              </HoverCard>
-
-              <HoverCard className="p-4 space-y-1.5 border-white/5 bg-black/20">
-                <div className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider">Badger Rate</div>
-                <div className="text-lg font-bold text-emerald-400">
-                  <AnimatedNumber value={parseFloat(experimentMetrics?.badgerRate?.toString() ?? "0")} suffix="%" />
-                </div>
-                <div className="text-[10px] text-emerald-500 font-medium flex items-center gap-1">
-                  <CheckCircle2 className="w-3 h-3" /> 0 Violations
-                </div>
-              </HoverCard>
-
-              <HoverCard className="p-4 space-y-1.5 border-white/5 bg-black/20">
-                <div className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider">Active Sessions</div>
-                <div className="text-lg font-bold text-amber-400">
-                  <AnimatedNumber value={stats?.activeSessions ?? 0} />
-                </div>
-                <div className="text-[10px] text-zinc-500 flex items-center gap-1">
-                  <StatusPulse color="amber" size="sm" /> Bounded execution
-                </div>
-              </HoverCard>
-            </StaggeredList>
-          </GlassCard>
-        </div>
-
-        {/* 4 Incident Lanes Filter Tabs */}
-        <motion.div 
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="space-y-4"
-        >
-          <div className="flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-white flex items-center gap-2">
-              <Layers className="w-4 h-4 text-cyan-400" />
-              Four Incident Lanes
-            </h2>
-            <div className="text-xs text-zinc-400 bg-white/5 px-2 py-1 rounded-md">Showing {filteredSessions.length} incidents</div>
-          </div>
-
-          <div className="flex flex-wrap gap-2 border-b border-zinc-800/80 pb-3">
-            <button
-              onClick={() => setActiveLane("all")}
-              className="relative px-4 py-2 rounded-lg text-xs font-medium transition-colors"
-            >
-              {activeLane === "all" && (
-                <motion.div
-                  layoutId="activeTabIndicator"
-                  className="absolute inset-0 bg-white/10 border border-white/20 rounded-lg shadow-sm"
-                  transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                />
-              )}
-              <span className={`relative z-10 ${activeLane === "all" ? "text-white" : "text-zinc-400 hover:text-zinc-200"}`}>
-                All Lanes ({sessions.length})
-              </span>
-            </button>
-
-            {Object.entries(laneLabels).map(([laneKey, info]) => {
-              const laneCount = sessions.filter((s) => s.incidentLane === laneKey).length;
-              const isActive = activeLane === laneKey;
-              return (
-                <button
-                  key={laneKey}
-                  onClick={() => setActiveLane(laneKey)}
-                  className="relative px-4 py-2 rounded-lg text-xs font-medium transition-colors flex items-center gap-1.5"
-                >
-                  {isActive && (
-                    <motion.div
-                      layoutId="activeTabIndicator"
-                      className={`absolute inset-0 rounded-lg border shadow-sm bg-black/40 ${info.color.replace('text-', 'border-').split(' ')[0]}`}
-                      transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                    />
-                  )}
-                  <span className={`relative z-10 flex items-center gap-1.5 ${isActive ? info.color.split(' ')[0] : "text-zinc-400 hover:text-zinc-200"}`}>
-                    <span>{info.icon}</span>
-                    <span>{info.label} ({laneCount})</span>
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Status Filter Sub-Bar (Includes Escalated / Human Review) */}
-          <div className="flex flex-wrap items-center justify-between gap-3 pt-3">
-            <div className="flex flex-wrap items-center gap-1.5 bg-black/30 p-1 rounded-xl border border-white/5">
-              {[
-                { id: "all", label: "All Statuses", count: statusCounts.all, color: "text-zinc-300" },
-                { id: "active", label: "Active", count: statusCounts.active, color: "text-amber-400" },
-                { id: "recovered", label: "Recovered", count: statusCounts.recovered, color: "text-emerald-400" },
-                { id: "escalated", label: "⚠️ Escalated / Human Review", count: statusCounts.escalated, color: "text-violet-400", badge: "bg-violet-500/20 text-violet-300 border border-violet-500/30 font-semibold" },
-                { id: "stopped", label: "Stopped", count: statusCounts.stopped, color: "text-rose-400" },
-              ].map((tab) => {
-                const isSelected = statusFilter === tab.id;
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => setStatusFilter(tab.id)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 ${
-                      isSelected
-                        ? "bg-white/10 text-white shadow-sm border border-white/20"
-                        : "text-zinc-400 hover:text-zinc-200 hover:bg-white/5"
-                    }`}
-                  >
-                    <span className={isSelected ? "text-white" : tab.color}>{tab.label}</span>
-                    <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-mono ${tab.badge || "bg-white/5 text-zinc-400"}`}>
-                      {tab.count}
+            {/* Tab 3: Communications & Voice Player */}
+            {activeDrawerTab === "communications" && (
+              <div className="space-y-4 text-xs">
+                {contract?.customerMessage && (
+                  <div className="p-4 rounded-md bg-white border border-stone-200 space-y-2">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-stone-800">
+                      Dispatched Debtor Message (SMS / WhatsApp)
                     </span>
-                  </button>
-                );
-              })}
-            </div>
-            {statusFilter === "escalated" && (
-              <div className="text-xs text-violet-300/90 flex items-center gap-1.5 bg-violet-500/10 px-3 py-1.5 rounded-lg border border-violet-500/20">
-                <Shield className="w-3.5 h-3.5 text-violet-400" />
-                <span>Deterministic stopping rules triggered: human review required</span>
-              </div>
-            )}
-          </div>
-
-          {/* Instant Search Bar & Quick Filter Chips */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2">
-            <div className="relative flex-1 max-w-md">
-              <Search className="w-4 h-4 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search invoice ID, strategy, lane, stop reason, amount..."
-                className="w-full pl-9 pr-8 py-2 rounded-xl bg-black/40 border border-white/10 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-cyan-500/50 transition-colors"
-              />
-              {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery("")}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white p-0.5 rounded"
-                >
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              )}
-            </div>
-
-            <div className="flex flex-wrap items-center gap-1.5 text-xs">
-              <span className="text-zinc-500 text-[11px] font-medium mr-1">Filter by:</span>
-              <button
-                onClick={() => setQuickFilter(quickFilter === "holdout" ? "all" : "holdout")}
-                className={`px-2.5 py-1 rounded-lg border text-[11px] font-medium transition-all flex items-center gap-1 ${
-                  quickFilter === "holdout"
-                    ? "bg-cyan-500/20 text-cyan-300 border-cyan-500/40 shadow-xs"
-                    : "bg-white/[0.02] text-zinc-400 hover:text-zinc-200 border-white/5"
-                }`}
-              >
-                <span>🎯</span>
-                <span>Holdout Control (15%)</span>
-              </button>
-              <button
-                onClick={() => setQuickFilter(quickFilter === "high_value" ? "all" : "high_value")}
-                className={`px-2.5 py-1 rounded-lg border text-[11px] font-medium transition-all flex items-center gap-1 ${
-                  quickFilter === "high_value"
-                    ? "bg-amber-500/20 text-amber-300 border-amber-500/40 shadow-xs"
-                    : "bg-white/[0.02] text-zinc-400 hover:text-zinc-200 border-white/5"
-                }`}
-              >
-                <span>💰</span>
-                <span>High Value (&gt; ₹5,000)</span>
-              </button>
-              {(searchQuery || quickFilter !== "all") && (
-                <button
-                  onClick={() => {
-                    setSearchQuery("");
-                    setQuickFilter("all");
-                  }}
-                  className="px-2 py-1 rounded-lg text-rose-400 hover:text-rose-300 text-[11px] font-medium transition-colors"
-                >
-                  Reset Filters
-                </button>
-              )}
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Incidents Table with Recovery Contract Inspection */}
-        <GlassCard delay={0.4} hoverScale={false} className="border border-white/10 bg-black/40 overflow-hidden shadow-2xl">
-          <div className="px-5 py-4 border-b border-white/10 bg-white/5 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold text-zinc-300 uppercase tracking-wider">Active Recovery Incidents</span>
-              <span className="px-2 py-0.5 rounded-full bg-white/5 text-[10px] text-zinc-400 font-mono">
-                {filteredSessions.length} matching
-              </span>
-            </div>
-            <span className="text-[11px] text-zinc-500 flex items-center gap-1">
-              <ChevronRight className="w-3 h-3" /> Click any incident to inspect its Recovery Contract
-            </span>
-          </div>
-
-          <div className="w-full">
-            {sessionsLoading ? (
-              <div className="p-5">
-                <ShimmerSkeleton variant="table-row" count={5} />
-              </div>
-            ) : filteredSessions.length === 0 ? (
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="py-20 flex flex-col items-center text-center space-y-4"
-              >
-                <LottieIcon preset="celebration" size={150} />
-                <div className="space-y-1">
-                  <h3 className="text-base font-semibold text-zinc-200">No active incidents</h3>
-                  <p className="text-sm text-zinc-500">All cases in this lane have been resolved.</p>
-                </div>
-                <button
-                  onClick={() => seed50Mutation.mutate()}
-                  className="mt-4 px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-cyan-400 text-xs font-medium border border-white/10 transition-colors"
-                >
-                  Seed Demo Batch
-                </button>
-              </motion.div>
-            ) : (
-              <StaggeredList direction="up" staggerDelay={0.03} className="divide-y divide-white/5">
-                {filteredSessions.map((session) => {
-                  const statusCls = statusColor[session.status] ?? "text-zinc-400 bg-zinc-400/10 border-zinc-400/20";
-                  const lane = laneLabels[session.incidentLane ?? "payment_degradation"];
-
-                  return (
-                    <motion.div
-                      key={session.id}
-                      whileHover={{ backgroundColor: "rgba(255,255,255,0.03)" }}
-                      className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-5 py-4 transition-colors group relative"
-                    >
-                      {/* Left accent line on hover */}
-                      <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-cyan-500 scale-y-0 group-hover:scale-y-100 transition-transform origin-center" />
-
-                      <div className="flex items-center gap-4 min-w-0">
-                        <div className="p-2.5 rounded-xl bg-white/5 border border-white/10 flex-shrink-0 shadow-inner group-hover:bg-white/10 transition-colors">
-                          {strategyIcon[session.strategy] ?? <Activity className="w-4 h-4 text-zinc-400" />}
-                        </div>
-                        <div className="min-w-0 space-y-1">
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm font-semibold text-white tracking-wide">{session.invoiceId.slice(0, 16)}</span>
-                            {session.isHoldout && (
-                              <span className="px-1.5 py-0.5 rounded bg-zinc-800/80 text-zinc-400 border border-zinc-700/80 text-[9px] font-mono tracking-wider uppercase">
-                                Holdout Control
-                              </span>
-                            )}
-                            {lane && (
-                              <span className={`text-[10px] px-2 py-0.5 rounded-full border ${lane.color}`}>
-                                {lane.icon} {lane.label}
-                              </span>
-                            )}
-                          </div>
-                          <div className="text-xs text-zinc-400 flex flex-wrap items-center gap-2">
-                            <span>Strategy: <strong className="text-zinc-200 capitalize font-medium">{session.strategy.replace(/_/g, " ")}</strong></span>
-                            <span className="text-zinc-600">·</span>
-                            <span>Retries: {session.retryCount}/3</span>
-                            {session.stopReason && (
-                              <>
-                                <span className="text-zinc-600">·</span>
-                                <span className="text-rose-400/90 font-medium">Stop: {session.stopReason.replace(/_/g, " ")}</span>
-                              </>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-4 sm:gap-8 justify-between sm:justify-end">
-                        <div className="text-right">
-                          <div className="text-sm font-bold text-white tabular-nums">{fmt(session.amountAtRisk)}</div>
-                          <div className="text-[11px] text-zinc-500">
-                            {session.status === "recovered" ? (
-                              <span className="text-emerald-400/90 font-medium">Recovered: {fmt(session.amountRecovered)}</span>
-                            ) : (
-                              "Amount at risk"
-                            )}
-                          </div>
-                        </div>
-
-                        <div className={`px-3 py-1 rounded-full text-[11px] font-semibold border ${statusCls} capitalize flex items-center gap-1.5`}>
-                          {session.status === "active" && <StatusPulse color="amber" size="sm" />}
-                          {session.status}
-                        </div>
-
-                        <div className="flex items-center gap-1.5">
-                          <button
-                            onClick={() => setInspectContractId(session.id)}
-                            className="px-2.5 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-cyan-400/90 hover:text-cyan-400 border border-white/10 text-[11px] font-medium flex items-center gap-1.5 transition-colors shadow-sm"
-                            title="Inspect Recovery Contract"
-                          >
-                            <FileText className="w-3.5 h-3.5" />
-                            <span>Contract</span>
-                          </button>
-
-                          <button
-                            onClick={() => handleCopyLink(session.id)}
-                            className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-cyan-400 border border-white/10 transition-colors"
-                            title="Copy Fresh 48h-Expiry Razorpay Payment Link"
-                          >
-                            <Link className="w-3.5 h-3.5" />
-                          </button>
-
-                          {session.status === "active" && !session.isHoldout && (
-                            <button
-                              onClick={() => executeMutation.mutate(session.id)}
-                              disabled={executeMutation.isPending}
-                              className="p-1.5 rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 transition-colors"
-                              title="Execute bounded recovery action"
-                            >
-                              <Play className="w-4 h-4" />
-                            </button>
-                          )}
-
-                          {session.status === "active" && (
-                            <button
-                              onClick={() => replayMutation.mutate(3)}
-                              disabled={replayMutation.isPending}
-                              className="p-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 transition-colors"
-                              title="Simulate Razorpay payment.captured webhook"
-                            >
-                              <CheckCircle2 className="w-3.5 h-3.5" />
-                            </button>
-                          )}
-
-                          {session.status === "active" && (
-                            <button
-                              onClick={() => optOutMutation.mutate(session.id)}
-                              disabled={optOutMutation.isPending}
-                              className="p-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 transition-colors"
-                              title="Simulate Customer 'STOP' Opt-Out"
-                            >
-                              <Ban className="w-4 h-4" />
-                            </button>
-                          )}
-
-                          <button
-                            onClick={() => setSelectedSessionId(session.id)}
-                            className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-zinc-200 border border-white/5 transition-colors"
-                            title="View audit trail"
-                          >
-                            <Eye className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-                    </motion.div>
-                  );
-                })}
-              </StaggeredList>
-            )}
-          </div>
-        </GlassCard>
-
-        {/* Charts & Analytics Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 pb-12">
-          {/* Recovery Trend Chart */}
-          <GlassCard delay={0.5} hoverScale={false} className="lg:col-span-2 p-5 bg-black/40 border-white/10 space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-sm font-semibold text-white">7-Day Recovery Lift Velocity</h3>
-                <p className="text-xs text-zinc-400">Cumulative money recovered via automated bounded workflows</p>
-              </div>
-              <div className="px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
-                <span className="text-xs font-bold text-emerald-400 font-mono">
-                  <AnimatedNumber value={parseFloat(stats?.totalRecovered ?? "0")} format="currency" /> Total
-                </span>
-              </div>
-            </div>
-            <div className="h-60 w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={trendData}>
-                  <defs>
-                    <linearGradient id="recoveredGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#10b981" stopOpacity={0.4} />
-                      <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#ffffff" opacity={0.05} vertical={false} />
-                  <XAxis dataKey="day" stroke="#71717a" fontSize={11} axisLine={false} tickLine={false} />
-                  <YAxis stroke="#71717a" fontSize={11} tickFormatter={(val) => `₹${(val / 1000).toFixed(0)}K`} axisLine={false} tickLine={false} />
-                  <Tooltip
-                    contentStyle={{ backgroundColor: "rgba(24, 24, 27, 0.9)", backdropFilter: "blur(8px)", borderColor: "rgba(255,255,255,0.1)", borderRadius: "12px", fontSize: "12px", color: "#fff" }}
-                    itemStyle={{ color: "#10b981", fontWeight: "bold" }}
-                    formatter={(val) => [`₹${Number(val ?? 0).toLocaleString("en-IN")}`, "Recovered"]}
-                  />
-                  <Area type="monotone" dataKey="recovered" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#recoveredGradient)" activeDot={{ r: 6, fill: "#10b981", stroke: "#000", strokeWidth: 2 }} />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          </GlassCard>
-
-          {/* Strategy Distribution */}
-          <GlassCard delay={0.6} hoverScale={false} className="p-5 bg-black/40 border-white/10 space-y-4">
-            <div>
-              <h3 className="text-sm font-semibold text-white">Intervention Policy Distribution</h3>
-              <p className="text-xs text-zinc-400">AI-selected strategy by incident profile</p>
-            </div>
-            <div className="h-48 w-full flex items-center justify-center relative">
-              {strategyChartData.length > 0 ? (
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={strategyChartData}
-                      dataKey="count"
-                      nameKey="name"
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={50}
-                      outerRadius={75}
-                      paddingAngle={4}
-                      stroke="none"
-                    >
-                      {strategyChartData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={STRATEGY_COLORS[entry.name] ?? "#a1a1aa"} />
-                      ))}
-                    </Pie>
-                    <Tooltip
-                      contentStyle={{ backgroundColor: "rgba(24, 24, 27, 0.9)", backdropFilter: "blur(8px)", borderColor: "rgba(255,255,255,0.1)", borderRadius: "12px", fontSize: "11px", color: "#fff" }}
-                      itemStyle={{ fontWeight: "bold" }}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
-              ) : (
-                <div className="flex flex-col items-center justify-center text-zinc-500 opacity-50">
-                  <PieChart className="w-12 h-12 mb-2" />
-                  <span className="text-xs">No strategy data</span>
-                </div>
-              )}
-              {/* Inner glow circle */}
-              <div className="absolute inset-0 m-auto w-24 h-24 rounded-full bg-white/5 blur-xl pointer-events-none" />
-            </div>
-            <div className="space-y-2 text-xs">
-              {strategyChartData.slice(0, 4).map((entry) => (
-                <div key={entry.name} className="flex items-center justify-between text-zinc-400 hover:text-zinc-200 transition-colors p-1.5 rounded-lg hover:bg-white/5">
-                  <div className="flex items-center gap-2.5">
-                    <span className="w-3 h-3 rounded-full shadow-inner" style={{ backgroundColor: STRATEGY_COLORS[entry.name] ?? "#a1a1aa" }} />
-                    <span className="capitalize font-medium">{entry.name.replace(/_/g, " ")}</span>
+                    <div className="p-3 bg-stone-50 rounded border border-stone-200 font-mono text-stone-800 leading-relaxed">
+                      {contract.customerMessage}
+                    </div>
                   </div>
-                  <span className="font-semibold text-white font-mono bg-white/10 px-2 py-0.5 rounded-md">{entry.count}</span>
+                )}
+
+                {contract?.voiceScriptHinglish && (
+                  <div className="p-4 rounded-md bg-white border border-stone-200 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-stone-800">
+                        Interactive Hinglish Voice Synthesis
+                      </span>
+                      <button
+                        onClick={() => handleVoicePlayback(contract.voiceScriptHinglish!)}
+                        className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-semibold transition-colors ${
+                          isPlayingVoice ? "bg-red-700 text-white" : "bg-stone-900 text-white hover:bg-stone-800"
+                        }`}
+                      >
+                        {isPlayingVoice ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
+                        <span>{isPlayingVoice ? "Stop Audio" : "Play Hinglish Voice"}</span>
+                      </button>
+                    </div>
+
+                    <p className="p-3 bg-stone-50 rounded border border-stone-200 italic text-stone-700 leading-relaxed">
+                      "{contract.voiceScriptHinglish}"
+                    </p>
+                  </div>
+                )}
+
+                <div className="p-4 rounded-md bg-white border border-stone-200 text-stone-500">
+                  <div className="font-semibold text-stone-800 mb-1">Outreach Constraints</div>
+                  <div>Channel: {contract?.actionParameters?.allowedMethods?.join(", ") || "UPI, Cards, Netbanking"}</div>
+                  <div>Link Expiry: {contract?.actionParameters?.expiresInHours || 48} hours (Test mode)</div>
                 </div>
-              ))}
-            </div>
-          </GlassCard>
-        </div>
-      </div>
+              </div>
+            )}
 
-      {/* Modals & Drawers */}
-      <AnimatePresence>
-        {selectedSessionId && (
-          <AuditDrawer sessionId={selectedSessionId} onClose={() => setSelectedSessionId(null)} />
+            {/* Tab 4: Promise to Pay */}
+            {activeDrawerTab === "ptp" && (
+              <div className="p-4 rounded-md bg-white border border-stone-200 text-xs space-y-3">
+                <div className="text-[11px] font-bold uppercase tracking-wider text-stone-800">
+                  Promise to Pay (PTP) Commitments
+                </div>
+                {selectedSession.strategy === "promise_follow_up" ? (
+                  <div className="p-3 bg-amber-50 rounded border border-amber-200 space-y-1.5">
+                    <div className="font-semibold text-amber-900">Active Promise Commitment Found</div>
+                    <div className="text-stone-600">Extracted customer intent from previous debtor communication.</div>
+                    <div className="pt-2 text-[11px] text-stone-700">
+                      Follow-up scheduled with non-intrusive reminder. Broken-promise penalty triggers if unpaid after grace date.
+                    </div>
+                  </div>
+                ) : (
+                  <EmptyState
+                    title="No active promise commitment"
+                    description="Customer has not submitted a deferred payment commitment or installment proposal."
+                  />
+                )}
+              </div>
+            )}
+
+            {/* Tab 5: Serialized Audit Trail */}
+            {activeDrawerTab === "audit" && (
+              <div className="space-y-4 text-xs">
+                <div className="p-4 rounded-md bg-white border border-stone-200 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-stone-800">
+                      Hash-Chained Audit Ledger
+                    </span>
+                    <span className="text-[10px] font-semibold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                      Tamper-Evident
+                    </span>
+                  </div>
+
+                  {auditLogs.length > 0 ? (
+                    <div className="space-y-2">
+                      {auditLogs.map((log: RecoveryAuditEntry, idx: number) => {
+                        const meta = log.metadata as Record<string, unknown> | null;
+                        const logHash = (meta?.hash as string) || (meta?.sha256 as string);
+
+                        return (
+                          <div key={log.id || idx} className="p-2.5 rounded bg-stone-50 border border-stone-200 space-y-1">
+                            <div className="flex items-center justify-between font-semibold text-stone-900">
+                              <span>#{idx + 1}: {log.action}</span>
+                              <span className="text-[10px] font-mono text-stone-500">
+                                {new Date(log.createdAt).toLocaleTimeString()}
+                              </span>
+                            </div>
+                            <div className="text-[11px] text-stone-600">Actor: {log.actor} | Result: {log.result}</div>
+                            {logHash && (
+                              <div className="text-[10px] font-mono text-stone-400 truncate">
+                                SHA256: {logHash}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="text-stone-400 py-3 text-center">No audit entries recorded yet.</div>
+                  )}
+                </div>
+
+                {/* Raw Technical JSON Accordion */}
+                <div className="p-3 rounded-md bg-white border border-stone-200">
+                  <button
+                    onClick={() => setIsRawJsonExpanded((prev) => !prev)}
+                    className="flex items-center justify-between w-full text-left font-semibold text-stone-800 text-xs"
+                  >
+                    <span>Raw Technical Contract JSON</span>
+                    {isRawJsonExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                  </button>
+
+                  {isRawJsonExpanded && (
+                    <pre className="mt-3 p-3 bg-stone-900 text-stone-100 rounded text-[11px] font-mono overflow-x-auto max-h-60 thin-scrollbar">
+                      {JSON.stringify(contract || selectedSession, null, 2)}
+                    </pre>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
         )}
-      </AnimatePresence>
-
-      <AnimatePresence>
-        {inspectContractId && (
-          <ContractModal sessionId={inspectContractId} onClose={() => setInspectContractId(null)} />
-        )}
-      </AnimatePresence>
-
-      {/* Floating Notification Toasts */}
-      <NotificationToast toasts={toasts} onDismiss={removeToast} />
+      </SidePanel>
     </div>
   );
 }

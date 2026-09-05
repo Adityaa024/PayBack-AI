@@ -1,20 +1,25 @@
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import { AppLayout } from "./layouts/AppLayout";
-import { Dashboard } from "./pages/Dashboard";
-import { Login } from "./pages/Login";
-import { Register } from "./pages/Register";
-import { ForgotPassword } from "./pages/ForgotPassword";
+import { PortfolioOverview } from "./pages/PortfolioOverview";
+import { RecoveryDashboard } from "./pages/RecoveryDashboard";
+import { Customers } from "./pages/Customers";
 import { Invoices } from "./pages/Invoices";
 import { InvoiceDetail } from "./pages/InvoiceDetail";
 import { Agent } from "./pages/Agent";
+import { DLQ } from "./pages/DLQ";
+import { WorkflowsPolicy } from "./pages/WorkflowsPolicy";
 import { Analytics } from "./pages/Analytics";
+import { AuditTrustCenter } from "./pages/AuditTrustCenter";
 import { Settings } from "./pages/Settings";
 import { ActivityLog } from "./pages/ActivityLog";
 import { Disputes } from "./pages/Disputes";
 import { PaymentPlans } from "./pages/PaymentPlans";
 import { AcceptInvitation } from "./pages/AcceptInvitation";
 import { DebtorPortal } from "./pages/DebtorPortal";
-import { RecoveryDashboard } from "./pages/RecoveryDashboard";
+import { Dashboard } from "./pages/Dashboard";
+import { Login } from "./pages/Login";
+import { Register } from "./pages/Register";
+import { ForgotPassword } from "./pages/ForgotPassword";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 
 function App() {
@@ -27,22 +32,42 @@ function App() {
       <Route path="/invite" element={<AcceptInvitation />} />
       <Route path="/i/:token" element={<DebtorPortal />} />
 
-
       {/* Protected Routes */}
       <Route element={<ProtectedRoute />}>
         <Route element={<AppLayout />}>
-          <Route path="/" element={<Navigate to="/recovery" replace />} />
-          <Route path="/recovery" element={<RecoveryDashboard />} />
+          {/* 1. Portfolio Overview */}
+          <Route path="/" element={<PortfolioOverview />} />
+          <Route path="/overview" element={<PortfolioOverview />} />
           <Route path="/dashboard" element={<Dashboard />} />
+
+          {/* 2. Recovery Queue */}
+          <Route path="/recovery" element={<RecoveryDashboard />} />
+
+          {/* 3. Customers */}
+          <Route path="/customers" element={<Customers />} />
+
+          {/* 4. Invoices */}
           <Route path="/invoices" element={<Invoices />} />
           <Route path="/invoices/:id/trashed" element={<InvoiceDetail />} />
           <Route path="/invoices/:id" element={<InvoiceDetail />} />
+
+          {/* 5. Automation */}
           <Route path="/agent" element={<Agent />} />
+          <Route path="/dlq" element={<DLQ />} />
+
+          {/* 6. Workflows & Policy */}
+          <Route path="/workflows" element={<WorkflowsPolicy />} />
+          <Route path="/policy" element={<WorkflowsPolicy />} />
+
+          {/* 7. Analytics */}
           <Route path="/analytics" element={<Analytics />} />
-          <Route path="/recovery" element={<RecoveryDashboard />} />
-          
+
+          {/* 8. Audit & Trust Center */}
+          <Route path="/audit" element={<AuditTrustCenter />} />
+          <Route path="/trust" element={<AuditTrustCenter />} />
+
+          {/* Role-Guarded Subsystems */}
           <Route element={<ProtectedRoute allowedRoles={['admin', 'manager']} />}>
-            <Route path="/dlq" element={<Navigate to="/agent?tab=dlq" replace />} />
             <Route path="/disputes" element={<Disputes />} />
             <Route path="/payment-plans" element={<PaymentPlans />} />
             <Route path="/settings" element={<Settings />} />

@@ -182,8 +182,8 @@ export const recoveryService = {
     return data;
   },
 
-  async replayScenario(actNumber: 1 | 2 | 3 | 4 | 5): Promise<any> {
-    const { data } = await api.post<any>('/recovery/scenarios/replay', { actNumber });
+  async replayScenario(actNumber: 1 | 2 | 3 | 4 | 5): Promise<Record<string, unknown>> {
+    const { data } = await api.post<Record<string, unknown>>('/recovery/scenarios/replay', { actNumber });
     return data;
   },
 

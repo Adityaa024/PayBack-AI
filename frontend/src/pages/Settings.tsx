@@ -1081,7 +1081,7 @@ function CustomizationSettings() {
                       await recoveryService.resetDemo();
                       alert('Demo data has been successfully reset. Refreshing dashboard.');
                       window.location.reload();
-                    } catch (e) {
+                    } catch {
                       alert('Failed to reset demo data.');
                     }
                   }

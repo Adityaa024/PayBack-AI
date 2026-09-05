@@ -44,9 +44,11 @@ export function CommandPalette({ isOpen, onClose, onTriggerAction }: CommandPale
 
   useEffect(() => {
     if (isOpen) {
-      setTimeout(() => inputRef.current?.focus(), 50);
-      setSelectedIndex(0);
-      setQuery("");
+      setTimeout(() => {
+        inputRef.current?.focus();
+        setSelectedIndex(0);
+        setQuery("");
+      }, 50);
     }
   }, [isOpen]);
 
