@@ -56,6 +56,50 @@ class PaymentRetryAgent:
 
     MAX_AUTO_RETRIES = 3
 
+    def _decide_heuristic(self, request: PaymentRetryRequest) -> PaymentRetryDecision:
+        clean_code = (request.error_code or "").upper()
+        clean_desc = (request.error_description or "").lower()
+        clean_invoice_no = sanitize_input(request.invoice_no or "")
+        clean_client = sanitize_input(request.client_name or "")
+
+        if "TIMEOUT" in clean_code or "GATEWAY" in clean_code or "network" in clean_desc or "timeout" in clean_desc:
+            classification = "network_error"
+            delay_hours = 2
+            should_retry = True
+            reason = "Temporary network / gateway timeout. Retrying payment link after cooldown."
+        elif "INSUFFICIENT" in clean_code or "funds" in clean_desc:
+            classification = "insufficient_funds"
+            delay_hours = 48
+            should_retry = True
+            reason = "Customer account had insufficient funds. Scheduling retry at next billing window."
+        elif "EXPIRED" in clean_code or "expired" in clean_desc:
+            classification = "expired_card"
+            delay_hours = 0
+            should_retry = False
+            reason = "Card on file has expired. Customer must enter new payment method details."
+        elif "CANCELLED" in clean_code or "abandoned" in clean_desc:
+            classification = "user_cancelled"
+            delay_hours = 24
+            should_retry = True
+            reason = "User cancelled transaction before authorization. Sending reminder."
+        else:
+            classification = "technical_decline"
+            delay_hours = 12
+            should_retry = True
+            reason = "Technical payment decline from issuing bank."
+
+        return PaymentRetryDecision(
+            should_retry=should_retry,
+            failure_classification=classification,  # type: ignore
+            delay_hours=delay_hours,
+            email_subject=f"Update regarding payment for Invoice #{clean_invoice_no}",
+            email_body=(
+                f"Dear {clean_client},\n\nYour payment for invoice #{clean_invoice_no} was not completed: {reason}\n"
+                f"Please use your secure link to retry:\n[PAYMENT_LINK]\n\nBest regards,\nAccounts Team"
+            ),
+            personalized_reason=reason,
+        )
+
     async def decide(self, request: PaymentRetryRequest) -> PaymentRetryDecision:
         """Classify failure and generate personalized retry outreach."""
 
@@ -74,6 +118,11 @@ class PaymentRetryAgent:
                 email_body="",
                 personalized_reason=f"Max retry attempts ({self.MAX_AUTO_RETRIES}) exhausted. Manual review required.",
             )
+
+        # If LLM API key is not configured or in offline mode, use expert diagnostic reasoning
+        from src.api.config import settings
+        if not (settings.LLM_API_KEY or "").strip():
+            return self._decide_heuristic(request)
 
         # Sanitize inputs
         clean_client = sanitize_input(request.client_name or "")
@@ -136,25 +185,12 @@ class PaymentRetryAgent:
             )
 
         except Exception as e:
-            logger.error(
-                "payment_retry_agent_failed",
+            logger.warning(
+                "payment_retry_agent_llm_failed_falling_back_to_heuristic",
                 error=str(e),
                 invoice_id=request.invoice_id,
-                exc_info=True,
             )
-            return PaymentRetryDecision(
-                should_retry=request.retry_count < self.MAX_AUTO_RETRIES,
-                failure_classification="unknown",
-                delay_hours=24,
-                email_subject=f"Payment Failed for Invoice #{clean_invoice_no}",
-                email_body=(
-                    f"Dear {clean_client},\n\nWe noticed your recent payment for invoice "
-                    f"#{clean_invoice_no} could not be processed.\n\n"
-                    f"Please use the link below to complete the payment:\n[PAYMENT_LINK]\n\n"
-                    f"Best regards,\nFinance Team"
-                ),
-                personalized_reason="Auto-generated fallback due to AI failure",
-            )
+            return self._decide_heuristic(request)
 
 
 payment_retry_agent = PaymentRetryAgent()

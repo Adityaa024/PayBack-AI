@@ -87,6 +87,18 @@ class MandateSequencerAgent:
 
         # Only plan remaining slots
         remaining_attempts = self.MAX_MANDATE_RETRIES - request.previous_failures
+
+        # If LLM API key is not configured or in offline mode, use expert sequence reasoning
+        from src.api.config import settings
+        if not (settings.LLM_API_KEY or "").strip():
+            return MandateRetryPlan(
+                should_sequence=True,
+                stop_reason=None,
+                retry_slots=self.DEFAULT_RETRY_SLOTS[:remaining_attempts],
+                escalation_after_all_failed="human_review",
+                reasoning="Automated mandate recovery sequence configured with graduated tone escalation (warm -> firm -> serious).",
+            )
+
         clean_client = sanitize_input(request.client_name or "")
         clean_failure_reason = sanitize_input(request.failure_reason or "Unknown")
 

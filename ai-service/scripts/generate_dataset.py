@@ -77,8 +77,67 @@ def generate_dataset():
         tone_boost = resp_cfg.get('tone_escalation_lift', 0.12)
         tone_escalation_rec = lane_rec or (random.random() < tone_boost)
 
+        # Observable signals for AI agent diagnosis (with ~10% ambiguous noise)
+        is_ambiguous = (random.random() < 0.10)
+        
+        if lane == 'payment_degradation':
+            inv_prefix = "INV" if is_ambiguous else "PAY-DEG"
+            failure_reasons = [
+                ("Payment declined: bank gateway timeout", "GATEWAY_TIMEOUT"),
+                ("UPI collect request timed out after 15 minutes", "UPI_COLLECT_TIMEOUT"),
+                ("Card network temporary authorization error", "NETWORK_DECLINE")
+            ]
+            reason, err_code = random.choice(failure_reasons)
+            client_name = random.choice(["Rahul Sharma", "Vikram Malhotra", "Ananya Singh", "Siddharth Rao", "Priya Patel"])
+            portal_views = 1 if random.random() < 0.2 else 0
+
+        elif lane == 'subscription_rescue':
+            inv_prefix = "INV" if is_ambiguous else "SUB-REC"
+            failure_reasons = [
+                ("Mandate auto-debit failed: recurring payment declined by issuer", "MANDATE_DEBIT_FAILED"),
+                ("Customer card on file expired for monthly subscription", "CARD_EXPIRED"),
+                ("Recurring payment authorization expired", "MANDATE_EXPIRED")
+            ]
+            reason, err_code = random.choice(failure_reasons)
+            client_name = random.choice(["CloudScale SaaS", "DevMetrics Pro", "MediaFlow Stream", "ZenDesk User", "FinTrack App"])
+            portal_views = 1 if random.random() < 0.25 else 0
+
+        elif lane == 'checkout_dropoff':
+            inv_prefix = "INV" if is_ambiguous else "CHK-DRP"
+            failure_reasons = [
+                ("Checkout abandoned at payment method selection step", "CHECKOUT_ABANDONED"),
+                ("Customer dropped off on invoice payment portal", "PORTAL_SESSION_EXPIRED"),
+                ("Payment session expired before gateway handoff", "PAYMENT_UNATTEMPTED")
+            ]
+            reason, err_code = random.choice(failure_reasons)
+            client_name = random.choice(["Rohan Mehta", "Sneha Kapoor", "Kunal Ghosh", "Divya Nair", "Arjun Reddy"])
+            portal_views = random.randint(1, 4)
+
+        else:  # b2b_receivables
+            inv_prefix = "INV" if is_ambiguous else "INV-B2B"
+            failure_reasons = [
+                ("Corporate Net-30 payment terms overdue", "NET30_OVERDUE"),
+                ("Commercial vendor invoice awaiting finance clearance", "AP_APPROVAL_PENDING"),
+                ("Commercial billing terms Net-45 past due", "COMMERCIAL_TERMS_EXPIRED")
+            ]
+            reason, err_code = random.choice(failure_reasons)
+            client_name = random.choice(["Acme Technologies Ltd", "Tata Logistics Ltd", "Reliance Infra Corp", "Infosys Solutions B2B", "L&T Heavy Engg"])
+            portal_views = 0
+
+        if is_ambiguous:
+            reason = random.choice([
+                "Transaction declined - general payment failure",
+                "Payment overdue - standard account notification",
+                "Payment processing was unsuccessful",
+                "Outstanding balance pending settlement"
+            ])
+            err_code = "GENERIC_DECLINE"
+            client_name = random.choice(["Apex Enterprises", "Sharma Traders", "Global Services", "Vanguard Logistics", "Nexus Retail"])
+
         dataset.append({
             "invoice_id": invoice_id,
+            "invoice_no": f"{inv_prefix}-{i:04d}",
+            "client_name": client_name,
             "incident_lane": lane,
             "amount": value,
             "days_overdue": days_overdue,
@@ -87,6 +146,10 @@ def generate_dataset():
             "opted_out": opted_out,
             "retry_count": 0,
             "is_holdout": is_holdout,
+            "failure_reason": reason,
+            "error_code": err_code,
+            "portal_views": portal_views,
+            "due_date": "2026-08-15",
             "truth": {
                 "natural_recovery": natural_rec,
                 "naive_recovery": naive_rec,

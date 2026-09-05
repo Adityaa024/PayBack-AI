@@ -145,9 +145,9 @@ def main():
         orc = eval_summary.get('oracle_ceiling', {})
 
         print(f"  * Oracle Ceiling (Max Realizable): INR {orc.get('amount', 0):,.2f} ({orc.get('ceiling_percent_of_failed_value', 0)}% of total debt)")
-        print(f"  * Control (Baseline):             Gross Recovered INR {ctrl.get('recovered', 0):,.2f} (Cost: INR 0.00)")
+        print(f"  * Control (Baseline - 0 Action):   Recovered INR {ctrl.get('recovered', 0):,.2f} ({ctrl.get('recovery_rate_total_pct', 0)}% of debt)")
         print(f"  * Naive Baseline:                 Incremental Lift INR {naive.get('incremental', 0):,.2f} (Contacts: {naive.get('contacts', 0)}, Eff: {naive.get('oracle_efficiency_pct', 0)}%)")
-        print(f"  * PayBack-AI Agent (PolicyGuard): Incremental Lift INR {ai.get('incremental', 0):,.2f} (Contacts: {ai.get('contacts', 0)}, Eff: {ai.get('oracle_efficiency_pct', 0)}%)")
+        print(f"  * PayBack-AI Multi-Agent:        Incremental Lift INR {ai.get('incremental', 0):,.2f} (Contacts: {ai.get('contacts', 0)}, Eff: {ai.get('oracle_efficiency_pct', 0)}%, Diag Acc: {ai.get('diagnostic_accuracy_pct', 0)}%)")
 
     if failed_steps:
         print(f"\n[FAILED] Verification failed on {len(failed_steps)} step(s).")

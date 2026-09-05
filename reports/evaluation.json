@@ -1,58 +1,62 @@
 {
   "oracle_ceiling": {
-    "amount": 945618.25,
-    "recoverable_cases": 431,
-    "ceiling_percent_of_failed_value": 53.48,
+    "amount": 946436.57,
+    "recoverable_cases": 429,
+    "ceiling_percent_of_failed_value": 52.89,
     "harness_self_check": "PASSED (100.00% exact match)"
   },
   "control": {
-    "eligible": 433602.18,
-    "recovered": 89738.34,
-    "recovery_rate_total_pct": 20.7,
+    "eligible": 432459.06,
+    "recovered": 72593.34,
+    "recovery_rate_total_pct": 16.79,
     "contacts": 0,
     "cost": 0,
-    "net": 89738.34
+    "net": 72593.34
   },
   "naive": {
-    "eligible": 1768306.45,
-    "recovered": 547408.29,
-    "recovery_rate_total_pct": 30.96,
-    "oracle_efficiency_pct": 57.89,
+    "eligible": 1789506.44,
+    "recovered": 580433.37,
+    "recovery_rate_total_pct": 32.44,
+    "oracle_efficiency_pct": 61.33,
     "contacts": 811,
     "cost": 1216.5,
-    "net": 546191.79,
-    "incremental": 180222.95
+    "net": 579216.87,
+    "incremental": 278827.17
   },
   "ai": {
-    "eligible": 1768306.45,
-    "recovered": 945618.25,
-    "recovery_rate_total_pct": 53.48,
-    "oracle_efficiency_pct": 100,
-    "contacts": 1002,
-    "cost": 1503,
-    "net": 944115.25,
-    "incremental": 578146.41,
+    "eligible": 1789506.44,
+    "recovered": 922480.72,
+    "recovery_rate_total_pct": 51.55,
+    "oracle_efficiency_pct": 97.47,
+    "diagnostic_accuracy_pct": 85.2,
+    "correct_diagnoses": 691,
+    "total_cases_evaluated": 811,
+    "contacts": 956,
+    "cost": 1434,
+    "net": 921046.72,
+    "incremental": 620657.02,
     "policy_enforcement_telemetry": {
       "holdout_suppressed": 189,
-      "legal_stop_90_days": 64,
-      "customer_opted_out": 19,
-      "active_dispute_frozen": 17,
-      "ptp_broken_twice": 23,
-      "economic_floor_violation": 5,
+      "legal_stop_90_days": 74,
+      "customer_opted_out": 16,
+      "active_dispute_frozen": 19,
+      "ptp_broken_twice": 33,
+      "economic_floor_violation": 10,
       "high_value_human_approval": 0,
-      "payment_captured_first_touch": 364,
-      "payment_captured_escalated_touch": 43,
-      "max_attempts_reached": 276
+      "payment_captured_first_touch": 362,
+      "payment_captured_escalated_touch": 35,
+      "max_attempts_reached": 262,
+      "misdiagnosis_suppressed_yield": 36
     }
   },
   "oracle": {
-    "eligible": 1768306.45,
-    "recovered": 945618.25,
-    "recovery_rate_total_pct": 53.48,
+    "eligible": 1789506.44,
+    "recovered": 946436.57,
+    "recovery_rate_total_pct": 52.89,
     "oracle_efficiency_pct": 100,
-    "contacts": 321,
-    "cost": 481.5,
-    "net": 945136.75,
-    "incremental": 579167.91
+    "contacts": 302,
+    "cost": 453,
+    "net": 945983.57,
+    "incremental": 645593.87
   }
 }
