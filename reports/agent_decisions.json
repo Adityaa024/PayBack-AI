@@ -1926,12 +1926,17 @@
   },
   {
     "invoice_id": "inv_sim_0099",
-    "diagnosed_lane": "b2b_receivables",
-    "strategy": "firm_escalation",
-    "confidence": 0.88,
-    "root_cause": "behavioral_delay",
-    "estimated_recovery_probability": 0.62,
-    "retry_decision": null,
+    "diagnosed_lane": "payment_degradation",
+    "strategy": "legal_stop",
+    "confidence": 1.0,
+    "root_cause": "dispute_pending",
+    "estimated_recovery_probability": 0.05,
+    "retry_decision": {
+      "should_retry": false,
+      "failure_classification": "expired_card",
+      "delay_hours": 0,
+      "personalized_reason": "Card on file has expired. Customer must enter new payment method details."
+    },
     "mandate_plan": null
   },
   {
@@ -2732,7 +2737,7 @@
     "diagnosed_lane": "payment_degradation",
     "strategy": "legal_stop",
     "confidence": 1.0,
-    "root_cause": "unknown",
+    "root_cause": "dispute_pending",
     "estimated_recovery_probability": 0.05,
     "retry_decision": {
       "should_retry": true,
@@ -4374,10 +4379,10 @@
   {
     "invoice_id": "inv_sim_0238",
     "diagnosed_lane": "payment_degradation",
-    "strategy": "payment_link_refresh",
-    "confidence": 0.65,
-    "root_cause": "payment_method_failed",
-    "estimated_recovery_probability": 0.55,
+    "strategy": "legal_stop",
+    "confidence": 1.0,
+    "root_cause": "dispute_pending",
+    "estimated_recovery_probability": 0.05,
     "retry_decision": {
       "should_retry": true,
       "failure_classification": "technical_decline",
@@ -5536,12 +5541,17 @@
   },
   {
     "invoice_id": "inv_sim_0300",
-    "diagnosed_lane": "b2b_receivables",
-    "strategy": "soft_reminder",
-    "confidence": 0.88,
-    "root_cause": "behavioral_delay",
-    "estimated_recovery_probability": 0.62,
-    "retry_decision": null,
+    "diagnosed_lane": "payment_degradation",
+    "strategy": "legal_stop",
+    "confidence": 1.0,
+    "root_cause": "dispute_pending",
+    "estimated_recovery_probability": 0.05,
+    "retry_decision": {
+      "should_retry": true,
+      "failure_classification": "technical_decline",
+      "delay_hours": 12,
+      "personalized_reason": "Technical payment decline from issuing bank."
+    },
     "mandate_plan": null
   },
   {
@@ -6345,12 +6355,17 @@
   },
   {
     "invoice_id": "inv_sim_0343",
-    "diagnosed_lane": "checkout_dropoff",
-    "strategy": "payment_link_refresh",
-    "confidence": 0.89,
-    "root_cause": "checkout_abandoned",
-    "estimated_recovery_probability": 0.68,
-    "retry_decision": null,
+    "diagnosed_lane": "payment_degradation",
+    "strategy": "legal_stop",
+    "confidence": 1.0,
+    "root_cause": "dispute_pending",
+    "estimated_recovery_probability": 0.05,
+    "retry_decision": {
+      "should_retry": false,
+      "failure_classification": "expired_card",
+      "delay_hours": 0,
+      "personalized_reason": "Card on file has expired. Customer must enter new payment method details."
+    },
     "mandate_plan": null
   },
   {
@@ -6491,7 +6506,7 @@
     "diagnosed_lane": "payment_degradation",
     "strategy": "legal_stop",
     "confidence": 1.0,
-    "root_cause": "unknown",
+    "root_cause": "dispute_pending",
     "estimated_recovery_probability": 0.05,
     "retry_decision": {
       "should_retry": false,
@@ -6583,10 +6598,10 @@
   {
     "invoice_id": "inv_sim_0356",
     "diagnosed_lane": "payment_degradation",
-    "strategy": "payment_link_refresh",
-    "confidence": 0.94,
-    "root_cause": "payment_method_failed",
-    "estimated_recovery_probability": 0.82,
+    "strategy": "legal_stop",
+    "confidence": 1.0,
+    "root_cause": "dispute_pending",
+    "estimated_recovery_probability": 0.05,
     "retry_decision": {
       "should_retry": true,
       "failure_classification": "network_error",
@@ -7140,7 +7155,7 @@
     "diagnosed_lane": "payment_degradation",
     "strategy": "legal_stop",
     "confidence": 1.0,
-    "root_cause": "unknown",
+    "root_cause": "dispute_pending",
     "estimated_recovery_probability": 0.05,
     "retry_decision": {
       "should_retry": true,
@@ -7571,12 +7586,17 @@
   },
   {
     "invoice_id": "inv_sim_0414",
-    "diagnosed_lane": "b2b_receivables",
-    "strategy": "firm_escalation",
-    "confidence": 0.88,
-    "root_cause": "behavioral_delay",
-    "estimated_recovery_probability": 0.62,
-    "retry_decision": null,
+    "diagnosed_lane": "payment_degradation",
+    "strategy": "legal_stop",
+    "confidence": 1.0,
+    "root_cause": "dispute_pending",
+    "estimated_recovery_probability": 0.05,
+    "retry_decision": {
+      "should_retry": true,
+      "failure_classification": "technical_decline",
+      "delay_hours": 12,
+      "personalized_reason": "Technical payment decline from issuing bank."
+    },
     "mandate_plan": null
   },
   {
@@ -8658,10 +8678,10 @@
   {
     "invoice_id": "inv_sim_0475",
     "diagnosed_lane": "payment_degradation",
-    "strategy": "payment_link_refresh",
-    "confidence": 0.94,
-    "root_cause": "payment_method_failed",
-    "estimated_recovery_probability": 0.82,
+    "strategy": "legal_stop",
+    "confidence": 1.0,
+    "root_cause": "dispute_pending",
+    "estimated_recovery_probability": 0.05,
     "retry_decision": {
       "should_retry": true,
       "failure_classification": "network_error",
@@ -8855,12 +8875,17 @@
   },
   {
     "invoice_id": "inv_sim_0486",
-    "diagnosed_lane": "b2b_receivables",
-    "strategy": "soft_reminder",
-    "confidence": 0.88,
-    "root_cause": "behavioral_delay",
-    "estimated_recovery_probability": 0.62,
-    "retry_decision": null,
+    "diagnosed_lane": "payment_degradation",
+    "strategy": "legal_stop",
+    "confidence": 1.0,
+    "root_cause": "dispute_pending",
+    "estimated_recovery_probability": 0.05,
+    "retry_decision": {
+      "should_retry": false,
+      "failure_classification": "expired_card",
+      "delay_hours": 0,
+      "personalized_reason": "Card on file has expired. Customer must enter new payment method details."
+    },
     "mandate_plan": null
   },
   {
@@ -8915,10 +8940,10 @@
   {
     "invoice_id": "inv_sim_0489",
     "diagnosed_lane": "payment_degradation",
-    "strategy": "payment_link_refresh",
-    "confidence": 0.94,
-    "root_cause": "payment_method_failed",
-    "estimated_recovery_probability": 0.82,
+    "strategy": "legal_stop",
+    "confidence": 1.0,
+    "root_cause": "dispute_pending",
+    "estimated_recovery_probability": 0.05,
     "retry_decision": {
       "should_retry": true,
       "failure_classification": "network_error",
@@ -9834,10 +9859,10 @@
   {
     "invoice_id": "inv_sim_0541",
     "diagnosed_lane": "payment_degradation",
-    "strategy": "payment_link_refresh",
-    "confidence": 0.94,
-    "root_cause": "payment_method_failed",
-    "estimated_recovery_probability": 0.82,
+    "strategy": "legal_stop",
+    "confidence": 1.0,
+    "root_cause": "dispute_pending",
+    "estimated_recovery_probability": 0.05,
     "retry_decision": {
       "should_retry": true,
       "failure_classification": "network_error",
@@ -11434,10 +11459,10 @@
   {
     "invoice_id": "inv_sim_0631",
     "diagnosed_lane": "payment_degradation",
-    "strategy": "payment_link_refresh",
-    "confidence": 0.94,
-    "root_cause": "payment_method_failed",
-    "estimated_recovery_probability": 0.82,
+    "strategy": "legal_stop",
+    "confidence": 1.0,
+    "root_cause": "dispute_pending",
+    "estimated_recovery_probability": 0.05,
     "retry_decision": {
       "should_retry": true,
       "failure_classification": "network_error",
@@ -11714,12 +11739,17 @@
   },
   {
     "invoice_id": "inv_sim_0646",
-    "diagnosed_lane": "b2b_receivables",
-    "strategy": "firm_escalation",
-    "confidence": 0.88,
-    "root_cause": "behavioral_delay",
-    "estimated_recovery_probability": 0.62,
-    "retry_decision": null,
+    "diagnosed_lane": "payment_degradation",
+    "strategy": "legal_stop",
+    "confidence": 1.0,
+    "root_cause": "dispute_pending",
+    "estimated_recovery_probability": 0.05,
+    "retry_decision": {
+      "should_retry": false,
+      "failure_classification": "expired_card",
+      "delay_hours": 0,
+      "personalized_reason": "Card on file has expired. Customer must enter new payment method details."
+    },
     "mandate_plan": null
   },
   {
@@ -12589,10 +12619,10 @@
   {
     "invoice_id": "inv_sim_0694",
     "diagnosed_lane": "payment_degradation",
-    "strategy": "payment_link_refresh",
-    "confidence": 0.94,
-    "root_cause": "payment_method_failed",
-    "estimated_recovery_probability": 0.82,
+    "strategy": "legal_stop",
+    "confidence": 1.0,
+    "root_cause": "dispute_pending",
+    "estimated_recovery_probability": 0.05,
     "retry_decision": {
       "should_retry": true,
       "failure_classification": "network_error",
@@ -12953,37 +12983,18 @@
   },
   {
     "invoice_id": "inv_sim_0713",
-    "diagnosed_lane": "subscription_rescue",
-    "strategy": "mandate_retry",
-    "confidence": 0.92,
-    "root_cause": "subscription_lapsed",
-    "estimated_recovery_probability": 0.74,
-    "retry_decision": null,
-    "mandate_plan": {
-      "should_sequence": true,
-      "stop_reason": null,
-      "retry_slots": [
-        {
-          "attempt": 1,
-          "delay_hours": 24,
-          "notify_customer": true,
-          "message_tone": "warm"
-        },
-        {
-          "attempt": 2,
-          "delay_hours": 72,
-          "notify_customer": true,
-          "message_tone": "firm"
-        },
-        {
-          "attempt": 3,
-          "delay_hours": 168,
-          "notify_customer": true,
-          "message_tone": "serious"
-        }
-      ],
-      "escalation_after_all_failed": "human_review"
-    }
+    "diagnosed_lane": "payment_degradation",
+    "strategy": "legal_stop",
+    "confidence": 1.0,
+    "root_cause": "dispute_pending",
+    "estimated_recovery_probability": 0.05,
+    "retry_decision": {
+      "should_retry": false,
+      "failure_classification": "expired_card",
+      "delay_hours": 0,
+      "personalized_reason": "Card on file has expired. Customer must enter new payment method details."
+    },
+    "mandate_plan": null
   },
   {
     "invoice_id": "inv_sim_0714",
@@ -13460,12 +13471,17 @@
   },
   {
     "invoice_id": "inv_sim_0739",
-    "diagnosed_lane": "b2b_receivables",
-    "strategy": "soft_reminder",
-    "confidence": 0.6,
-    "root_cause": "behavioral_delay",
-    "estimated_recovery_probability": 0.5,
-    "retry_decision": null,
+    "diagnosed_lane": "payment_degradation",
+    "strategy": "legal_stop",
+    "confidence": 1.0,
+    "root_cause": "dispute_pending",
+    "estimated_recovery_probability": 0.05,
+    "retry_decision": {
+      "should_retry": true,
+      "failure_classification": "technical_decline",
+      "delay_hours": 12,
+      "personalized_reason": "Technical payment decline from issuing bank."
+    },
     "mandate_plan": null
   },
   {
@@ -13662,12 +13678,17 @@
   },
   {
     "invoice_id": "inv_sim_0749",
-    "diagnosed_lane": "b2b_receivables",
-    "strategy": "firm_escalation",
-    "confidence": 0.88,
-    "root_cause": "behavioral_delay",
-    "estimated_recovery_probability": 0.62,
-    "retry_decision": null,
+    "diagnosed_lane": "payment_degradation",
+    "strategy": "legal_stop",
+    "confidence": 1.0,
+    "root_cause": "dispute_pending",
+    "estimated_recovery_probability": 0.05,
+    "retry_decision": {
+      "should_retry": true,
+      "failure_classification": "technical_decline",
+      "delay_hours": 12,
+      "personalized_reason": "Technical payment decline from issuing bank."
+    },
     "mandate_plan": null
   },
   {
@@ -16124,10 +16145,10 @@
   {
     "invoice_id": "inv_sim_0880",
     "diagnosed_lane": "payment_degradation",
-    "strategy": "payment_link_refresh",
-    "confidence": 0.94,
-    "root_cause": "payment_method_failed",
-    "estimated_recovery_probability": 0.82,
+    "strategy": "legal_stop",
+    "confidence": 1.0,
+    "root_cause": "dispute_pending",
+    "estimated_recovery_probability": 0.05,
     "retry_decision": {
       "should_retry": true,
       "failure_classification": "network_error",
@@ -16209,10 +16230,10 @@
   {
     "invoice_id": "inv_sim_0886",
     "diagnosed_lane": "payment_degradation",
-    "strategy": "payment_link_refresh",
-    "confidence": 0.94,
-    "root_cause": "payment_method_failed",
-    "estimated_recovery_probability": 0.82,
+    "strategy": "legal_stop",
+    "confidence": 1.0,
+    "root_cause": "dispute_pending",
+    "estimated_recovery_probability": 0.05,
     "retry_decision": {
       "should_retry": true,
       "failure_classification": "network_error",
@@ -16368,10 +16389,10 @@
   {
     "invoice_id": "inv_sim_0896",
     "diagnosed_lane": "payment_degradation",
-    "strategy": "payment_link_refresh",
-    "confidence": 0.94,
-    "root_cause": "payment_method_failed",
-    "estimated_recovery_probability": 0.82,
+    "strategy": "legal_stop",
+    "confidence": 1.0,
+    "root_cause": "dispute_pending",
+    "estimated_recovery_probability": 0.05,
     "retry_decision": {
       "should_retry": true,
       "failure_classification": "network_error",
@@ -16630,7 +16651,7 @@
     "diagnosed_lane": "payment_degradation",
     "strategy": "legal_stop",
     "confidence": 1.0,
-    "root_cause": "unknown",
+    "root_cause": "dispute_pending",
     "estimated_recovery_probability": 0.05,
     "retry_decision": {
       "should_retry": true,
@@ -17328,12 +17349,17 @@
   },
   {
     "invoice_id": "inv_sim_0946",
-    "diagnosed_lane": "checkout_dropoff",
-    "strategy": "payment_link_refresh",
-    "confidence": 0.89,
-    "root_cause": "checkout_abandoned",
-    "estimated_recovery_probability": 0.68,
-    "retry_decision": null,
+    "diagnosed_lane": "payment_degradation",
+    "strategy": "legal_stop",
+    "confidence": 1.0,
+    "root_cause": "dispute_pending",
+    "estimated_recovery_probability": 0.05,
+    "retry_decision": {
+      "should_retry": false,
+      "failure_classification": "expired_card",
+      "delay_hours": 0,
+      "personalized_reason": "Card on file has expired. Customer must enter new payment method details."
+    },
     "mandate_plan": null
   },
   {

@@ -92,6 +92,9 @@ class RecoveryAgent:
         if request.ptp_broken >= 2:
             reasons.append(f"Promise-to-pay broken {request.ptp_broken} times")
 
+        if request.has_dispute:
+            reasons.append("Active dispute or refund inquiry flagged")
+
         if reasons:
             reason_text = "; ".join(reasons)
             logger.info(
@@ -100,14 +103,14 @@ class RecoveryAgent:
                 reasons=reason_text,
             )
             return RecoveryDecision(
-                root_cause="unknown",
+                root_cause="dispute_pending" if request.has_dispute else "unknown",
                 strategy="legal_stop",
                 confidence=1.0,
                 reasoning=f"Automatic stop: {reason_text}",
                 estimated_recovery_probability=0.05,
                 recommended_delay_hours=0,
                 stopping_condition=reason_text,
-                personalization_hint="Refer to legal team — do not send automated comms",
+                personalization_hint="Refer to legal/compliance team — do not send automated comms",
             )
         return None
 

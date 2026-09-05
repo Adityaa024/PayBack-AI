@@ -21,10 +21,10 @@ def test_oracle_arm_hits_exactly_100_percent_of_ceiling():
     with open(eval_file, 'r', encoding='utf-8') as f:
         data = json.load(f)
 
-    oracle_ceiling = data.get('oracle_ceiling', {}).get('amount') or data.get('arms', {}).get('oracle_ceiling', {}).get('recoverable_oracle_ceiling') or data.get('benchmark_metadata', {}).get('oracle_ceiling_amount')
-    oracle_arm = data.get('oracle', {}) or data.get('arms', {}).get('oracle_ceiling', {})
-    oracle_recovered = oracle_arm.get('recovered') or oracle_arm.get('gross_recovered_value')
-    oracle_efficiency = oracle_arm.get('oracle_efficiency_pct') or oracle_arm.get('recovery_pct_oracle_ceiling')
+    oracle_ceiling = data.get('arms', {}).get('oracle', {}).get('recoverable_oracle_ceiling') or data.get('arms', {}).get('oracle_ceiling', {}).get('recoverable_oracle_ceiling') or data.get('benchmark_metadata', {}).get('oracle_ceiling_amount')
+    oracle_arm = data.get('arms', {}).get('oracle') or data.get('arms', {}).get('oracle_ceiling') or data.get('oracle', {})
+    oracle_recovered = oracle_arm.get('gross_recovered_value') or oracle_arm.get('recovered')
+    oracle_efficiency = oracle_arm.get('recovery_pct_oracle_ceiling') or oracle_arm.get('oracle_efficiency_pct')
 
     assert oracle_ceiling is not None, "Missing oracle_ceiling in evaluation output"
     assert oracle_recovered is not None, "Missing oracle recovered in evaluation output"

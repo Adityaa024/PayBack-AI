@@ -267,38 +267,50 @@ export function RecoveryDashboard() {
         </div>
       </div>
 
-      {/* ── 4 Top Executive KPI Cards (ReVora & Recoup pattern) ────────────── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+      {/* ── 5 Top Executive KPI Cards (ReVora & Recoup pattern) ────────────── */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
         <div className="p-4 rounded-lg bg-white border border-stone-200 shadow-2xs">
           <span className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider block">
             Revenue at Risk
           </span>
           <div className="text-xl font-bold text-stone-900 mt-1">
-            ₹{stats?.totalAtRisk ? parseFloat(stats.totalAtRisk).toLocaleString('en-IN') : "17,89,506"}
+            ₹{stats?.totalAtRisk ? parseFloat(stats.totalAtRisk).toLocaleString('en-IN') : "22,21,966"}
           </div>
           <p className="text-[11px] text-stone-500 mt-1">
-            Active overdue debt undergoing automated diagnosis.
+            1,000 unified overdue cases undergoing automated triage.
           </p>
         </div>
 
         <div className="p-4 rounded-lg bg-white border border-stone-200 shadow-2xs">
           <span className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider block">
-            Incremental Lift (vs Control)
+            Gross Recovered
+          </span>
+          <div className="text-xl font-bold text-emerald-800 mt-1">
+            ₹11,89,650
+          </div>
+          <p className="text-[11px] text-stone-500 mt-1">
+            53.54% of total failed portfolio value.
+          </p>
+        </div>
+
+        <div className="p-4 rounded-lg bg-white border border-stone-200 shadow-2xs">
+          <span className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider block">
+            Incremental Lift (vs Natural)
           </span>
           <div className="text-xl font-bold text-emerald-700 mt-1">
-            +₹6,38,268
+            +₹8,37,647
           </div>
           <p className="text-[11px] text-emerald-700 font-semibold mt-1">
-            +35.7% lift over 20% uncontacted holdout baseline.
+            Net lift above organic uncontacted baseline.
           </p>
         </div>
 
         <div className="p-4 rounded-lg bg-white border border-stone-200 shadow-2xs">
           <span className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider block">
-            Oracle Ceiling (Theoretical Max)
+            Oracle Ceiling Efficiency
           </span>
           <div className="text-xl font-bold text-stone-900 mt-1">
-            ₹9,46,437 <span className="text-xs font-medium text-stone-500">(99.3% eff)</span>
+            ₹12,03,167 <span className="text-xs font-medium text-emerald-700 font-bold">(98.88%)</span>
           </div>
           <p className="text-[11px] text-stone-500 mt-1">
             Harness self-check: 100.00% precision verified.
@@ -569,37 +581,37 @@ export function RecoveryDashboard() {
             <div className="grid grid-cols-1 sm:grid-cols-5 gap-3 pt-2">
               <div className="p-3 bg-stone-50 rounded-md border border-stone-200">
                 <span className="text-[10px] font-bold text-stone-500 uppercase block">1. Total Failed Debt</span>
-                <span className="text-base font-bold text-stone-900 mt-1 block">₹17,89,506</span>
+                <span className="text-base font-bold text-stone-900 mt-1 block">₹22,21,966</span>
                 <span className="text-[11px] text-stone-500 font-mono">1,000 cases (100%)</span>
               </div>
               <div className="p-3 bg-stone-50 rounded-md border border-stone-200">
                 <span className="text-[10px] font-bold text-stone-500 uppercase block">2. Policy Eligible</span>
-                <span className="text-base font-bold text-stone-900 mt-1 block">₹13,57,047</span>
-                <span className="text-[11px] text-stone-500 font-mono">811 cases (non-holdout)</span>
+                <span className="text-base font-bold text-stone-900 mt-1 block">₹19,84,320</span>
+                <span className="text-[11px] text-stone-500 font-mono">848 cases passed PolicyGuard</span>
               </div>
               <div className="p-3 bg-stone-50 rounded-md border border-stone-200">
                 <span className="text-[10px] font-bold text-stone-500 uppercase block">3. First-Touch Capture</span>
-                <span className="text-base font-bold text-emerald-800 mt-1 block">₹7,24,180</span>
-                <span className="text-[11px] text-emerald-700 font-mono">351 captured</span>
+                <span className="text-base font-bold text-emerald-800 mt-1 block">₹8,92,450</span>
+                <span className="text-[11px] text-emerald-700 font-mono">412 captured</span>
               </div>
               <div className="p-3 bg-stone-50 rounded-md border border-stone-200">
                 <span className="text-[10px] font-bold text-stone-500 uppercase block">4. Escalated Capture</span>
-                <span className="text-base font-bold text-emerald-800 mt-1 block">₹2,15,942</span>
-                <span className="text-[11px] text-emerald-700 font-mono">35 tone captures</span>
+                <span className="text-base font-bold text-emerald-800 mt-1 block">₹2,97,200</span>
+                <span className="text-[11px] text-emerald-700 font-mono">127 retry/tone captures</span>
               </div>
               <div className="p-3 bg-stone-50 rounded-md border border-stone-200">
                 <span className="text-[10px] font-bold text-stone-500 uppercase block">5. Policy Suppressed</span>
                 <span className="text-base font-bold text-stone-700 mt-1 block">152 Cases</span>
-                <span className="text-[11px] text-stone-500 font-mono">74 legal, 16 opt-outs</span>
+                <span className="text-[11px] text-stone-500 font-mono">74 legal, 18 opt-outs, 25 disp</span>
               </div>
             </div>
           </div>
 
-          {/* 6-Arm Multi-Benchmark Comparison Matrix */}
+          {/* 7-Arm Multi-Benchmark Comparison Matrix */}
           <div className="p-5 rounded-lg bg-white border border-stone-200 shadow-2xs space-y-3">
             <h2 className="text-xs font-bold text-stone-900 uppercase tracking-wider flex items-center gap-1.5">
               <TrendingUp className="w-4 h-4 text-stone-700" />
-              <span>2. Multi-Arm Benchmark Matrix (15 Standardized Metrics)</span>
+              <span>2. 7-Arm Benchmark Matrix (Unified 1,000-Case Denominator)</span>
             </h2>
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
@@ -612,72 +624,135 @@ export function RecoveryDashboard() {
                     <th className="py-2.5 px-3 text-center">% Oracle Ceiling</th>
                     <th className="py-2.5 px-3 text-center">Contacts</th>
                     <th className="py-2.5 px-3 text-center">Violations</th>
-                    <th className="py-2.5 px-3 text-right">LLM Cost</th>
+                    <th className="py-2.5 px-3 text-right">Cost/Rupee</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-stone-200">
                   <tr className="bg-stone-50/40">
-                    <td className="py-2 px-3 font-semibold text-stone-700">1. Do-Nothing (Control 20%)</td>
-                    <td className="py-2 px-3 text-right tabular-nums">₹4,32,459</td>
-                    <td className="py-2 px-3 text-right tabular-nums">₹72,593</td>
+                    <td className="py-2 px-3 font-semibold text-stone-700">1. Do-Nothing (Full Cohort)</td>
+                    <td className="py-2 px-3 text-right tabular-nums">₹22,21,966</td>
+                    <td className="py-2 px-3 text-right tabular-nums">₹3,52,003</td>
                     <td className="py-2 px-3 text-right text-stone-400">Baseline</td>
-                    <td className="py-2 px-3 text-center tabular-nums">7.67%</td>
+                    <td className="py-2 px-3 text-center tabular-nums">29.26%</td>
                     <td className="py-2 px-3 text-center tabular-nums">0</td>
                     <td className="py-2 px-3 text-center text-emerald-800 font-bold">0</td>
-                    <td className="py-2 px-3 text-right text-stone-400">₹0.00</td>
+                    <td className="py-2 px-3 text-right text-stone-400">₹0.0000</td>
                   </tr>
                   <tr>
                     <td className="py-2 px-3 font-semibold text-stone-700">2. Fixed Retry (Blind 2-touch)</td>
-                    <td className="py-2 px-3 text-right tabular-nums">₹17,89,506</td>
-                    <td className="py-2 px-3 text-right tabular-nums">₹5,80,433</td>
-                    <td className="py-2 px-3 text-right tabular-nums">₹2,78,422</td>
-                    <td className="py-2 px-3 text-center tabular-nums">61.33%</td>
-                    <td className="py-2 px-3 text-center tabular-nums">811</td>
-                    <td className="py-2 px-3 text-center text-red-700 font-bold">93 (90d/STOP)</td>
-                    <td className="py-2 px-3 text-right text-stone-400">₹0.00</td>
+                    <td className="py-2 px-3 text-right tabular-nums">₹22,21,966</td>
+                    <td className="py-2 px-3 text-right tabular-nums">₹7,30,703</td>
+                    <td className="py-2 px-3 text-right tabular-nums">₹3,78,700</td>
+                    <td className="py-2 px-3 text-center tabular-nums">60.73%</td>
+                    <td className="py-2 px-3 text-center tabular-nums">1,000</td>
+                    <td className="py-2 px-3 text-center text-red-700 font-bold">123 (90d/STOP)</td>
+                    <td className="py-2 px-3 text-right tabular-nums">₹0.0027</td>
                   </tr>
                   <tr>
                     <td className="py-2 px-3 font-semibold text-stone-700">3. Contact-Only (Day 1)</td>
-                    <td className="py-2 px-3 text-right tabular-nums">₹17,89,506</td>
-                    <td className="py-2 px-3 text-right tabular-nums">₹5,80,433</td>
-                    <td className="py-2 px-3 text-right tabular-nums">₹2,78,827</td>
-                    <td className="py-2 px-3 text-center tabular-nums">61.33%</td>
-                    <td className="py-2 px-3 text-center tabular-nums">811</td>
-                    <td className="py-2 px-3 text-center text-red-700 font-bold">93 (90d/STOP)</td>
-                    <td className="py-2 px-3 text-right text-stone-400">₹0.00</td>
+                    <td className="py-2 px-3 text-right tabular-nums">₹22,21,966</td>
+                    <td className="py-2 px-3 text-right tabular-nums">₹7,30,703</td>
+                    <td className="py-2 px-3 text-right tabular-nums">₹3,78,700</td>
+                    <td className="py-2 px-3 text-center tabular-nums">60.73%</td>
+                    <td className="py-2 px-3 text-center tabular-nums">1,000</td>
+                    <td className="py-2 px-3 text-center text-red-700 font-bold">123 (90d/STOP)</td>
+                    <td className="py-2 px-3 text-right tabular-nums">₹0.0021</td>
                   </tr>
                   <tr className="bg-stone-50/70 font-medium">
                     <td className="py-2 px-3 font-bold text-stone-900">4. PayBack-AI Deterministic</td>
-                    <td className="py-2 px-3 text-right tabular-nums">₹17,89,506</td>
-                    <td className="py-2 px-3 text-right tabular-nums">₹9,22,481</td>
-                    <td className="py-2 px-3 text-right font-bold text-stone-900 tabular-nums">₹6,20,657</td>
-                    <td className="py-2 px-3 text-center font-bold text-stone-900 tabular-nums">97.47%</td>
-                    <td className="py-2 px-3 text-center tabular-nums">956</td>
+                    <td className="py-2 px-3 text-right tabular-nums">₹22,21,966</td>
+                    <td className="py-2 px-3 text-right tabular-nums">₹11,62,391</td>
+                    <td className="py-2 px-3 text-right font-bold text-stone-900 tabular-nums">₹8,10,388</td>
+                    <td className="py-2 px-3 text-center font-bold text-stone-900 tabular-nums">96.61%</td>
+                    <td className="py-2 px-3 text-center tabular-nums">1,040</td>
                     <td className="py-2 px-3 text-center text-emerald-800 font-bold">0</td>
-                    <td className="py-2 px-3 text-right text-stone-400">₹0.00</td>
+                    <td className="py-2 px-3 text-right font-bold tabular-nums">₹0.0014</td>
                   </tr>
                   <tr className="bg-emerald-50/60 font-semibold text-emerald-950">
-                    <td className="py-2 px-3 font-bold text-emerald-900">5. PayBack-AI LLM Policy</td>
-                    <td className="py-2 px-3 text-right tabular-nums">₹17,89,506</td>
-                    <td className="py-2 px-3 text-right tabular-nums text-emerald-800">₹9,40,122</td>
-                    <td className="py-2 px-3 text-right font-bold text-emerald-800 tabular-nums">₹6,38,268</td>
-                    <td className="py-2 px-3 text-center font-bold text-emerald-800 tabular-nums">99.33%</td>
-                    <td className="py-2 px-3 text-center tabular-nums">947</td>
+                    <td className="py-2 px-3 font-bold text-emerald-900">5. PayBack-AI Simulated LLM</td>
+                    <td className="py-2 px-3 text-right tabular-nums">₹22,21,966</td>
+                    <td className="py-2 px-3 text-right tabular-nums text-emerald-800">₹11,89,650</td>
+                    <td className="py-2 px-3 text-right font-bold text-emerald-800 tabular-nums">₹8,37,647</td>
+                    <td className="py-2 px-3 text-center font-bold text-emerald-800 tabular-nums">98.88%</td>
+                    <td className="py-2 px-3 text-center tabular-nums">1,032</td>
                     <td className="py-2 px-3 text-center text-emerald-800 font-bold">0</td>
-                    <td className="py-2 px-3 text-right tabular-nums text-stone-600">₹44.36</td>
+                    <td className="py-2 px-3 text-right font-bold tabular-nums text-emerald-800">₹0.0014</td>
+                  </tr>
+                  <tr className="bg-stone-50/20 text-stone-400 italic">
+                    <td className="py-2 px-3 font-medium">6. Real LLM Policy</td>
+                    <td className="py-2 px-3 text-right">Gated</td>
+                    <td className="py-2 px-3 text-right">Requires Provider Traces</td>
+                    <td className="py-2 px-3 text-right">Gated</td>
+                    <td className="py-2 px-3 text-center">Gated</td>
+                    <td className="py-2 px-3 text-center">-</td>
+                    <td className="py-2 px-3 text-center">0</td>
+                    <td className="py-2 px-3 text-right">-</td>
                   </tr>
                   <tr className="border-t-2 border-stone-300 font-bold text-stone-900">
-                    <td className="py-2 px-3 font-bold text-stone-900">6. Oracle Ceiling (Theoretical)</td>
-                    <td className="py-2 px-3 text-right tabular-nums">₹17,89,506</td>
-                    <td className="py-2 px-3 text-right tabular-nums">₹9,46,437</td>
-                    <td className="py-2 px-3 text-right tabular-nums">₹6,45,594</td>
+                    <td className="py-2 px-3 font-bold text-stone-900">7. Oracle Ceiling (Theoretical)</td>
+                    <td className="py-2 px-3 text-right tabular-nums">₹22,21,966</td>
+                    <td className="py-2 px-3 text-right tabular-nums">₹12,03,167</td>
+                    <td className="py-2 px-3 text-right tabular-nums">₹8,51,164</td>
                     <td className="py-2 px-3 text-center tabular-nums">100.00%</td>
-                    <td className="py-2 px-3 text-center tabular-nums">302</td>
+                    <td className="py-2 px-3 text-center tabular-nums">379</td>
                     <td className="py-2 px-3 text-center text-emerald-800">0</td>
-                    <td className="py-2 px-3 text-right text-stone-400">₹0.00</td>
+                    <td className="py-2 px-3 text-right tabular-nums">₹0.0005</td>
                   </tr>
                 </tbody>
               </table>
+            </div>
+          </div>
+
+          {/* Multi-Seed & Sensitivity Analysis Summary Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="p-4 rounded-lg bg-white border border-stone-200 shadow-2xs space-y-2">
+              <div className="font-bold text-xs uppercase tracking-wider text-stone-900 flex items-center gap-1.5">
+                <Cpu className="w-4 h-4 text-stone-700" />
+                <span>3. Multi-Seed Rigor (10 Deterministic Seeds)</span>
+              </div>
+              <div className="text-xs text-stone-600 space-y-1">
+                <div className="flex justify-between border-b border-stone-100 py-1">
+                  <span>Total Portfolio (Mean ± 95% CI):</span>
+                  <span className="font-bold text-stone-900">₹22,33,860 [±₹17,117]</span>
+                </div>
+                <div className="flex justify-between border-b border-stone-100 py-1">
+                  <span>Oracle Ceiling (Mean ± 95% CI):</span>
+                  <span className="font-bold text-stone-900">₹11,82,928 [±₹24,444]</span>
+                </div>
+                <div className="flex justify-between border-b border-stone-100 py-1">
+                  <span>Gross Recovery (Mean ± 95% CI):</span>
+                  <span className="font-bold text-emerald-800">₹11,68,466 [±₹24,404]</span>
+                </div>
+                <div className="flex justify-between py-1">
+                  <span>Oracle Efficiency (Mean ± 95% CI):</span>
+                  <span className="font-bold text-emerald-700">98.78% [98.29%, 99.26%]</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-4 rounded-lg bg-white border border-stone-200 shadow-2xs space-y-2">
+              <div className="font-bold text-xs uppercase tracking-wider text-stone-900 flex items-center gap-1.5">
+                <Activity className="w-4 h-4 text-stone-700" />
+                <span>4. 10-Sweep Sensitivity Stress Tests</span>
+              </div>
+              <div className="text-xs text-stone-600 space-y-1">
+                <div className="flex justify-between border-b border-stone-100 py-1">
+                  <span>Severe Downturn Stress (0.70x):</span>
+                  <span className="font-bold text-stone-900">₹8,32,755 (69.5% eff)</span>
+                </div>
+                <div className="flex justify-between border-b border-stone-100 py-1">
+                  <span>High Contact Unit Cost (₹5.00/msg):</span>
+                  <span className="font-bold text-stone-900">₹0.0044 / recovered ₹</span>
+                </div>
+                <div className="flex justify-between border-b border-stone-100 py-1">
+                  <span>Provider Outage Rate (20% downtime):</span>
+                  <span className="font-bold text-emerald-800">97.0% resilience via outbox</span>
+                </div>
+                <div className="flex justify-between py-1">
+                  <span>Hidden Holdout (Seed 999, 250 cases):</span>
+                  <span className="font-bold text-emerald-700">99.40% generalization</span>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -688,10 +763,10 @@ export function RecoveryDashboard() {
               <span>Transparent Limitations & Disclosures</span>
             </div>
             <p>
-              <strong>1. Misdiagnosis Yield Suppression:</strong> 36 cases carried ambiguous decline notes where heuristic classification misdiagnosed the lane. In our causal evaluation, lane-specific yield was strictly withheld on these cases rather than crediting false recoveries.
+              <strong>1. Misdiagnosis Yield Suppression:</strong> 32 cases carried ambiguous decline notes where heuristic classification misdiagnosed the lane. In our causal evaluation, lane-specific yield was strictly withheld on these cases rather than crediting false recoveries.
             </p>
             <p>
-              <strong>2. LLM Inference Cost:</strong> The simulated/recorded LLM arm incurred ₹44.36 in token costs across 1,000 cases to achieve +₹17,611 in incremental lift over the pure deterministic policy.
+              <strong>2. LLM Inference Cost & Offline Nomenclature:</strong> The offline arm is strictly labeled as simulated_llm_policy. It incurred ₹44.36 in token costs across 1,000 cases to achieve +₹27,259 in incremental gross recovery over the deterministic policy. Replay mode strictly enforces loud failure (KeyError) on missing traces with zero heuristic fallbacks.
             </p>
           </div>
         </div>

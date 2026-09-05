@@ -86,6 +86,18 @@ Every top-tier hackathon submission encounters reality gaps. This document logs 
 - Wired causal recovery in `evaluate-batch.ts`: `lane_recovery` succeeds *only* if the agent's diagnosed lane matches the debtor's actual incident lane. Misclassified cases fail lane-specific recovery.
 - The resulting empirical efficiency is **97.47% of the Oracle ceiling** (85.20% diagnostic accuracy on non-holdout cases), proving both the strategic lift of AI diagnosis and the honest margin of real-world uncertainty.
 
+### 12. Denominator Asymmetry Caused by Split Holdout Cohort
+**Date:** September 5, 2026
+**What happened:** In earlier iterations of the benchmark, the `do_nothing_baseline` only evaluated the 189 holdout cases (eligible ₹432k failed debt), while intervention arms evaluated the 811 non-holdout cases (eligible ₹1.789M failed debt).
+**Why it happened:** The control cohort was implemented as an in-batch partition (`is_holdout` flag), which caused the loop to skip holdout cases for intervention arms and skip intervention cases for the control arm. This introduced denominator inconsistency when quoting recovery numbers across arms side-by-side.
+**The Fix:** Unified the benchmark evaluation across all 1,000 cases for every arm. The uncontacted `do_nothing` arm now evaluates natural recovery across all 1,000 cases (₹2,221,965.50 failed debt), guaranteeing that Total Failed Value and Oracle Ceiling are 100.00% identical across all benchmark arms. For true out-of-sample generalization testing, we introduced an isolated hidden holdout dataset of 250 cases (Seed 999) that the agent prompts and heuristic tuning cannot inspect.
+
+### 13. Ablation Additivity & The Telescoping Sum Requirement
+**Date:** September 5, 2026
+**What happened:** Previous versions of the ablation analysis assigned estimated lift values across layers rather than computing every layer's increment by re-running the evaluator under toggled feature flags.
+**Why it happened:** Authoring individual ablation configurations required parameterizing the evaluation engine and handling combinations of coverage, retry timing, channel selection, dynamic cooldowns, and PolicyGuard.
+**The Fix:** Rewrote `ai-service/scripts/run_ablation_sensitivity.py` to systematically execute `evaluate_ablation_layer` across 8 discrete configurations, measuring cumulative lift at each layer and verifying the mathematical invariant `sum(ablation increments) == final incremental lift` with an automated CI test (`ai-service/test/test_ablation_integrity.py`).
+
 ## Conclusion
 Our evaluation harness ensures that the numbers reported in `EVALUATION.md` are not aspirational—they are mathematically proven against our stated assumptions, driven by real multi-agent decisions, and empirically executed by the actual production TypeScript code.
 

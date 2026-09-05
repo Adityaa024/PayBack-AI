@@ -4,16 +4,16 @@ import random
 import hashlib
 from pathlib import Path
 
-def generate_dataset():
+def generate_dataset(seed: int = 42, output_file: Path = None, total_cases_override: int = None, write_to_disk: bool = True):
     script_dir = Path(__file__).parent
     assumptions_path = script_dir / 'world_assumptions.yaml'
     
     with open(assumptions_path, 'r') as f:
         assumptions = yaml.safe_load(f)
 
-    random.seed(42)  # Fixed seed for reproducibility
+    random.seed(seed)  # Fixed seed for reproducibility
 
-    total_cases = assumptions['cohort_sizes']['total_batch_size']
+    total_cases = total_cases_override or assumptions['cohort_sizes']['total_batch_size']
     holdout_pct = assumptions['cohort_sizes']['holdout_percentage']
     
     avg_value = assumptions['avg_value'] if 'avg_value' in assumptions else assumptions['avg_invoice_value']
@@ -134,11 +134,43 @@ def generate_dataset():
             err_code = "GENERIC_DECLINE"
             client_name = random.choice(["Apex Enterprises", "Sharma Traders", "Global Services", "Vanguard Logistics", "Nexus Retail"])
 
+        # Deterministic dimensional assignment
+        dim_hash = int(hashlib.md5(f"{invoice_id}_dim".encode()).hexdigest(), 16)
+        if lane == 'payment_degradation':
+            rails = ['upi', 'card', 'netbanking']
+            rail = rails[dim_hash % 3]
+            segment = 'consumer_d2c' if (dim_hash % 10 < 7) else 'smb_saas'
+        elif lane == 'subscription_rescue':
+            rails = ['mandate', 'card']
+            rail = rails[dim_hash % 2]
+            segment = 'smb_saas' if (dim_hash % 10 < 7) else 'consumer_d2c'
+        elif lane == 'checkout_dropoff':
+            rails = ['upi', 'card']
+            rail = rails[dim_hash % 2]
+            segment = 'consumer_d2c' if (dim_hash % 10 < 8) else 'smb_saas'
+        else:  # b2b_receivables
+            rails = ['netbanking', 'mandate']
+            rail = rails[dim_hash % 2]
+            segment = 'enterprise_b2b'
+
+        if value < 1000:
+            amount_band = '< ₹1,000'
+        elif value < 10000:
+            amount_band = '₹1,000–₹10,000'
+        elif value <= 50000:
+            amount_band = '₹10,000–₹50,000'
+        else:
+            amount_band = '> ₹50,000'
+
         dataset.append({
             "invoice_id": invoice_id,
             "invoice_no": f"{inv_prefix}-{i:04d}",
             "client_name": client_name,
             "incident_lane": lane,
+            "failure_type": lane,
+            "payment_rail": rail,
+            "customer_segment": segment,
+            "amount_band": amount_band,
             "amount": value,
             "days_overdue": days_overdue,
             "ptp_broken": ptp_broken,
@@ -158,13 +190,14 @@ def generate_dataset():
             }
         })
 
-    output_path = script_dir.parent.parent / 'reports'
-    output_path.mkdir(exist_ok=True)
-    
-    with open(output_path / 'simulated_batch.json', 'w') as f:
-        json.dump(dataset, f, indent=2)
-        
-    print(f"Generated {total_cases} simulated cases at {output_path / 'simulated_batch.json'}")
+    if write_to_disk:
+        target_file = output_file or (script_dir.parent.parent / 'reports' / 'simulated_batch.json')
+        target_file.parent.mkdir(parents=True, exist_ok=True)
+        with open(target_file, 'w', encoding='utf-8') as f:
+            json.dump(dataset, f, indent=2)
+        print(f"Generated {total_cases} simulated cases (seed={seed}) at {target_file}")
+
+    return dataset
 
 if __name__ == '__main__':
     generate_dataset()

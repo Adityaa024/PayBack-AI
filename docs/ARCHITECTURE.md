@@ -45,14 +45,54 @@
 
 ---
 
-## The 6 Hard Stopping Rules + Economic Floor Guard
+## The End-to-End Reliability Pipeline
 
-Every automated action recommended by the AI layer must pass deterministic validation in `PolicyGuard` before any API call is dispatched:
+```
+API Request -> RecoveryService -> PolicyGuard -> Transactional Outbox -> Provider Adapter -> Webhook -> Ledger
+```
 
-1. **90-Day Overdue Hard Cap**: Invoices older than 90 days are escalated to human collections to prevent automated harassment.
-2. **3-Retry Ceiling**: No invoice may undergo more than 3 automated payment link or mandate retry attempts.
-3. **PTP-Broken-Twice**: If a customer breaks a Promise-to-Pay (PTP) twice, automated reminders stop and the case escalates to manual intervention.
-4. **DLQ Threshold (Dead Letter Queue)**: Exhausted recovery sessions transition into an explicit `escalated` state for operator review.
-5. **Mandate-Cap**: Subscriptions with recurring mandate rejections are capped after 3 tries.
-6. **Invoice-Paid / Settled**: Any settled, paid, or written-off invoice instantly halts all active recovery sessions.
-7. **Economic Floor Check (< ₹100)**: Any invoice with amount below ₹100 is skipped as economically unviable for recovery communication costs.
+1. **API Ingestion**: Ingests payment failure events (`invoice_id`, `amount`, `customer_id`, `failure_code`).
+2. **RecoveryService**: Formulates candidate action using deterministic heuristics or LLM strategy.
+3. **PolicyGuard Validation**: Pure function evaluating 8 deterministic stopping rules. Returns `{ allowed: boolean, reason?: string, rule?: string }`.
+4. **Transactional Outbox (`recovery_outbox_intents`)**: Atomic insertion of intent with unique `idempotency_key = SHA256(tenantId:sessionId:actionType:attemptNumber)`. DB transaction commits intent and session state atomically.
+5. **Outbox Worker & Provider Adapter**: Background worker claims intent via `SELECT ... FOR UPDATE SKIP LOCKED`. Dispatches external request via `RazorpayAdapter` with timeout & retry handling.
+6. **Signed Webhook Ingestion**: Receives `payment.captured` event. Verifies signature via `crypto.createHmac('sha256', secret).update(rawBody).digest('hex')` using `crypto.timingSafeEqual`.
+7. **Tamper-Evident Ledger**: Appends state change to `recovery_audit_log` with serialized advisory lock (`pg_advisory_xact_lock`) and SHA-256 hash chaining `SHA256(prevHash || payload)`.
+
+### Tested Failure & Chaos Modes (16 Scenarios Verified)
+- **Crash before external execution**: Intent remains `queued`; swept and re-claimed cleanly without duplicate side-effects.
+- **Crash after external execution**: Intent marked `completed` before crash; idempotency key prevents duplicate link generation.
+- **Duplicate webhook**: Secondary webhook with identical `event_id` is deduplicated; returns `200 OK` with `duplicate_ignored`.
+- **Delayed webhook**: Ingested and reconciled against session even after timeout; ledger transitions cleanly.
+- **Webhook signature failure**: Constant-time comparison mismatch rejects delivery immediately with `401 Unauthorized`.
+- **Provider timeout**: Worker marks attempt failed, decrements retry quota, and releases lock.
+- **Database outage**: Worker fails closed; zero unpersisted external dispatches allowed.
+- **Worker restart / Concurrent workers**: Safe parallel execution via `FOR UPDATE SKIP LOCKED`.
+- **Duplicate idempotency key**: Second dispatch with same key returns existing transaction ID; zero duplicate payment links.
+- **Stale lock recovery**: Sessions stuck in-flight > 5 minutes are reclaimed by `sweepStaleClaims()`.
+- **STOP opt-out during workflow**: Debtor opt-out propagates across tenant; active recovery sessions transition to `escalated`.
+- **Dispute opened during recovery**: Dispute event immediately freezes active sessions (`DISPUTE_ACTIVE`).
+- **Settled invoice during recovery**: Outbox dispatch aborts if invoice marked `Paid` / `Settled`.
+- **Malformed LLM output**: Pydantic schema validation failure rejects output and falls back to deterministic rule with `AUDIT_PARSE_ERROR`.
+- **LLM recommendation violating PolicyGuard**: PolicyGuard intercepts and blocks action with zero external dispatch.
+
+---
+
+## Empirical Evaluation Architecture
+
+```
+                               ┌──> 1. do_nothing
+                               ├──> 2. fixed_retry
+                               ├──> 3. contact_only
+1,000 Payment Failures ───────┼──> 4. deterministic_policy
+(Unified Denominator: ₹22.2L)  ├──> 5. simulated_llm_policy
+                               ├──> 6. real_llm_policy (gated on replay cache)
+                               └──> 7. oracle (exact theoretical ceiling)
+```
+
+- **Unified Denominator**: Every arm evaluated across all 1,000 cases ($N=1,000$, Failed Debt: ₹2,221,965.50, Oracle Ceiling: ₹1,203,167.01).
+- **Multi-Seed Stability**: 10 deterministic seeds (42–51) calculating mean, median, min, max, std, and 95% confidence intervals.
+- **Hidden Holdout Generalization**: 250 cases generated with uninspected seed (999) verifying policy robustness on unseen distributions.
+- **Ablation Additivity**: 8 discrete layers evaluated sequentially proving telescoping sum $\sum \Delta \text{Incremental Lift} = \text{Final Lift}$ ($< 10^{-4}$ tolerance).
+- **10-Parameter Sensitivity Sweeps**: Automated sweeps across failure rates, recovery probabilities, contact/retry costs, annoyance penalties, salary cycles, compliance windows, LLM error rates, provider outages, and seeds.
+- **Automated Verification**: Single master command (`python scripts/verify_all.py`) runs all 12 stages and halts CI on any metric mismatch.

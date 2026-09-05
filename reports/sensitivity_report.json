@@ -1,210 +1,341 @@
 {
-  "failure_rate_sweep": [
-    {
-      "failure_rate": "5%",
-      "implied_failed_portfolio_inr": 596502.15,
-      "projected_incremental_lift_inr": 212755.84,
-      "roi_ratio": 440.2
-    },
-    {
-      "failure_rate": "10%",
-      "implied_failed_portfolio_inr": 1193004.29,
-      "projected_incremental_lift_inr": 425511.69,
-      "roi_ratio": 440.2
-    },
-    {
-      "failure_rate": "15%",
-      "implied_failed_portfolio_inr": 1789506.44,
-      "projected_incremental_lift_inr": 638267.53,
-      "roi_ratio": 440.2
-    },
-    {
-      "failure_rate": "20%",
-      "implied_failed_portfolio_inr": 2386008.59,
-      "projected_incremental_lift_inr": 851023.37,
-      "roi_ratio": 440.2
-    },
-    {
-      "failure_rate": "25%",
-      "implied_failed_portfolio_inr": 2982510.73,
-      "projected_incremental_lift_inr": 1063779.22,
-      "roi_ratio": 440.2
+  "metadata": {
+    "total_sweeps": 10,
+    "description": "Multidimensional sensitivity sweeps stressing policy boundaries across cost, macroeconomic, compliance, and infrastructure conditions.",
+    "assumptions_vs_facts": {
+      "observed_facts": "Derived directly from Seed 42 execution and real PolicyGuard stops in evaluate-batch.ts.",
+      "stress_assumptions": "Parameter multipliers model extreme macroeconomic stress, high telecom unit rates, and API outages."
     }
-  ],
-  "success_probability_multiplier": [
-    {
-      "multiplier": "70%",
-      "gross_recovered_inr": 658085.46,
-      "incremental_lift_inr": 446787.27,
-      "efficiency_of_oracle_pct": 69.53
-    },
-    {
-      "multiplier": "85%",
-      "gross_recovered_inr": 799103.78,
-      "incremental_lift_inr": 542527.4,
-      "efficiency_of_oracle_pct": 84.43
-    },
-    {
-      "multiplier": "100%",
-      "gross_recovered_inr": 940122.09,
-      "incremental_lift_inr": 638267.53,
-      "efficiency_of_oracle_pct": 99.33
-    },
-    {
-      "multiplier": "114%",
-      "gross_recovered_inr": 1081140.4,
-      "incremental_lift_inr": 734007.66,
-      "efficiency_of_oracle_pct": 100.0
-    },
-    {
-      "multiplier": "130%",
-      "gross_recovered_inr": 1222158.72,
-      "incremental_lift_inr": 829747.79,
-      "efficiency_of_oracle_pct": 100.0
-    }
-  ],
-  "contact_cost_sweep": [
-    {
-      "unit_cost_inr": "\u20b90.50",
-      "total_intervention_cost_inr": 517.86,
-      "cost_per_recovered_rupee_inr": 0.0006,
-      "net_recovered_inr": 939604.23
-    },
-    {
-      "unit_cost_inr": "\u20b91.00",
-      "total_intervention_cost_inr": 991.36,
-      "cost_per_recovered_rupee_inr": 0.0011,
-      "net_recovered_inr": 939130.73
-    },
-    {
-      "unit_cost_inr": "\u20b91.50",
-      "total_intervention_cost_inr": 1464.86,
-      "cost_per_recovered_rupee_inr": 0.0016,
-      "net_recovered_inr": 938657.23
-    },
-    {
-      "unit_cost_inr": "\u20b92.50",
-      "total_intervention_cost_inr": 2411.86,
-      "cost_per_recovered_rupee_inr": 0.0026,
-      "net_recovered_inr": 937710.23
-    },
-    {
-      "unit_cost_inr": "\u20b95.00",
-      "total_intervention_cost_inr": 4779.36,
-      "cost_per_recovered_rupee_inr": 0.0051,
-      "net_recovered_inr": 935342.73
-    }
-  ],
-  "retry_cost_sweep": [
-    {
-      "unit_cost_inr": "\u20b90.10",
-      "fixed_retry_arm_cost_inr": 1297.6,
-      "payback_ai_retry_cost_inr": 0.0,
-      "cost_savings_vs_fixed_retry_inr": 81.1
-    },
-    {
-      "unit_cost_inr": "\u20b90.25",
-      "fixed_retry_arm_cost_inr": 1419.25,
-      "payback_ai_retry_cost_inr": 0.0,
-      "cost_savings_vs_fixed_retry_inr": 202.75
-    },
-    {
-      "unit_cost_inr": "\u20b90.50",
-      "fixed_retry_arm_cost_inr": 1622.0,
-      "payback_ai_retry_cost_inr": 0.0,
-      "cost_savings_vs_fixed_retry_inr": 405.5
-    },
-    {
-      "unit_cost_inr": "\u20b91.00",
-      "fixed_retry_arm_cost_inr": 2027.5,
-      "payback_ai_retry_cost_inr": 0.0,
-      "cost_savings_vs_fixed_retry_inr": 811.0
-    },
-    {
-      "unit_cost_inr": "\u20b92.00",
-      "fixed_retry_arm_cost_inr": 2838.5,
-      "payback_ai_retry_cost_inr": 0.0,
-      "cost_savings_vs_fixed_retry_inr": 1622.0
-    }
-  ],
-  "annoyance_penalty_sweep": [
-    {
-      "opt_out_risk_per_touch": "0.5%",
-      "expected_opt_outs_naive_fixed": 8.1,
-      "expected_opt_outs_payback_ai": 0.7,
-      "churn_prevention_advantage": "91.2%"
-    },
-    {
-      "opt_out_risk_per_touch": "1.0%",
-      "expected_opt_outs_naive_fixed": 16.2,
-      "expected_opt_outs_payback_ai": 1.4,
-      "churn_prevention_advantage": "91.2%"
-    },
-    {
-      "opt_out_risk_per_touch": "2.0%",
-      "expected_opt_outs_naive_fixed": 32.4,
-      "expected_opt_outs_payback_ai": 2.8,
-      "churn_prevention_advantage": "91.2%"
-    },
-    {
-      "opt_out_risk_per_touch": "5.0%",
-      "expected_opt_outs_naive_fixed": 81.1,
-      "expected_opt_outs_payback_ai": 7.1,
-      "churn_prevention_advantage": "91.2%"
-    },
-    {
-      "opt_out_risk_per_touch": "10.0%",
-      "expected_opt_outs_naive_fixed": 162.2,
-      "expected_opt_outs_payback_ai": 14.2,
-      "churn_prevention_advantage": "91.2%"
-    }
-  ],
-  "salary_timing_sweep": [
-    {
-      "salary_window_multiplier": "1.00x",
-      "timing_adjusted_recovery_inr": 940122.09,
-      "incremental_timing_gain_inr": 0.0
-    },
-    {
-      "salary_window_multiplier": "1.15x",
-      "timing_adjusted_recovery_inr": 989478.5,
-      "incremental_timing_gain_inr": 49356.41
-    },
-    {
-      "salary_window_multiplier": "1.25x",
-      "timing_adjusted_recovery_inr": 1022382.77,
-      "incremental_timing_gain_inr": 82260.68
-    },
-    {
-      "salary_window_multiplier": "1.40x",
-      "timing_adjusted_recovery_inr": 1071739.18,
-      "incremental_timing_gain_inr": 131617.09
-    }
-  ],
-  "compliance_window_sweep": [
-    {
-      "overdue_cap_days": "30 days",
-      "cases_eligible": 691,
-      "statutory_risk_score": "HIGH (30d violates standard terms)",
-      "recoverable_ceiling_inr": 832864.18
-    },
-    {
-      "overdue_cap_days": "60 days",
-      "cases_eligible": 719,
-      "statutory_risk_score": "MODERATE",
-      "recoverable_ceiling_inr": 908579.11
-    },
-    {
-      "overdue_cap_days": "90 days",
-      "cases_eligible": 737,
-      "statutory_risk_score": "OPTIMAL (90d statutory cap)",
-      "recoverable_ceiling_inr": 946436.57
-    },
-    {
-      "overdue_cap_days": "120 days",
-      "cases_eligible": 771,
-      "statutory_risk_score": "MODERATE",
-      "recoverable_ceiling_inr": 965365.3
-    }
-  ]
+  },
+  "sweeps": {
+    "contact_cost_sweep": [
+      {
+        "contact_cost_inr": 0.5,
+        "total_cost_inr": 618.86,
+        "net_recovered_inr": 1189031.37,
+        "cost_per_recovered_rupee": 0.0005
+      },
+      {
+        "contact_cost_inr": 1.0,
+        "total_cost_inr": 1134.86,
+        "net_recovered_inr": 1188515.37,
+        "cost_per_recovered_rupee": 0.001
+      },
+      {
+        "contact_cost_inr": 1.5,
+        "total_cost_inr": 1650.86,
+        "net_recovered_inr": 1187999.37,
+        "cost_per_recovered_rupee": 0.0014
+      },
+      {
+        "contact_cost_inr": 2.5,
+        "total_cost_inr": 2682.86,
+        "net_recovered_inr": 1186967.37,
+        "cost_per_recovered_rupee": 0.0023
+      },
+      {
+        "contact_cost_inr": 5.0,
+        "total_cost_inr": 5262.86,
+        "net_recovered_inr": 1184387.37,
+        "cost_per_recovered_rupee": 0.0044
+      }
+    ],
+    "retry_cost_sweep": [
+      {
+        "retry_cost_inr": 0.1,
+        "total_cost_inr": 1604.06,
+        "net_recovered_inr": 1188046.17,
+        "cost_per_recovered_rupee": 0.0013
+      },
+      {
+        "retry_cost_inr": 0.25,
+        "total_cost_inr": 1621.61,
+        "net_recovered_inr": 1188028.62,
+        "cost_per_recovered_rupee": 0.0014
+      },
+      {
+        "retry_cost_inr": 0.5,
+        "total_cost_inr": 1650.86,
+        "net_recovered_inr": 1187999.37,
+        "cost_per_recovered_rupee": 0.0014
+      },
+      {
+        "retry_cost_inr": 1.0,
+        "total_cost_inr": 1709.36,
+        "net_recovered_inr": 1187940.87,
+        "cost_per_recovered_rupee": 0.0014
+      },
+      {
+        "retry_cost_inr": 2.0,
+        "total_cost_inr": 1826.36,
+        "net_recovered_inr": 1187823.87,
+        "cost_per_recovered_rupee": 0.0015
+      }
+    ],
+    "recovery_probability_sweep": [
+      {
+        "multiplier": 0.7,
+        "scenario": "Severe Downturn",
+        "gross_recovered_inr": 832755.16,
+        "incremental_lift_inr": 586353.1,
+        "oracle_efficiency_pct": 98.88
+      },
+      {
+        "multiplier": 0.85,
+        "scenario": "Mild Downturn",
+        "gross_recovered_inr": 1011202.7,
+        "incremental_lift_inr": 712000.2,
+        "oracle_efficiency_pct": 98.88
+      },
+      {
+        "multiplier": 1.0,
+        "scenario": "Baseline",
+        "gross_recovered_inr": 1189650.23,
+        "incremental_lift_inr": 837647.29,
+        "oracle_efficiency_pct": 98.88
+      },
+      {
+        "multiplier": 1.15,
+        "scenario": "Mild Upside",
+        "gross_recovered_inr": 1368097.76,
+        "incremental_lift_inr": 963294.38,
+        "oracle_efficiency_pct": 98.88
+      },
+      {
+        "multiplier": 1.3,
+        "scenario": "Strong Upside",
+        "gross_recovered_inr": 1546545.3,
+        "incremental_lift_inr": 1088941.48,
+        "oracle_efficiency_pct": 98.88
+      }
+    ],
+    "annoyance_penalty_sweep": [
+      {
+        "touch_optout_risk_pct": 0.5,
+        "expected_optouts_fixed_retry": 8.1,
+        "expected_optouts_payback_ai": 0.7,
+        "churn_prevention_advantage_pct": 91.4
+      },
+      {
+        "touch_optout_risk_pct": 1.0,
+        "expected_optouts_fixed_retry": 16.2,
+        "expected_optouts_payback_ai": 1.4,
+        "churn_prevention_advantage_pct": 91.4
+      },
+      {
+        "touch_optout_risk_pct": 2.0,
+        "expected_optouts_fixed_retry": 32.4,
+        "expected_optouts_payback_ai": 2.8,
+        "churn_prevention_advantage_pct": 91.4
+      },
+      {
+        "touch_optout_risk_pct": 5.0,
+        "expected_optouts_fixed_retry": 81.0,
+        "expected_optouts_payback_ai": 7.0,
+        "churn_prevention_advantage_pct": 91.4
+      },
+      {
+        "touch_optout_risk_pct": 10.0,
+        "expected_optouts_fixed_retry": 162.0,
+        "expected_optouts_payback_ai": 14.0,
+        "churn_prevention_advantage_pct": 91.4
+      }
+    ],
+    "salary_cycle_sweep": [
+      {
+        "salary_cycle_lift_multiplier": 1.0,
+        "description": "Baseline (Unaligned)",
+        "incremental_lift_inr": 837647.29
+      },
+      {
+        "salary_cycle_lift_multiplier": 1.15,
+        "description": "1st\u20135th Month Payday Window",
+        "incremental_lift_inr": 963294.38
+      },
+      {
+        "salary_cycle_lift_multiplier": 1.25,
+        "description": "Last Day + 1st Week Combined",
+        "incremental_lift_inr": 1047059.11
+      },
+      {
+        "salary_cycle_lift_multiplier": 1.4,
+        "description": "Aggressive Payday Synchronized",
+        "incremental_lift_inr": 1172706.21
+      }
+    ],
+    "compliance_window_sweep": [
+      {
+        "statutory_cutoff_days": 30,
+        "gross_recovered_inr": 656060.56,
+        "incremental_lift_inr": 303551.12,
+        "compliance_safety": "Over-conservative"
+      },
+      {
+        "statutory_cutoff_days": 60,
+        "gross_recovered_inr": 988198.4,
+        "incremental_lift_inr": 635157.96,
+        "compliance_safety": "Balanced"
+      },
+      {
+        "statutory_cutoff_days": 90,
+        "gross_recovered_inr": 1278014.33,
+        "incremental_lift_inr": 924470.39,
+        "compliance_safety": "Balanced"
+      },
+      {
+        "statutory_cutoff_days": 120,
+        "gross_recovered_inr": 1363271.16,
+        "incremental_lift_inr": 1009580.22,
+        "compliance_safety": "Legal Risk (>90d)"
+      }
+    ],
+    "failure_rate_sweep": [
+      {
+        "portfolio_failure_rate_pct": 5.0,
+        "scaled_failed_cases": 333,
+        "gross_exposure_inr": 740655.17,
+        "simulated_recovered_inr": 396550.08
+      },
+      {
+        "portfolio_failure_rate_pct": 10.0,
+        "scaled_failed_cases": 666,
+        "gross_exposure_inr": 1481310.33,
+        "simulated_recovered_inr": 793100.15
+      },
+      {
+        "portfolio_failure_rate_pct": 15.0,
+        "scaled_failed_cases": 1000,
+        "gross_exposure_inr": 2221965.5,
+        "simulated_recovered_inr": 1189650.23
+      },
+      {
+        "portfolio_failure_rate_pct": 20.0,
+        "scaled_failed_cases": 1333,
+        "gross_exposure_inr": 2962620.67,
+        "simulated_recovered_inr": 1586200.31
+      },
+      {
+        "portfolio_failure_rate_pct": 25.0,
+        "scaled_failed_cases": 1666,
+        "gross_exposure_inr": 3703275.83,
+        "simulated_recovered_inr": 1982750.38
+      }
+    ],
+    "dataset_seed_sweep": [
+      {
+        "seed": 42,
+        "gross_recovered_inr": 1278014.33,
+        "incremental_lift_inr": 924470.39
+      },
+      {
+        "seed": 43,
+        "gross_recovered_inr": 1249140.78,
+        "incremental_lift_inr": 917331.52
+      },
+      {
+        "seed": 44,
+        "gross_recovered_inr": 1296574.26,
+        "incremental_lift_inr": 900821.75
+      },
+      {
+        "seed": 45,
+        "gross_recovered_inr": 1174374.26,
+        "incremental_lift_inr": 868566.67
+      },
+      {
+        "seed": 46,
+        "gross_recovered_inr": 1261302.28,
+        "incremental_lift_inr": 910324.86
+      },
+      {
+        "seed": 47,
+        "gross_recovered_inr": 1252978.75,
+        "incremental_lift_inr": 963296.94
+      },
+      {
+        "seed": 48,
+        "gross_recovered_inr": 1287926.09,
+        "incremental_lift_inr": 964557.55
+      },
+      {
+        "seed": 49,
+        "gross_recovered_inr": 1271828.71,
+        "incremental_lift_inr": 939827.28
+      },
+      {
+        "seed": 50,
+        "gross_recovered_inr": 1272390.33,
+        "incremental_lift_inr": 955701.3
+      },
+      {
+        "seed": 51,
+        "gross_recovered_inr": 1322468.73,
+        "incremental_lift_inr": 931562.01
+      }
+    ],
+    "llm_error_rate_sweep": [
+      {
+        "llm_error_rate_pct": 0.0,
+        "safety_mechanism": "PolicyGuard Fallback to Deterministic Rules",
+        "gross_recovered_inr": 1189650.23,
+        "degradation_pct": 0.0
+      },
+      {
+        "llm_error_rate_pct": 5.0,
+        "safety_mechanism": "PolicyGuard Fallback to Deterministic Rules",
+        "gross_recovered_inr": 1188287.26,
+        "degradation_pct": 0.11
+      },
+      {
+        "llm_error_rate_pct": 10.0,
+        "safety_mechanism": "PolicyGuard Fallback to Deterministic Rules",
+        "gross_recovered_inr": 1186924.29,
+        "degradation_pct": 0.23
+      },
+      {
+        "llm_error_rate_pct": 15.0,
+        "safety_mechanism": "PolicyGuard Fallback to Deterministic Rules",
+        "gross_recovered_inr": 1185561.32,
+        "degradation_pct": 0.34
+      },
+      {
+        "llm_error_rate_pct": 20.0,
+        "safety_mechanism": "PolicyGuard Fallback to Deterministic Rules",
+        "gross_recovered_inr": 1184198.35,
+        "degradation_pct": 0.46
+      }
+    ],
+    "provider_outage_sweep": [
+      {
+        "provider_outage_rate_pct": 0.0,
+        "resilience_mechanism": "Transactional Outbox + Exponential Backoff Retry",
+        "effective_recovered_inr": 1189650.23,
+        "lost_recovery_pct": 0.0
+      },
+      {
+        "provider_outage_rate_pct": 2.0,
+        "resilience_mechanism": "Transactional Outbox + Exponential Backoff Retry",
+        "effective_recovered_inr": 1186081.28,
+        "lost_recovery_pct": 0.3
+      },
+      {
+        "provider_outage_rate_pct": 5.0,
+        "resilience_mechanism": "Transactional Outbox + Exponential Backoff Retry",
+        "effective_recovered_inr": 1180727.85,
+        "lost_recovery_pct": 0.75
+      },
+      {
+        "provider_outage_rate_pct": 10.0,
+        "resilience_mechanism": "Transactional Outbox + Exponential Backoff Retry",
+        "effective_recovered_inr": 1171805.48,
+        "lost_recovery_pct": 1.5
+      },
+      {
+        "provider_outage_rate_pct": 20.0,
+        "resilience_mechanism": "Transactional Outbox + Exponential Backoff Retry",
+        "effective_recovered_inr": 1153960.72,
+        "lost_recovery_pct": 3.0
+      }
+    ]
+  }
 }

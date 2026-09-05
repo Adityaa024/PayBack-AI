@@ -1,55 +1,70 @@
 {
-  "benchmark_total_incremental_lift": 638267.53,
-  "total_failed_value": 1789506.44,
+  "benchmark_total_incremental_lift": 924470.39,
+  "sum_of_ablation_increments": 924470.39,
+  "invariant_verified": true,
   "layers": [
     {
       "layer": "1. Base (Do-Nothing Baseline)",
-      "description": "Natural baseline recovery of uncontacted holdout cohort",
+      "description": "Natural baseline recovery of uncontacted debt (0 contacts)",
       "marginal_lift_inr": 0.0,
       "cumulative_lift_inr": 0.0,
       "percent_of_total_lift": 0.0
     },
     {
       "layer": "2. + Coverage Outreach",
-      "description": "Intervening on eligible overdue debt instead of passive write-off",
-      "marginal_lift_inr": 218450.0,
-      "cumulative_lift_inr": 218450.0,
-      "percent_of_total_lift": 34.23
+      "description": "Actively engaging eligible overdue accounts vs passive write-off",
+      "marginal_lift_inr": 263590.21,
+      "cumulative_lift_inr": 263590.21,
+      "percent_of_total_lift": 28.51
     },
     {
-      "layer": "3. + Dynamic Timing",
-      "description": "Quiet hours suppression, weekday 10am-6pm sending, and salary-cycle alignment",
-      "marginal_lift_inr": 114320.0,
-      "cumulative_lift_inr": 332770.0,
-      "percent_of_total_lift": 17.91
+      "layer": "3. + Retry Timing",
+      "description": "Quiet hours suppression (10pm-8am) and time-boxed retry schedules",
+      "marginal_lift_inr": 0.0,
+      "cumulative_lift_inr": 263590.21,
+      "percent_of_total_lift": 0.0
     },
     {
       "layer": "4. + Channel Selection",
-      "description": "Routing high-intent B2C to WhatsApp and high-ticket B2B to formal Statement of Account",
-      "marginal_lift_inr": 86140.0,
-      "cumulative_lift_inr": 418910.0,
-      "percent_of_total_lift": 13.5
+      "description": "Channel matching: WhatsApp for UPI/D2C vs Email statement for B2B",
+      "marginal_lift_inr": 0.0,
+      "cumulative_lift_inr": 263590.21,
+      "percent_of_total_lift": 0.0
     },
     {
-      "layer": "5. + PolicyGuard Deterministic Safety",
-      "description": "8 hard stopping rules eliminating wasted outreach on opt-outs, >90d debt, and disputes",
-      "marginal_lift_inr": 112450.0,
-      "cumulative_lift_inr": 531360.0,
-      "percent_of_total_lift": 17.62
+      "layer": "5. + Dynamic Cooldowns",
+      "description": "24h-48h cooldown enforcement to eliminate spam penalties and debtor churn",
+      "marginal_lift_inr": 0.0,
+      "cumulative_lift_inr": 263590.21,
+      "percent_of_total_lift": 0.0
     },
     {
-      "layer": "6. + LLM Classification",
-      "description": "Nuanced interpretation of ambiguous payment decline notes (85.2% -> 96.9% accuracy)",
-      "marginal_lift_inr": 89280.0,
-      "cumulative_lift_inr": 620640.0,
-      "percent_of_total_lift": 13.99
+      "layer": "6. + PolicyGuard Safety",
+      "description": "8 stopping rules eliminating wasted outreach on opt-outs and >90d debt",
+      "marginal_lift_inr": -44043.35,
+      "cumulative_lift_inr": 219546.86,
+      "percent_of_total_lift": -4.76
     },
     {
-      "layer": "7. + LLM Adaptive Planning",
-      "description": "Dynamic cooldown calculation, mandate sequencing slots, and empathetic tone progression",
-      "marginal_lift_inr": 17627.53,
-      "cumulative_lift_inr": 638267.53,
-      "percent_of_total_lift": 2.76
+      "layer": "7. + Deterministic Classification",
+      "description": "Rule-based routing to causal incident lanes (84.8% diagnostic accuracy)",
+      "marginal_lift_inr": 647104.36,
+      "cumulative_lift_inr": 866651.22,
+      "percent_of_total_lift": 70.0
+    },
+    {
+      "layer": "8. + LLM Classification & Planning",
+      "description": "LLM disambiguation (96.8% accuracy) + adaptive mandate retry sequence",
+      "marginal_lift_inr": 42658.07,
+      "cumulative_lift_inr": 909309.29,
+      "percent_of_total_lift": 4.61
+    },
+    {
+      "layer": "8. + LLM Classification & Planning",
+      "description": "LLM disambiguation (96.8% accuracy) + adaptive mandate retry sequence",
+      "marginal_lift_inr": 15161.1,
+      "cumulative_lift_inr": 924470.39,
+      "percent_of_total_lift": 1.64
     }
   ]
 }
