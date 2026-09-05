@@ -85,12 +85,17 @@ The Razorpay Buildathon judging rubric evaluates four core dimensions. Here is h
 
 ---
 
-### 🖥️ Enterprise Recovery Control Tower
-| Desktop Operator View (1440×900) | Mobile Operator View (375×812) |
+### 🖥️ Enterprise Recovery Control Tower UI Showcase
+
+| Desktop Operations View (1440×900) | Mobile Operator View (375×812) |
 |:---:|:---:|
 | ![Recovery Control Tower Desktop](docs/assets/dashboard_desktop.png) | ![Recovery Control Tower Mobile](docs/assets/dashboard_mobile.png) |
 
-*Live multi-tenant AR Operations Dashboard displaying real-time recovery velocity, causal incident breakdown, stopping-rule telemetry, and immutable audit logs.*
+| Incident Remediation & Triage Modal | Multi-Tenant Operations Dashboard |
+|:---:|:---:|
+| ![Incident Remediation Modal](docs/assets/incidents_remediation.png) | ![Multi-Tenant Control Tower](docs/assets/control_tower_dashboard.png) |
+
+*Live AR Operations Dashboard displaying real-time recovery velocity, causal incident breakdown, stopping-rule telemetry, and immutable audit logs.*
 
 ---
 
@@ -177,6 +182,14 @@ PayBack-AI evaluates recovery across a **100% unified complete dataset (1,000 ca
 
 *Canonical Leaderboard Proof*: Headline performance and recovery rankings are strictly established by Arm 4 (PayBack-AI Deterministic) and Arm 5 (PayBack-AI Simulated LLM) on the unified 1,000-case dataset ($N=1,000$, Seed 42). Arm 6 (`real_llm_policy`) is kept strictly gated offline in the canonical benchmark table to prevent invalid cross-cohort comparison between a 50-case diagnostic sample ($N=50$) and the 1,000-case benchmark ($N=1,000$).
 *Note on Arm 5 (`simulated_llm_policy`)*: Arm 5 represents a rule-based synthetic heuristic approximation of LLM reasoning, evaluated for algorithmic baseline comparison; it does NOT represent live model inference.
+
+### 📊 Benchmark Yield & Smart Recovery Analytics
+
+| 7-Arm Benchmark Comparison | Smart Yield & Experimentation Analytics |
+|:---:|:---:|
+| ![7-Arm Canonical Benchmark Comparison](docs/assets/benchmark_chart.png) | ![Smart Yield Analytics](docs/assets/analytics_smart_yield.png) |
+
+*Left: Net Recovered Capital (₹) vs Oracle Recoverable Ceiling across 7 arms. Right: Real-time recovery velocity, causal incident lane distribution, and A/B policy experimentation metrics.*
 
 ---
 
