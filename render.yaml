@@ -1,10 +1,11 @@
 services:
   # ----------------------------------------------------------------------------
-  # 1. Python FastAPI AI Service (ai-service/)
+  # 1. Python FastAPI AI Service (ai-service/) — FREE TIER
   # ----------------------------------------------------------------------------
   - type: web
     name: payback-ai-service
     env: python
+    plan: free
     region: singapore
     rootDir: ai-service
     buildCommand: pip install -r requirements.txt
@@ -18,11 +19,12 @@ services:
         sync: false
 
   # ----------------------------------------------------------------------------
-  # 2. Node.js / Express Backend Engine (backend/)
+  # 2. Node.js / Express Backend Engine (backend/) — FREE TIER
   # ----------------------------------------------------------------------------
   - type: web
     name: payback-backend
     env: node
+    plan: free
     region: singapore
     rootDir: backend
     buildCommand: npm install && npm run build
