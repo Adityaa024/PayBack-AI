@@ -546,7 +546,13 @@ export class RecoveryRepository {
         throw new Error('Insert failed to return row');
       });
     } catch (err: unknown) {
-      if (err && typeof err === 'object' && 'code' in err && (err as any).code === '23505') {
+      const isUniqueViolation =
+        (err as any)?.code === '23505' ||
+        (err as any)?.cause?.code === '23505' ||
+        String((err as any)?.message || '').includes('duplicate key') ||
+        String((err as any)?.message || '').includes('23505');
+
+      if (isUniqueViolation && (data as any).idempotencyKey) {
         logger.info('Duplicate audit log suppressed by unique constraint', { idempotencyKey: (data as any).idempotencyKey });
         const [existing] = await this.db
           .select()

@@ -1,25 +1,69 @@
 {
+  "oracle_ceiling": {
+    "amount": 945618.25,
+    "recoverable_cases": 431,
+    "ceiling_percent_of_failed_value": 53.48,
+    "harness_self_check": "PASSED (100.00% exact match)"
+  },
   "control": {
-    "recovered": 83881.46,
-    "eligible": 424846.23000000004,
-    "cost": 0,
+    "eligible": 433602.18,
+    "recovered": 89738.34,
+    "recovery_rate_total_pct": 20.7,
     "contacts": 0,
-    "net": 83881.46
+    "cost": 0.0,
+    "net": 89738.34
   },
   "naive": {
-    "recovered": 572570.8299999998,
-    "eligible": 1836144.5599999991,
-    "cost": 1216.5,
+    "eligible": 1768306.45,
+    "recovered": 547408.29,
+    "recovery_rate_total_pct": 30.96,
+    "oracle_efficiency_pct": 57.89,
     "contacts": 811,
-    "net": 571354.3299999998,
-    "incremental": 208826.72450881422
+    "cost": 1216.5,
+    "net": 546191.79,
+    "incremental": 180222.95
   },
   "ai": {
-    "recovered": 939659.8100000003,
-    "eligible": 1836144.5599999991,
-    "cost": 1458.0,
-    "contacts": 972,
-    "net": 938201.8100000003,
-    "incremental": 575674.2045088147
+    "eligible": 1768306.45,
+    "recovered": 945618.25,
+    "recovery_rate_total_pct": 53.48,
+    "oracle_efficiency_pct": 100.0,
+    "contacts": 1002,
+    "cost": 1503.0,
+    "net": 944115.25,
+    "incremental": 578146.41,
+    "policy_enforcement_telemetry": {
+      "holdout_suppressed": 0,
+      "over_90_days_legal_stop": 66,
+      "customer_opted_out": 19,
+      "active_dispute_frozen": 17,
+      "ptp_broken_twice": 21,
+      "economic_floor_violation": 5,
+      "high_value_human_approval_required": 0,
+      "payment_captured_first_touch": 364,
+      "payment_captured_escalated_touch": 43,
+      "max_attempts_reached": 276
+    }
+  },
+  "llm": {
+    "eligible": 1768306.45,
+    "recovered": 888218.36,
+    "recovery_rate_total_pct": 50.23,
+    "oracle_efficiency_pct": 93.93,
+    "contacts": 933,
+    "cost": 1742.5,
+    "net": 886475.86,
+    "incremental": 520507.02,
+    "token_overhead_incurred": 343.0
+  },
+  "oracle": {
+    "eligible": 1768306.45,
+    "recovered": 945618.25,
+    "recovery_rate_total_pct": 53.48,
+    "oracle_efficiency_pct": 100.0,
+    "contacts": 321,
+    "cost": 481.5,
+    "net": 945136.75,
+    "incremental": 579167.91
   }
 }

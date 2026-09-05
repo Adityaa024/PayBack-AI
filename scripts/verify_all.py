@@ -112,6 +112,13 @@ def main():
     else:
         failed_steps.append(step5[0])
 
+    # Step 6: Oracle Ceiling Self-Check Assertion (recoverx benchmark)
+    step6 = ("Evaluation Harness Oracle Ceiling Self-Check", [sys.executable, "test/test_oracle_ceiling.py"], AI_SERVICE_DIR)
+    if run_step(*step6):
+        passed_steps.append(step6[0])
+    else:
+        failed_steps.append(step6[0])
+
     # Read latest evaluation report
     eval_json_path = REPORTS_DIR / 'evaluation.json'
     eval_summary = {}
@@ -135,9 +142,14 @@ def main():
         ai = eval_summary.get('ai', {})
         naive = eval_summary.get('naive', {})
         ctrl = eval_summary.get('control', {})
-        print(f"  * Control (Baseline): Gross Recovered INR {ctrl.get('recovered', 0):,.2f} (Cost: INR 0.00)")
-        print(f"  * Naive Baseline:     Incremental Lift INR {naive.get('incremental', 0):,.2f} (Contacts: {naive.get('contacts', 0)})")
-        print(f"  * PayBack-AI Agent:   Incremental Lift INR {ai.get('incremental', 0):,.2f} (Contacts: {ai.get('contacts', 0)})")
+        llm = eval_summary.get('llm', {})
+        orc = eval_summary.get('oracle_ceiling', {})
+
+        print(f"  * Oracle Ceiling (Max Realizable): INR {orc.get('amount', 0):,.2f} ({orc.get('ceiling_percent_of_failed_value', 0)}% of total debt)")
+        print(f"  * Control (Baseline):             Gross Recovered INR {ctrl.get('recovered', 0):,.2f} (Cost: INR 0.00)")
+        print(f"  * Naive Baseline:                 Incremental Lift INR {naive.get('incremental', 0):,.2f} (Contacts: {naive.get('contacts', 0)}, Eff: {naive.get('oracle_efficiency_pct', 0)}%)")
+        print(f"  * PayBack-AI Heuristic Agent:     Incremental Lift INR {ai.get('incremental', 0):,.2f} (Contacts: {ai.get('contacts', 0)}, Eff: {ai.get('oracle_efficiency_pct', 0)}%)")
+        print(f"  * PayBack-AI LLM Strategist Arm:  Incremental Lift INR {llm.get('incremental', 0):,.2f} (Contacts: {llm.get('contacts', 0)}, Eff: {llm.get('oracle_efficiency_pct', 0)}%)")
 
     if failed_steps:
         print(f"\n[FAILED] Verification failed on {len(failed_steps)} step(s).")

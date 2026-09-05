@@ -12,8 +12,19 @@ cohort_sizes:
   holdout_percentage: 0.20           # [ASSUMPTION] 20% assigned to "no intervention" (Control Arm)
 
 recovery_probabilities:
-  naive_baseline: 0.35               # [ASSUMPTION] "Always send a link" recovers ~35% (gross)
-  ai_agent_baseline: 0.65            # [ASSUMPTION] Full AI agent recovers ~65% (gross) due to optimal timing, channels, and tones
+  naive_baseline: 0.35               # [ASSUMPTION] "Always send a generic link" recovers ~35% (gross)
+  # NOTE: AI Agent recovery is NO LONGER a typed-in constant.
+  # It is dynamically computed by running the actual PolicyGuard stopping rules
+  # and multi-stage tone escalation decision engine in run_evaluation.py.
+
+# Customer Responsiveness Assumptions (Behavioral Ground Truth)
+customer_responsiveness:
+  natural_recovery: 0.15             # 15% resolve organically
+  payment_degradation: 0.56          # Recoverable when given instant 1-click UPI/card retry link
+  subscription_rescue: 0.46          # Recoverable when prompted with mandate update flow
+  b2b_receivables: 0.40              # Recoverable with formal commercial notice
+  checkout_dropoff: 0.34             # Recoverable with saved cart link
+  tone_escalation_lift: 0.12         # Incremental response from Stage 2 firm follow-up
 
 # Incident Lane Distribution
 incident_lanes:

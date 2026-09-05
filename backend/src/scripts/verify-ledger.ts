@@ -15,20 +15,54 @@ async function verifyLedger() {
 
   console.log(`Verifying Audit Ledger for tenant: ${tenantId}`);
   
-  const logs = await db
+  const rawLogs = await db
     .select()
     .from(recoveryAuditLog)
-    .where(eq(recoveryAuditLog.tenantId, tenantId))
-    .orderBy(asc(recoveryAuditLog.createdAt));
+    .where(eq(recoveryAuditLog.tenantId, tenantId));
 
-  if (logs.length === 0) {
+  if (rawLogs.length === 0) {
     console.log('No audit logs found for tenant.');
     return;
   }
 
+  // Map by previousHash to reconstruct chain and detect concurrent forks
+  const byPrevHash = new Map<string, (typeof rawLogs)[0]>();
+  let forkDetected = false;
+
+  for (const log of rawLogs) {
+    const prev = log.previousHash || 'GENESIS';
+    if (byPrevHash.has(prev)) {
+      console.error(`[CHAIN FORK] Multiple logs claim previous_hash: ${prev}`);
+      forkDetected = true;
+    }
+    byPrevHash.set(prev, log);
+  }
+
+  // Traverse chain from GENESIS
+  const logs: typeof rawLogs = [];
+  let curr = 'GENESIS';
+  const visited = new Set<string>();
+
+  while (byPrevHash.has(curr)) {
+    const next = byPrevHash.get(curr)!;
+    if (visited.has(next.id)) {
+      console.error(`[CYCLE DETECTED] Hash chain contains cycle at log ${next.id}`);
+      forkDetected = true;
+      break;
+    }
+    visited.add(next.id);
+    logs.push(next);
+    curr = next.hash!;
+  }
+
   let runningHash = 'GENESIS';
   let validCount = 0;
-  let invalidCount = 0;
+  let invalidCount = forkDetected ? 1 : 0;
+
+  if (logs.length !== rawLogs.length) {
+    console.error(`[DISCONNECTED LOGS] Found ${rawLogs.length} total logs but chain traversal only reached ${logs.length}.`);
+    invalidCount += (rawLogs.length - logs.length);
+  }
 
   for (const log of logs) {
     const payloadString = JSON.stringify({

@@ -36,28 +36,62 @@ def generate_dataset():
         # Randomize value around the average
         value = round(avg_value * random.uniform(0.5, 2.5), 2)
         
-        # We pre-determine if the customer WOULD pay under each arm.
-        # This prevents 'datetime.now()' drift and keeps results 100% reproducible.
-        
-        # Organic recovery (no intervention)
+        # Realistic attributes for policy evaluation
+        # 10% of cases are > 90 days overdue (Rule 1: Legal Stop)
+        if random.random() < 0.10:
+            days_overdue = random.randint(91, 130)
+        else:
+            days_overdue = random.randint(1, 89)
+
+        # 3% of cases have 2+ broken promises (Rule 3: PTP Broken Twice)
+        ptp_rand = random.random()
+        if ptp_rand < 0.03:
+            ptp_broken = 2
+        elif ptp_rand < 0.08:
+            ptp_broken = 1
+        else:
+            ptp_broken = 0
+
+        # 2.5% have active dispute / refund inquiry (Rule 6: Dispute Active)
+        has_dispute = random.random() < 0.025
+
+        # 2% have sent STOP keyword opt-out (Rule 2: Opt-Out)
+        opted_out = random.random() < 0.02
+
+        # 1% under economic floor of ₹100 (Rule 7: Economic Floor)
+        if random.random() < 0.01:
+            value = round(random.uniform(25.0, 95.0), 2)
+
+        # Ground-truth customer responsiveness
         natural_rec = random.random() < assumptions['natural_recovery_rate']
         
-        # Naive recovery (dumb link send)
-        # If they naturally recover, they also recover here.
+        # Naive responsiveness: customer responds to a generic link
         naive_rec = natural_rec or (random.random() < (assumptions['recovery_probabilities']['naive_baseline'] - assumptions['natural_recovery_rate']))
         
-        # AI recovery (smart, optimal timing/tone)
-        ai_rec = naive_rec or (random.random() < (assumptions['recovery_probabilities']['ai_agent_baseline'] - assumptions['recovery_probabilities']['naive_baseline']))
+        # Lane-specific responsiveness based on optimal channel and intervention
+        resp_cfg = assumptions.get('customer_responsiveness', {})
+        base_lane_prob = resp_cfg.get(lane, 0.45)
+        lane_rec = natural_rec or (random.random() < base_lane_prob)
+        
+        # Additional response if escalated to firm tone (Stage 2)
+        tone_boost = resp_cfg.get('tone_escalation_lift', 0.12)
+        tone_escalation_rec = lane_rec or (random.random() < tone_boost)
 
         dataset.append({
             "invoice_id": invoice_id,
             "incident_lane": lane,
             "amount": value,
+            "days_overdue": days_overdue,
+            "ptp_broken": ptp_broken,
+            "has_dispute": has_dispute,
+            "opted_out": opted_out,
+            "retry_count": 0,
             "is_holdout": is_holdout,
             "truth": {
                 "natural_recovery": natural_rec,
                 "naive_recovery": naive_rec,
-                "ai_recovery": ai_rec
+                "lane_recovery": lane_rec,
+                "tone_escalation_recovery": tone_escalation_rec
             }
         })
 
