@@ -48,6 +48,7 @@ def generate_real_provider_trace_sample(sample_size: int = 50, dry_run: bool = F
             print("[NOTICE] No live provider key detected. Real LLM arm remains gated offline.")
             return False
         raise RuntimeError(
+            "FATAL: No live LLM provider credentials configured. "
             "Real LLM trace recording requires a live provider API key (GROQ_API_KEY or OPENAI_API_KEY). "
             "Generating synthetic provider IDs or fake 'live' traces is strictly prohibited by evaluation integrity safeguards. "
             "To evaluate offline, the real_llm_policy arm must remain gated."
