@@ -59,7 +59,7 @@ We do not merely assert AI recovery; we prove it mathematically by executing the
 2. **Deterministic Enforcement Engine**: `PolicyGuard.validate()` in TypeScript (`backend/src/modules/recovery/recovery.contract.ts`) evaluates hard legal stops, opt-outs, dispute freezes, and broken promise limits.
 3. **Causal Recovery**: Lane-specific recovery succeeds *only* when the agent's diagnosed lane matches the customer's actual incident lane.
 
-Following the evaluation integrity standards modeled on [`piyush2676/recoverx`](https://github.com/piyush2676/recoverx), [`Ovais-Maker/razorpay-buildathon-recoup`](https://github.com/Ovais-Maker/razorpay-buildathon-recoup), and [`iamsiddhesh-dev/recoup`](https://github.com/iamsiddhesh-dev/recoup), PayBack-AI evaluates recovery across a **100% unified complete dataset (1,000 cases, Seed 42)** to remove denominator inconsistencies:
+PayBack-AI evaluates recovery across a **100% unified complete dataset (1,000 cases, Seed 42)** to remove denominator inconsistencies:
 
 | Metric | 1. Do Nothing | 2. Fixed Retry | 3. Contact Only | 4. PayBack-AI Deterministic | 5. PayBack-AI Simulated LLM | 6. PayBack-AI Real LLM (50-Case Sample) | 7. Oracle Ceiling |
 |---|---|---|---|---|---|---|---|
