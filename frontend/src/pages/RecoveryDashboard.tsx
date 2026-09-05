@@ -8,7 +8,7 @@ import {
   CreditCard,
   ShoppingCart,
   ShieldCheck, AlertTriangle, Cpu, Layers, TrendingUp, Clock, Lock, Play,
-  Bot
+  Bot, Copy, ChevronDown, ChevronUp
 } from "lucide-react";
 import { recoveryService } from "../services/recovery";
 import type { RecoveryContract } from "../services/recovery";
@@ -33,6 +33,54 @@ const laneMetadata: Record<string, { label: string; icon: React.ElementType; col
 let toastIdCounter = 0;
 const generateToastId = () => `toast_${Date.now()}_${++toastIdCounter}`;
 
+const liveDemoAuditLogs = [
+  {
+    id: "audit_live_01",
+    sessionId: "rcv_live_8912",
+    eventType: "webhook.received",
+    actionTaken: "payment.failed",
+    payload: { event: "payment.failed", error: "GATEWAY_TIMEOUT", bank: "HDFC", amount: 15000, channel: "UPI" },
+    actor: "Razorpay Webhook",
+    timestamp: new Date(Date.now() - 4000).toISOString(),
+  },
+  {
+    id: "audit_live_02",
+    sessionId: "rcv_live_8912",
+    eventType: "ai.diagnosis",
+    actionTaken: "classify_lane",
+    payload: { incidentLane: "payment_degradation", confidence: 0.94, primary: "gateway_technical_error" },
+    actor: "RecoveryAgent",
+    timestamp: new Date(Date.now() - 3000).toISOString(),
+  },
+  {
+    id: "audit_live_03",
+    sessionId: "rcv_live_8912",
+    eventType: "policy.evaluated",
+    actionTaken: "policyguard_passed",
+    payload: { stoppingRulesChecked: 8, violations: 0, cooldownHours: 24, approvalRequired: false },
+    actor: "PolicyGuard",
+    timestamp: new Date(Date.now() - 2000).toISOString(),
+  },
+  {
+    id: "audit_live_04",
+    sessionId: "rcv_live_8912",
+    eventType: "outbox.dispatched",
+    actionTaken: "send_payment_link",
+    payload: { link: "https://rzp.io/l/demo_8912", expiryHours: 48, channel: "whatsapp" },
+    actor: "OutboxWorker",
+    timestamp: new Date(Date.now() - 1000).toISOString(),
+  },
+  {
+    id: "audit_live_05",
+    sessionId: "rcv_live_8912",
+    eventType: "webhook.settled",
+    actionTaken: "payment.captured",
+    payload: { paymentId: "pay_live_captured_9918", amount: 15000, signature: "hmac_verified", settled: true },
+    actor: "Razorpay Webhook",
+    timestamp: new Date().toISOString(),
+  },
+];
+
 export function RecoveryDashboard() {
   const queryClient = useQueryClient();
   const [searchParams] = useSearchParams();
@@ -50,9 +98,26 @@ export function RecoveryDashboard() {
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(searchParams.get("id") || null);
   const [activeDrawerTab, setActiveDrawerTab] = useState<"overview" | "timeline" | "policy_explanation" | "evidence" | "llm_trace" | "audit">("overview");
 
-  // Real-Time Demo Flow Stepper
+  // Real-Time Demo Flow Stepper & Simulated Incident State
   const [demoStep, setDemoStep] = useState<number>(0);
   const [isDemoRunning, setIsDemoRunning] = useState<boolean>(false);
+  const [liveSimCase, setLiveSimCase] = useState<{
+    id: string;
+    invoiceId: string;
+    clientName: string;
+    clientEmail: string;
+    amountAtRisk: string;
+    amountRecovered: number;
+    incidentLane: string;
+    strategy: string;
+    status: string;
+    retryCount: number;
+    optedOut: boolean;
+    isHoldout: boolean;
+    step: number;
+    showRawWebhook?: boolean;
+    recoveryContract: any;
+  } | null>(null);
 
   // Toasts
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
@@ -70,7 +135,7 @@ export function RecoveryDashboard() {
   };
 
   const handleCopyLink = (sessionId: string) => {
-    const testUrl = `https://rzp.io/l/rec_${sessionId.slice(0, 8)}`;
+    const testUrl = sessionId === "rcv_live_8912" ? "https://rzp.io/l/demo_8912" : `https://rzp.io/l/rec_${sessionId.slice(0, 8)}`;
     if (navigator.clipboard) {
       navigator.clipboard.writeText(testUrl);
     }
@@ -78,29 +143,85 @@ export function RecoveryDashboard() {
   };
 
   // Run Real-Time Demo Flow (Simulates failed payment to webhook settlement)
-  const handleRunDemoSimulation = () => {
+  const handleRunDemoSimulation = async () => {
     if (isDemoRunning) return;
     setIsDemoRunning(true);
     setDemoStep(1);
+
+    const initialCase = {
+      id: "rcv_live_8912",
+      invoiceId: "INV-LIVE-8912",
+      clientName: "Rohan Sharma (Razorpay HDFC UPI)",
+      clientEmail: "rohan.sharma@example.com",
+      amountAtRisk: "15000.00",
+      amountRecovered: 0,
+      incidentLane: "payment_degradation",
+      strategy: "soft_reminder",
+      status: "active",
+      retryCount: 0,
+      optedOut: false,
+      isHoldout: false,
+      step: 1,
+      showRawWebhook: false,
+      recoveryContract: {
+        caseId: "rcv_live_8912",
+        incidentLane: "payment_degradation",
+        customerId: "cust_live_hdfc",
+        amountAtRisk: 15000,
+        currency: "INR",
+        diagnosis: {
+          primary: "gateway_technical_error",
+          evidence: ["HDFC UPI Gateway 504 Timeout", "Razorpay webhook: payment.failed", "1 failed attempt recorded"],
+          confidence: 0.94,
+        },
+        recommendedAction: "send_payment_link",
+        actionParameters: {
+          maxAmount: 15000,
+          expiresInHours: 48,
+          allowedMethods: ["upi", "card", "netbanking"],
+        },
+        customerMessage: "Namaste Rohan ji, your UPI payment of ₹15,000 for invoice INV-LIVE-8912 timed out. Complete your payment instantly via this secure link.",
+        voiceScriptHinglish: "Namaste Rohan ji, aapka ₹15,000 ka payment timeout ho gaya tha. Aap UPI ya card se turant secure link par payment complete kar sakte hain.",
+        cooldownHours: 24,
+        maxAttempts: 3,
+        escalateAfter: "no_payment_after_48h",
+        stopRules: ["payment_captured", "customer_opted_out", "refund_or_dispute_signal", "max_attempts_reached"],
+        requiresHumanApproval: false,
+      },
+    };
+
+    setLiveSimCase(initialCase);
     addToast("Step 1: Payment Failed", "HDFC UPI webhook received: Gateway timeout on ₹15,000 transaction.", "warning");
+
+    try {
+      await recoveryService.replayScenario(1);
+    } catch (err) {
+      console.warn("Failed to inject demo data via backend:", err);
+    }
 
     setTimeout(() => {
       setDemoStep(2);
-      addToast("Step 2: AI Multi-Agent Diagnosis", "RecoveryAgent diagnosed 'payment_degradation' with 92% confidence.", "info");
+      setLiveSimCase((prev) => prev ? { ...prev, step: 2 } : prev);
+      addToast("Step 2: AI Multi-Agent Diagnosis", "RecoveryAgent diagnosed 'payment_degradation' with 94% confidence.", "info");
+      queryClient.invalidateQueries({ queryKey: ["recovery-sessions"] });
+      queryClient.invalidateQueries({ queryKey: ["recovery-stats"] });
     }, 1200);
 
     setTimeout(() => {
       setDemoStep(3);
+      setLiveSimCase((prev) => prev ? { ...prev, step: 3 } : prev);
       addToast("Step 3: PolicyGuard Validation", "Passed 8 stopping rules. Cooldown verified (24h). 0 opt-out flags.", "success");
     }, 2400);
 
     setTimeout(() => {
       setDemoStep(4);
+      setLiveSimCase((prev) => prev ? { ...prev, step: 4, retryCount: 1 } : prev);
       addToast("Step 4: Outbox Intent Dispatched", "Signed payment link generated: https://rzp.io/l/demo_8912.", "action");
     }, 3600);
 
     setTimeout(() => {
       setDemoStep(5);
+      setLiveSimCase((prev) => prev ? { ...prev, step: 5, status: "recovered", amountRecovered: 15000 } : prev);
       addToast("Step 5: Webhook Captured & Settled", "Signed payment.captured received. ₹15,000 credited to ledger.", "success");
       setIsDemoRunning(false);
     }, 4800);
@@ -174,7 +295,10 @@ export function RecoveryDashboard() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [queryClient]);
 
-  const sessions = sessionsData?.sessions || [];
+  const rawSessions = sessionsData?.sessions || [];
+  const sessions = liveSimCase
+    ? [liveSimCase as unknown as (typeof rawSessions)[0], ...rawSessions.filter((s) => s.id !== liveSimCase.id)]
+    : rawSessions;
 
   // Filter sessions
   const filteredSessions = sessions.filter((s) => {
@@ -202,8 +326,14 @@ export function RecoveryDashboard() {
   });
 
   const selectedSession = sessions.find((s) => s.id === selectedSessionId);
-  const contract = selectedContractData?.contract as RecoveryContract | undefined;
-  const auditLogs = selectedAuditData?.audit || [];
+  const contract =
+    selectedSessionId === "rcv_live_8912"
+      ? (liveSimCase?.recoveryContract as RecoveryContract)
+      : (selectedContractData?.contract as RecoveryContract | undefined);
+  const auditLogs =
+    selectedSessionId === "rcv_live_8912"
+      ? liveDemoAuditLogs
+      : (selectedAuditData?.audit || []);
 
   return (
     <div className="space-y-5 max-w-7xl mx-auto pb-10">
@@ -286,10 +416,10 @@ export function RecoveryDashboard() {
             Gross Recovered
           </span>
           <div className="text-xl font-bold text-emerald-800 mt-1">
-            ₹12,11,073
+            ₹{liveSimCase?.status === "recovered" ? "12,26,073" : "12,11,073"}
           </div>
           <p className="text-[11px] text-stone-500 mt-1">
-            54.50% of total failed portfolio value.
+            {liveSimCase?.status === "recovered" ? "55.18% of total failed portfolio value (+₹15K live)." : "54.50% of total failed portfolio value."}
           </p>
         </div>
 
@@ -298,7 +428,7 @@ export function RecoveryDashboard() {
             Incremental Lift (vs Natural)
           </span>
           <div className="text-xl font-bold text-emerald-700 mt-1">
-            +₹8,59,070
+            +₹{liveSimCase?.status === "recovered" ? "8,74,070" : "8,59,070"}
           </div>
           <p className="text-[11px] text-emerald-700 font-semibold mt-1">
             Net lift above organic uncontacted baseline.
@@ -388,6 +518,146 @@ export function RecoveryDashboard() {
           })}
         </div>
       </div>
+
+      {/* ── Live Simulation Incident Card ─────────────────── */}
+      {liveSimCase && (
+        <div className="p-4 rounded-lg bg-gradient-to-r from-emerald-50/90 via-white to-emerald-50/70 border-2 border-emerald-500/60 shadow-xs space-y-3 transition-all animate-in fade-in slide-in-from-top-2 duration-300">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-emerald-200/70 pb-2.5">
+            <div className="flex items-center gap-2">
+              <span className="flex h-2.5 w-2.5 relative">
+                <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${liveSimCase.status === 'recovered' ? 'bg-emerald-400' : 'bg-amber-400'}`} />
+                <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${liveSimCase.status === 'recovered' ? 'bg-emerald-600' : 'bg-amber-600'}`} />
+              </span>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="font-bold text-stone-900 text-xs tracking-tight">
+                    LIVE SIMULATION STREAM: #{liveSimCase.invoiceId}
+                  </span>
+                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
+                    liveSimCase.status === 'recovered'
+                      ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                      : 'bg-amber-100 text-amber-800 border border-amber-300'
+                  }`}>
+                    {liveSimCase.status === 'recovered' ? '✓ Recovered & Settled' : `Phase ${liveSimCase.step}/5: In Flight`}
+                  </span>
+                </div>
+                <div className="text-[11px] text-stone-600 mt-0.5">
+                  Counterparty: <span className="font-semibold text-stone-800">{liveSimCase.clientName}</span> &nbsp;|&nbsp; Exposure: <span className="font-bold text-stone-900">₹15,000.00</span> &nbsp;|&nbsp; Lane: <span className="font-medium text-stone-700">Payment Degradation</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setSelectedSessionId(liveSimCase.id)}
+                className="flex items-center gap-1 px-3 py-1.5 rounded-md bg-stone-900 hover:bg-stone-800 text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+              >
+                <FileText className="w-3.5 h-3.5" />
+                <span>Inspect in Drawer</span>
+              </button>
+              <button
+                onClick={() => handleCopyLink(liveSimCase.id)}
+                className="flex items-center gap-1 px-3 py-1.5 rounded-md bg-white border border-stone-300 hover:bg-stone-50 text-stone-700 text-xs font-semibold shadow-2xs transition-colors cursor-pointer"
+              >
+                <Copy className="w-3 h-3 text-stone-500" />
+                <span>Copy Link</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Real-Time Telemetry Snapshot */}
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-2.5 text-xs">
+            <div className="p-2.5 rounded bg-white/90 border border-emerald-200/80 shadow-2xs">
+              <span className="text-[10px] font-bold text-stone-500 uppercase block">1. Ingested Trigger</span>
+              <span className="font-semibold text-stone-900 block mt-0.5">HDFC UPI Timeout</span>
+              <span className="text-[11px] text-stone-500 font-mono">504_GATEWAY_TIMEOUT</span>
+            </div>
+
+            <div className="p-2.5 rounded bg-white/90 border border-emerald-200/80 shadow-2xs">
+              <span className="text-[10px] font-bold text-stone-500 uppercase block">2. AI Diagnosis</span>
+              <span className="font-semibold text-stone-900 block mt-0.5">
+                {liveSimCase.step >= 2 ? "Confidence: 94%" : "Awaiting Triage..."}
+              </span>
+              <span className="text-[11px] text-stone-500">
+                {liveSimCase.step >= 2 ? "Soft Dynamic Retry" : "Calculating..."}
+              </span>
+            </div>
+
+            <div className="p-2.5 rounded bg-white/90 border border-emerald-200/80 shadow-2xs">
+              <span className="text-[10px] font-bold text-stone-500 uppercase block">3. PolicyGuard Defense</span>
+              <span className="font-semibold text-stone-900 block mt-0.5 flex items-center gap-1">
+                {liveSimCase.step >= 3 ? (
+                  <>
+                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-700 inline" />
+                    <span className="text-emerald-800">8/8 Rules Passed</span>
+                  </>
+                ) : (
+                  "Pending Check..."
+                )}
+              </span>
+              <span className="text-[11px] text-stone-500">
+                {liveSimCase.step >= 3 ? "0 opt-outs, 24h cooldown OK" : "Firewall verifying..."}
+              </span>
+            </div>
+
+            <div className="p-2.5 rounded bg-white/90 border border-emerald-200/80 shadow-2xs">
+              <span className="text-[10px] font-bold text-stone-500 uppercase block">4 & 5. Settlement</span>
+              <span className="font-semibold text-stone-900 block mt-0.5">
+                {liveSimCase.step >= 5 ? (
+                  <span className="text-emerald-700 font-bold">₹15,000.00 Credited</span>
+                ) : liveSimCase.step >= 4 ? (
+                  <span className="text-stone-700">Link Active (48h)</span>
+                ) : (
+                  "Pending Dispatch"
+                )}
+              </span>
+              <span className="text-[11px] text-stone-500">
+                {liveSimCase.step >= 5 ? "Razorpay payment.captured" : liveSimCase.step >= 4 ? "Dispatched to WhatsApp" : "Queue waiting"}
+              </span>
+            </div>
+          </div>
+
+          {/* Webhook JSON Preview Toggle */}
+          <div className="pt-1">
+            <button
+              onClick={() => setLiveSimCase((prev) => prev ? { ...prev, showRawWebhook: !prev.showRawWebhook } : prev)}
+              className="text-[11px] font-semibold text-stone-600 hover:text-stone-900 flex items-center gap-1 cursor-pointer"
+            >
+              {liveSimCase.showRawWebhook ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+              <span>{liveSimCase.showRawWebhook ? "Hide Raw Ingested Webhook Payload" : "View Raw Ingested Webhook Payload (JSON)"}</span>
+            </button>
+            {liveSimCase.showRawWebhook && (
+              <pre className="mt-2 p-3 bg-stone-900 text-emerald-400 rounded-md text-[11px] font-mono overflow-x-auto border border-stone-800">
+{JSON.stringify({
+  entity: "event",
+  account_id: "acc_demo_test",
+  event: liveSimCase.step >= 5 ? "payment.captured" : "payment.failed",
+  payload: {
+    payment: {
+      entity: {
+        id: "pay_live_8912_hdfc",
+        amount: 1500000,
+        currency: "INR",
+        status: liveSimCase.step >= 5 ? "captured" : "failed",
+        method: "upi",
+        bank: "HDFC",
+        error_code: liveSimCase.step >= 5 ? null : "GATEWAY_TIMEOUT",
+        notes: {
+          invoice_id: "INV-LIVE-8912",
+          customer_name: "Rohan Sharma",
+          lane: "payment_degradation"
+        }
+      }
+    }
+  },
+  signature: "hmac_sha256_verified_c89d1a2f9011be44",
+  timestamp: new Date().toISOString()
+}, null, 2)}
+              </pre>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* ── CONDITIONAL MAIN VIEW: Operations Queue vs Benchmark & Funnel ──── */}
       {mainView === "queue" ? (
@@ -488,15 +758,24 @@ export function RecoveryDashboard() {
                         key={session.id}
                         onClick={() => setSelectedSessionId(session.id)}
                         className={`cursor-pointer transition-colors ${
-                          isSelected ? "bg-stone-100/90 font-medium" : "hover:bg-stone-50/70"
+                          session.id === "rcv_live_8912"
+                            ? "bg-emerald-50/80 hover:bg-emerald-100/80 ring-2 ring-emerald-500/50 shadow-2xs font-medium"
+                            : isSelected
+                            ? "bg-stone-100/90 font-medium"
+                            : "hover:bg-stone-50/70"
                         }`}
                       >
                         <td className="py-2.5 px-3">
                           <div className="font-semibold text-stone-900 flex items-center gap-1.5">
-                            <span className="font-mono">#{session.invoiceId?.slice(0, 8)}</span>
+                            <span className="font-mono">#{session.invoiceId?.slice(0, 12)}</span>
+                            {session.id === "rcv_live_8912" && (
+                              <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-700 text-white animate-pulse">
+                                🔴 LIVE DEMO
+                              </span>
+                            )}
                           </div>
                           <div className="text-[11px] text-stone-500 truncate max-w-[150px]">
-                            Tenant: primary-sandbox
+                            {session.id === "rcv_live_8912" ? "Rohan Sharma (HDFC UPI)" : "Tenant: primary-sandbox"}
                           </div>
                         </td>
 
@@ -515,7 +794,7 @@ export function RecoveryDashboard() {
                           <span className="font-semibold text-stone-800">
                             {session.recoveryContract?.diagnosis?.confidence
                               ? `${Math.round(session.recoveryContract.diagnosis.confidence * 100)}%`
-                              : "92%"}
+                              : "94%"}
                           </span>
                         </td>
 
@@ -538,27 +817,54 @@ export function RecoveryDashboard() {
                         </td>
 
                         <td className="py-2.5 px-3">
-                          <StatusBadge status={session.status} />
+                          {session.id === "rcv_live_8912" && session.status === "recovered" ? (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 animate-in fade-in">
+                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700" />
+                              <span>RECOVERED (+₹15K)</span>
+                            </span>
+                          ) : (
+                            <StatusBadge status={session.status} />
+                          )}
                         </td>
 
                         <td className="py-2.5 px-3 text-right">
                           <div className="flex items-center justify-end gap-1.5" onClick={(e) => e.stopPropagation()}>
-                            {session.status === "active" && (
-                              <button
-                                onClick={() => executeMutation.mutate(session.id)}
-                                disabled={executeMutation.isPending}
-                                className="px-2 py-1 rounded bg-stone-900 hover:bg-stone-800 text-white font-medium text-[11px] transition-colors"
-                              >
-                                Execute
-                              </button>
+                            {session.id === "rcv_live_8912" ? (
+                              <>
+                                <button
+                                  onClick={() => setSelectedSessionId(session.id)}
+                                  className="px-2 py-1 rounded bg-stone-900 hover:bg-stone-800 text-white font-medium text-[11px] transition-colors"
+                                >
+                                  Inspect
+                                </button>
+                                <button
+                                  onClick={() => handleCopyLink(session.id)}
+                                  className="px-2 py-1 rounded bg-stone-100 hover:bg-stone-200 text-stone-700 font-medium text-[11px] border border-stone-300 transition-colors"
+                                  title="Copy fresh Razorpay payment link"
+                                >
+                                  Copy Link
+                                </button>
+                              </>
+                            ) : (
+                              <>
+                                {session.status === "active" && (
+                                  <button
+                                    onClick={() => executeMutation.mutate(session.id)}
+                                    disabled={executeMutation.isPending}
+                                    className="px-2 py-1 rounded bg-stone-900 hover:bg-stone-800 text-white font-medium text-[11px] transition-colors"
+                                  >
+                                    Execute
+                                  </button>
+                                )}
+                                <button
+                                  onClick={() => handleCopyLink(session.id)}
+                                  className="px-2 py-1 rounded bg-stone-100 hover:bg-stone-200 text-stone-700 font-medium text-[11px] border border-stone-300 transition-colors"
+                                  title="Copy fresh Razorpay payment link"
+                                >
+                                  Copy Link
+                                </button>
+                              </>
                             )}
-                            <button
-                              onClick={() => handleCopyLink(session.id)}
-                              className="px-2 py-1 rounded bg-stone-100 hover:bg-stone-200 text-stone-700 font-medium text-[11px] border border-stone-300 transition-colors"
-                              title="Copy fresh Razorpay payment link"
-                            >
-                              Copy Link
-                            </button>
                           </div>
                         </td>
                       </tr>

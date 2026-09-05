@@ -1,5 +1,5 @@
 import { eq } from 'drizzle-orm';
-import { invoices } from '../../db/index.js';
+import { invoices, paymentPlanRequests } from '../../db/index.js';
 import type { DatabaseClient, PaymentPlanRequest, NewPaymentPlanInstallment, PaymentPlanInstallment } from '../../db/index.js';
 import type { PaymentPlanRepository } from './payment-plan.repository.js';
 import type { InvoiceRepository } from '../invoice/invoice.repository.js';
@@ -388,5 +388,61 @@ export class PaymentPlanService {
         }
       );
     });
+  }
+
+  async resetDemoPlans(tenantId: string): Promise<void> {
+    const plans = [
+      {
+        id: 'plan_req_001',
+        invoiceId: 'rcv_b2b_007',
+        installments: 3,
+        amountPerMonth: '43333.33',
+        reason: 'Cashflow constrained due to delayed enterprise client payout. Requesting 3 monthly installments to clear full balance.',
+        status: 'pending' as const,
+      },
+      {
+        id: 'plan_req_002',
+        invoiceId: 'rcv_pay_004',
+        installments: 2,
+        amountPerMonth: '3650.00',
+        reason: 'Transitioning payment gateway provider. Will clear in 2 bi-weekly tranches.',
+        status: 'pending' as const,
+      },
+      {
+        id: 'plan_req_003',
+        invoiceId: 'rcv_pay_002',
+        installments: 3,
+        amountPerMonth: '1633.33',
+        reason: 'Pre-approved installment plan under PolicyGuard grace terms.',
+        status: 'approved' as const,
+      },
+      {
+        id: 'plan_req_004',
+        invoiceId: 'rcv_pay_003',
+        installments: 6,
+        amountPerMonth: '1016.66',
+        reason: 'Exceeds maximum allowed 90-day recovery window.',
+        status: 'denied' as const,
+      },
+    ];
+
+    for (const p of plans) {
+      await this.db.insert(paymentPlanRequests).values({
+        id: p.id,
+        tenantId,
+        invoiceId: p.invoiceId,
+        installments: p.installments,
+        proposedAmountPerMonth: p.amountPerMonth,
+        reason: p.reason,
+        status: p.status,
+      }).onConflictDoUpdate({
+        target: paymentPlanRequests.id,
+        set: {
+          status: p.status,
+          reason: p.reason,
+          proposedAmountPerMonth: p.amountPerMonth,
+        },
+      });
+    }
   }
 }

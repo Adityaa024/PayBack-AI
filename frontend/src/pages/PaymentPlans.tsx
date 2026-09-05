@@ -59,6 +59,18 @@ export function PaymentPlans() {
     },
   });
 
+  const resetMutation = useMutation({
+    mutationFn: () => invoiceService.resetDemoPaymentPlans(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['paymentPlans'] });
+      setSuccessNotice('Demo proposals reset: 2 pending proposals restored.');
+      setTimeout(() => setSuccessNotice(null), 3500);
+    },
+    onError: () => {
+      setError('Failed to reset demo payment proposals.');
+    },
+  });
+
   const formatCurrency = (amount: string, currencyCode: string) => {
     try {
       const num = parseFloat(amount);
@@ -127,6 +139,15 @@ export function PaymentPlans() {
             </span>
           )}
           <button
+            onClick={() => resetMutation.mutate()}
+            disabled={resetMutation.isPending}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-stone-100 border border-stone-300 hover:bg-stone-200 text-stone-700 text-xs font-semibold shadow-2xs transition-colors cursor-pointer disabled:opacity-50"
+            title="Restore default demo proposals"
+          >
+            <RefreshCw className={`h-3.5 w-3.5 text-stone-500 ${resetMutation.isPending ? 'animate-spin' : ''}`} />
+            <span>Reset Demo Proposals</span>
+          </button>
+          <button
             onClick={() => refetch()}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-white border border-stone-300 hover:bg-stone-50 text-stone-700 text-xs font-semibold shadow-2xs transition-colors cursor-pointer"
           >
@@ -180,6 +201,23 @@ export function PaymentPlans() {
             <p className="text-xs text-stone-500 max-w-sm leading-relaxed">
               There are no payment plan proposals currently in '{statusFilter}' status.
             </p>
+            <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
+              {statusFilter !== 'all' && (
+                <button
+                  onClick={() => setStatusFilter('all')}
+                  className="px-3 py-1.5 rounded-md bg-stone-900 text-white text-xs font-semibold hover:bg-stone-800 transition-colors cursor-pointer"
+                >
+                  View All Proposals (Approved & Denied)
+                </button>
+              )}
+              <button
+                onClick={() => resetMutation.mutate()}
+                disabled={resetMutation.isPending}
+                className="px-3 py-1.5 rounded-md bg-white border border-stone-300 text-stone-700 text-xs font-semibold hover:bg-stone-50 transition-colors cursor-pointer"
+              >
+                Reset Demo Proposals (Restore 2 Pending)
+              </button>
+            </div>
           </div>
         ) : (
           <div className="grid gap-3.5">

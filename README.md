@@ -4,7 +4,7 @@
 > *"Find revenue that’s slipping away and win it back. Build an agent that detects revenue at risk, determines the right intervention, and executes a bounded recovery workflow: from payment failures and checkout abandonment to overdue receivables."*
 
 [![Build & Verification Status](https://img.shields.io/badge/Verification-14%2F14%20Passing-brightgreen?style=flat-square)](scripts/verify_all.py)
-[![Vitest Recovery Suites](https://img.shields.io/badge/Vitest%20Recovery-121%2F121%20Passed-blue?style=flat-square)](backend/test/modules/recovery/)
+[![Vitest Test Suites](https://img.shields.io/badge/Vitest%20Suites-558%2F558%20Passed-blue?style=flat-square)](backend/test/)
 [![PostgreSQL Engine](https://img.shields.io/badge/PostgreSQL-17.6%20Active-blue?style=flat-square)](backend/src/db/schema.ts)
 [![Razorpay API](https://img.shields.io/badge/Razorpay-Test%20Mode%20APIs-0c2340?style=flat-square&logo=razorpay)](https://razorpay.com)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
@@ -28,7 +28,7 @@ The Razorpay Buildathon judging rubric evaluates four core dimensions. Here is h
 ### 2. 🏛️ Build Quality: *Does it run, is it structured, would you trust it?*
 - **Does it run?**
   - Instant, one-command master verification: `python verify_all.py` (or `npm --prefix backend run verify:all`).
-  - Executes **14/14 automated stages** end-to-end in <90 seconds: compiler AST structural safety bans, live PostgreSQL migrations, all 20 Vitest recovery test suites (121/121 tests passing), 20-seed Monte Carlo simulations (20,000 cases), and deterministic reproducibility verification.
+  - Executes **14/14 automated stages** end-to-end: compiler AST structural safety bans, live PostgreSQL migrations, all 71 Vitest test suites (558/558 tests passing), 20-seed Monte Carlo simulations (20,000 cases), zero migration drift assertion (`npm run db:check`), and deterministic reproducibility verification.
 - **Is it structured?**
   - Strict architectural separation across 4 execution layers:
     - **Advisory AI Layer** (`ai-service` in Python / FastAPI): Multi-agent diagnostic triage (`RecoveryAgent`, `PaymentRetryAgent`, `MandateSequencerAgent`). Compiler AST inspection (`test_structural_safety.py`) bans DB drivers, HTTP clients, and payment SDKs from the AI layer.
@@ -437,13 +437,14 @@ cd PayBack-AI
 # 2. Install backend dependencies
 cd backend && npm install
 
-# 3. Run database migrations
+# 3. Run database migrations and verify zero schema drift
 npm run db:migrate
+npm run db:check
 
 # 4. Install AI service dependencies
 cd ../ai-service && pip install -r requirements.txt
 
-# 5. Run full system verification (1 command, all 6 steps)
+# 5. Run full system verification (1 command, all 14 stages)
 cd .. && python scripts/verify_all.py
 ```
 

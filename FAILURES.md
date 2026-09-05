@@ -165,8 +165,22 @@ The synthetic dataset generator (`generate_dataset.py`) produced monolithic bool
 4. **Honest AI < Oracle Gap**: With real decision branching, AI Agent recovers **84.27%** (Deterministic) and **85.50%** (Simulated LLM) of the Oracle Ceiling (₹11,93,696.63 and ₹12,11,073.36 vs Oracle ₹14,16,470.85). The gap is directly explained by real diagnostic misclassifications on ambiguous cases and suboptimal strategy choices.
 5. **Adversarial Regression Test (`agent-decision-causality.test.ts`)**: Added an adversarial test constructing a case where the optimal strategy (`mandate_retry`) differs from the agent's choice (`payment_link_refresh`). The test asserts the agent recovers ₹0 while Oracle recovers ₹5,000, and proves that under the old logic the agent would have erroneously recovered ₹5,000.
 
+### 17. Schema & Migration Drift Resolution & CI Pre-Commit Guard
+**Date:** September 5, 2026
+**What happened:**
+A fresh clone running `npm run db:migrate` against a clean PostgreSQL instance failed with `column "incident_lane" of relation "recovery_sessions" does not exist`. Running `drizzle-kit push` revealed 9 missing `ALTER TABLE` statements across `recovery_sessions` (`incident_lane`, `is_holdout`, `recovery_contract`, `voice_script_hinglish`, `opted_out`, `locked_at`) and `recovery_audit_log` (`previous_hash`, `hash`, `idempotency_key`), plus two missing unique indexes.
+
+**Why it happened:**
+`src/db/schema.ts` had been updated directly in recent commits without running `npm run db:generate` to produce the corresponding SQL migration file and `meta/` snapshot. `0003_recovery_outbox_and_safety.sql` only created `recovery_outbox_intents` without altering existing tables, and `meta/` was missing `0003_snapshot.json`.
+
+**The Fix:**
+1. **Migration & Snapshot Generation**: Executed `npx drizzle-kit generate` to produce `0003_yielding_king_cobra.sql` and `meta/0003_snapshot.json` containing all 9 `ALTER TABLE` statements, enum additions with `IF NOT EXISTS` guards, and unique indexes (`payment_retry_attempts_session_attempt_uniq`, `recovery_audit_idempotency_uniq`).
+2. **Clean Database Verification**: Dropped all public and drizzle schemas and ran `npm run db:migrate` from scratch against a clean PostgreSQL instance. All 4 migrations applied in sequence with zero errors, and all 558 Vitest tests passed green.
+3. **CI Drift Check Script**: Built `backend/src/scripts/check-schema-drift.ts` and registered `npm run db:check` in `package.json`, which executes `drizzle-kit generate` and asserts an empty diff (`No schema changes, nothing to migrate`), preventing silent schema drift in CI.
+
 ## Conclusion
 Our evaluation harness ensures that every number reported across PayBack-AI is mathematically proven, reproducible, and verifiable by independent inspection down to raw cryptographic hashes, live HTTP wire headers, and physical database sockets.
+
 
 
 

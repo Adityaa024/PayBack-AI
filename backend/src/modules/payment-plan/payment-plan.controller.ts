@@ -142,4 +142,15 @@ export class PaymentPlanController {
       next(err);
     }
   };
+
+  resetDemoPlans = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const authReq = req as AuthenticatedRequest;
+      const tenantId = authReq.user?.tenantId || 'tenant_demo_001';
+      await this.service.resetDemoPlans(tenantId);
+      res.status(200).json({ success: true, message: 'Demo payment plans reset successfully.' });
+    } catch (err) {
+      next(err);
+    }
+  };
 }

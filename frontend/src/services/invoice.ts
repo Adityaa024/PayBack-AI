@@ -102,6 +102,11 @@ export const invoiceService = {
     return response.data;
   },
 
+  resetDemoPaymentPlans: async () => {
+    const response = await api.post('/invoices/payment-plans/reset-demo');
+    return response.data;
+  },
+
   getInstallments: async (invoiceId: string) => {
     const response = await api.get(`/invoices/${invoiceId}/installments`);
     return response.data;
