@@ -22,11 +22,30 @@ describe('Priority 9: Scientific Credibility & Evaluation Audit Integrity', () =
   const README_FILE = path.join(ROOT_DIR, 'README.md');
   const TRACES_SCRIPT = path.join(ROOT_DIR, 'ai-service', 'scripts', 'record_real_llm_traces.py');
 
+  const getPythonExec = (root: string) => {
+    if (process.env.PYTHON) return `"${process.env.PYTHON}"`;
+    const candidates = [
+      path.join(root, 'ai-service', '.venv', 'Scripts', 'python.exe'),
+      path.join(root, 'ai-service', 'venv', 'Scripts', 'python.exe'),
+      path.join(root, 'ai-service', '.venv', 'bin', 'python'),
+      path.join(root, 'ai-service', 'venv', 'bin', 'python'),
+      path.join(root, '.venv', 'Scripts', 'python.exe'),
+      path.join(root, 'venv', 'Scripts', 'python.exe'),
+      path.join(root, '.venv', 'bin', 'python'),
+      path.join(root, 'venv', 'bin', 'python'),
+    ];
+    for (const c of candidates) {
+      if (fs.existsSync(c)) return `"${c}"`;
+    }
+    return 'python';
+  };
+
   it('1. rejects fake LLM trace generation and enforces fail-loudly behavior without genuine provider credentials', () => {
     // Execute record_real_llm_traces.py with stripped API keys and expect strict failure (exit code 1)
     let threw = false;
+    const pyExec = getPythonExec(ROOT_DIR);
     try {
-      execSync('python "' + TRACES_SCRIPT + '" --sample-size 5', {
+      execSync(`${pyExec} "${TRACES_SCRIPT}" --sample-size 5`, {
         env: {
           ...process.env,
           GROQ_API_KEY: '',
