@@ -1,0 +1,57 @@
+services:
+  # ----------------------------------------------------------------------------
+  # 1. Python FastAPI AI Service (ai-service/)
+  # ----------------------------------------------------------------------------
+  - type: web
+    name: payback-ai-service
+    env: python
+    region: singapore
+    rootDir: ai-service
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn src.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: GROQ_API_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+
+  # ----------------------------------------------------------------------------
+  # 2. Node.js / Express Backend Engine (backend/)
+  # ----------------------------------------------------------------------------
+  - type: web
+    name: payback-backend
+    env: node
+    region: singapore
+    rootDir: backend
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3001
+      - key: DATABASE_URL
+        value: postgresql://postgres:Adianu7890@@db.jnbenaukuoohvkvnzjfw.supabase.co:5432/postgres
+      - key: AI_ML_SERVICE_URL
+        fromService:
+          type: web
+          name: payback-ai-service
+          property: host
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: ALLOW_IN_MEMORY_FALLBACK
+        value: "false"
+      - key: DEMO_MODE
+        value: "false"
+      - key: RAZORPAY_KEY_ID
+        sync: false
+      - key: RAZORPAY_KEY_SECRET
+        sync: false
+      - key: RAZORPAY_WEBHOOK_SECRET
+        sync: false
+      - key: FRONTEND_URL
+        sync: false
