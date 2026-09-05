@@ -1,7 +1,10 @@
 import { Router, type RequestHandler } from 'express';
+import { z } from 'zod';
 import { AgentController } from './agent.controller.js';
 import { requireRole } from '../../middleware/require-role.js';
 import { validateParam } from '../../middleware/validate-param.js';
+
+const idParamSchema = z.string().min(1).max(64).regex(/^[a-zA-Z0-9_\-\.]+$/);
 
 export function createAgentRouter(
   agentController: AgentController,
@@ -25,7 +28,7 @@ export function createAgentRouter(
   router.get('/runs/:id/chunks', validateParam('id'), agentController.getRunChunks);
 
   // POST /api/agent/run/invoice/:id
-  router.post('/run/invoice/:id', validateParam('id'), requireRole('admin', 'manager'), agentController.runInvoice);
+  router.post('/run/invoice/:id', validateParam('id', idParamSchema), requireRole('admin', 'manager'), agentController.runInvoice);
 
   return router;
 }
