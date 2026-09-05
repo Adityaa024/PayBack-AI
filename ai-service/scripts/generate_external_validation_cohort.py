@@ -53,6 +53,45 @@ def generate_external_validation_cohort(seed: int = 888, count: int = 500):
         naive_rec = rng.random() < 0.28
         tone_esc_rec = rng.random() < 0.45
 
+        # Candidate strategy effectiveness matrix for enterprise cohort
+        ext_rng = random.Random(f"{seed}_{inv_id}_strat")
+        if lane == 'b2b_receivables':
+            ext_strat_probs = {
+                'firm_escalation': 0.56 if days_overdue > 45 else 0.35,
+                'soft_reminder': 0.28 if days_overdue > 45 else 0.50,
+                'human_escalation': 0.38 if days_overdue > 45 else 0.24,
+                'payment_link_refresh': 0.12,
+                'mandate_retry': 0.04,
+            }
+        elif lane == 'subscription_rescue':
+            ext_strat_probs = {
+                'mandate_retry': 0.60,
+                'payment_link_refresh': 0.30,
+                'soft_reminder': 0.20,
+                'firm_escalation': 0.16,
+                'human_escalation': 0.18,
+            }
+        elif lane == 'checkout_dropoff':
+            ext_strat_probs = {
+                'payment_link_refresh': 0.50,
+                'soft_reminder': 0.28,
+                'firm_escalation': 0.12,
+                'mandate_retry': 0.02,
+                'human_escalation': 0.12,
+            }
+        else: # payment_degradation
+            ext_strat_probs = {
+                'payment_link_refresh': 0.64,
+                'soft_reminder': 0.22,
+                'firm_escalation': 0.16,
+                'mandate_retry': 0.04,
+                'human_escalation': 0.14,
+            }
+
+        strategy_outcomes = {}
+        for strat, prob in ext_strat_probs.items():
+            strategy_outcomes[strat] = True if natural_rec else (ext_rng.random() < prob)
+
         total_exposure += amount
 
         cases.append({
@@ -78,6 +117,7 @@ def generate_external_validation_cohort(seed: int = 888, count: int = 500):
             "ptp_count": 1 if ptp_broken > 0 else 0,
             "truth": {
                 "natural_recovery": natural_rec,
+                "strategy_outcomes": strategy_outcomes,
                 "lane_recovery": lane_rec,
                 "naive_recovery": naive_rec,
                 "tone_escalation_recovery": tone_esc_rec,

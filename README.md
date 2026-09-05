@@ -2,6 +2,31 @@
 
 An enterprise-grade accounts receivable automation platform with an AI Revenue Recovery Engine that detects revenue at risk, determines the right intervention, executes bounded recovery workflows, and measures recovered money across every batch — with compliant escalation, hard stopping rules, a transactional outbox, and a serialized, tamper-evident cryptographic audit ledger.
 
+## Razorpay AI Buildathon 2026 — Track 3: AI Revenue Recovery
+
+PayBack-AI is built for Track 3: **find revenue that is slipping away and win it back**. It closes the recovery loop from detection to diagnosis, bounded intervention, verified settlement, and audit:
+
+| Track 3 requirement | PayBack-AI implementation |
+|---|---|
+| Detect revenue at risk | Failed-payment and overdue-receivable recovery cases, risk scoring, and an operations queue |
+| Determine the right intervention | Recovery agents classify the incident, select a channel or retry lane, and estimate economic value |
+| Execute a bounded workflow | Transactional outbox, idempotency keys, responsible-contact limits, and deterministic PolicyGuard vetoes |
+| Show measured money recovered across a batch | Seven-arm evaluation on the same 1,000-case synthetic cohort with oracle-ceiling and baseline comparisons |
+| Compliant escalation and stopping rules | STOP opt-out, dispute freeze, quiet hours, retry caps, legal stops, approval thresholds, and human escalation |
+| Audit trail | Signed webhook truth boundary, append-only hash-chained ledger, and independently verifiable audit events |
+
+### Submission Evidence
+
+- **Public repository:** [Adityaa024/PayBack-AI](https://github.com/Adityaa024/PayBack-AI)
+- **Track:** AI Revenue Recovery, Track 3
+- **Demo workflow:** failed payment → diagnosis → PolicyGuard decision → outbox dispatch → signed settlement webhook
+- **Evaluation:** [EVALUATION.md](EVALUATION.md)
+- **Architecture:** [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+- **Failure log:** [FAILURES.md](FAILURES.md)
+- **Five-minute walkthrough:** [walkthrough.md](walkthrough.md)
+
+The benchmark is explicitly simulator-based and test-mode only. It reports measured recovery under documented assumptions; it does not claim production merchant results. The LLM evidence is separated into simulated-policy results and an unverified diagnostic sample unless genuine provider traces are available.
+
 ---
 
 ### 🖥️ Enterprise Recovery Control Tower
@@ -79,19 +104,19 @@ PayBack-AI evaluates recovery across a **100% unified complete dataset (1,000 ca
 | Metric | 1. Do Nothing | 2. Fixed Retry | 3. Contact Only | 4. PayBack-AI Deterministic | 5. PayBack-AI Simulated LLM | 6. PayBack-AI Real LLM | 7. Oracle Ceiling |
 |---|---|---|---|---|---|---|---|
 | **Total Failed Value (₹)** | ₹22,21,965.50 | ₹22,21,965.50 | ₹22,21,965.50 | ₹22,21,965.50 | ₹22,21,965.50 | ₹22,21,965.50 | ₹22,21,965.50 |
-| **Oracle Ceiling (₹)** | ₹12,03,167.01 | ₹12,03,167.01 | ₹12,03,167.01 | ₹12,03,167.01 | ₹12,03,167.01 | ₹12,03,167.01 | ₹12,03,167.01 |
-| **Gross Recovered (₹)** | ₹3,52,002.94 | ₹7,30,703.24 | ₹7,30,703.24 | **₹11,62,390.82** | **₹11,89,650.23** | Gated (offline) | ₹12,03,167.01 |
+| **Oracle Ceiling (₹)** | ₹14,16,470.85 | ₹14,16,470.85 | ₹14,16,470.85 | ₹14,16,470.85 | ₹14,16,470.85 | ₹14,16,470.85 | ₹14,16,470.85 |
+| **Gross Recovered (₹)** | ₹3,52,002.94 | ₹9,88,722.46 | ₹6,89,682.11 | **₹11,93,696.63** | **₹12,11,073.36** | Gated (offline) | ₹14,16,470.85 |
 | **Organic Recovery (₹)** | ₹3,52,002.94 | ₹3,52,002.94 | ₹3,52,002.94 | ₹3,52,002.94 | ₹3,52,002.94 | Gated | ₹3,52,002.94 |
-| **Incremental Recovery (₹)** | Baseline (₹0.00) | ₹3,78,700.30 | ₹3,78,700.30 | **₹8,10,387.88** | **₹8,37,647.29** | Gated | **₹8,51,164.07** |
-| **% of Oracle Ceiling** | 29.26% | 60.73% | 60.73% | **96.61%** | **98.88%** | Gated | **100.00%** |
-| **% of Total Failed Value** | 15.84% | 32.89% | 32.89% | **52.31%** | **53.54%** | Gated | 54.15% |
-| **Net Recovered Value (₹)** | ₹3,52,002.94 | ₹7,28,703.24 | ₹7,29,203.24 | **₹11,60,769.32** | **₹11,87,999.37** | Gated | ₹12,02,598.51 |
-| **Contact Count** | 0 | 1,000 | 1,000 | 1,040 | 1,032 | Gated | 379 |
-| **Retry Count** | 0 | 1,000 | 0 | 123 | 117 | Gated | 0 |
-| **Compliance Violations** | **0** | **123** (opt-out/90d) | **123** (opt-out/90d) | **0** (PolicyGuard) | **0** (PolicyGuard) | Gated | **0** |
+| **Incremental Recovery (₹)** | Baseline (₹0.00) | ₹6,36,719.52 | ₹3,37,679.17 | **₹8,41,693.69** | **₹8,59,070.42** | Gated | **₹10,64,467.91** |
+| **% of Oracle Ceiling** | 24.85% | 69.80% | 48.69% | **84.27%** | **85.50%** | Gated | **100.00%** |
+| **% of Total Failed Value** | 15.84% | 44.50% | 31.04% | **53.72%** | **54.50%** | Gated | 63.75% |
+| **Net Recovered Value (₹)** | ₹3,52,002.94 | ₹9,86,722.46 | ₹6,88,182.11 | **₹11,92,131.63** | **₹12,09,467.00** | Gated | ₹14,15,771.85 |
+| **Contact Count** | 0 | 1,000 | 1,000 | 1,003 | 1,004 | Gated | 466 |
+| **Retry Count** | 0 | 1,000 | 0 | 121 | 112 | Gated | 0 |
+| **Compliance Violations** | **0** | **143** (opt-out/90d/dispute) | **123** (opt-out/90d) | **0** (PolicyGuard) | **0** (PolicyGuard) | Gated | **0** |
 | **Duplicate Charges** | **0** | **0** | **0** | **0** | **0** | Gated | **0** |
 | **Human Escalations** | 0 | 0 | 0 | 60 | 60 | Gated | 0 |
-| **Cost per Recovered Rupee (₹)** | ₹0.0000 | ₹0.0027 | ₹0.0021 | **₹0.0014** | **₹0.0014** | Gated | ₹0.0005 |
+| **Cost per Recovered Rupee (₹)** | ₹0.0000 | ₹0.0020 | ₹0.0022 | **₹0.0013** | **₹0.0013** | Gated | ₹0.0005 |
 | **LLM Inference Cost (₹)** | ₹0.00 | ₹0.00 | ₹0.00 | ₹0.00 | ₹44.36 | Gated | ₹0.00 |
 
 *Denominator Integrity Rule (Arm 6 Gating)*: Arm 6 (`real_llm_policy`) is kept strictly gated offline in the canonical 1,000-case benchmark table to prevent invalid cross-cohort comparison between a 50-case diagnostic sample ($N=50$) and the 1,000-case benchmark ($N=1,000$).
@@ -127,40 +152,40 @@ PayBack-AI evaluates recovery across a **100% unified complete dataset (1,000 ca
 To guarantee the absence of seed-cherry-picking, PayBack-AI evaluates 20 independent pseudo-random seeds ($N=20,000$ cases total). We report both **Normal-Theory 95% Confidence Intervals** ($\bar{x} \pm 1.96 \cdot \frac{s}{\sqrt{N}}$, strictly clamped $\le 100.00\%$) and **Empirical Percentile Bootstrap 95% Confidence Intervals** (1,000 Monte Carlo resamples taking 2.5th and 97.5th percentiles):
 
 - **Total Portfolio Exposure (Mean ± 95% CI)**: ₹22,32,285.54 [₹22,16,022.52, ₹22,48,548.57] (Bootstrap: [₹22,17,712.14, ₹22,48,165.49])
-- **Oracle Recoverable Ceiling (Mean ± 95% CI)**: ₹11,88,331.76 [₹11,72,516.04, ₹12,04,147.49] (Bootstrap: [₹11,72,502.06, ₹12,02,512.64])
-- **PayBack-AI Simulated LLM Gross (Mean ± 95% CI)**: ₹11,74,924.45 [₹11,59,614.26, ₹11,90,234.64] (Bootstrap: [₹11,59,383.07, ₹11,89,451.74])
-- **Oracle Efficiency (Mean)**: **98.88%** (Median: 98.91%, Min: 97.63%, Max: 100.00%, Stdev: 0.63%)
-  - **Normal-Theory 95% CI**: **[98.60%, 99.15%]** ($\bar{x} \pm 1.96 \cdot \text{SE}$, bounded $\le 100.00\%$)
-  - **Empirical Percentile Bootstrap 95% CI**: **[98.61%, 99.14%]** (1,000 iterations)
-- **Incremental Lift (Mean ± 95% CI)**: ₹8,35,564.34 [₹8,21,686.35, ₹8,49,442.34] (Bootstrap: [₹8,21,957.43, ₹8,49,086.66])
+- **Oracle Recoverable Ceiling (Mean ± 95% CI)**: ₹14,15,711.52 [₹13,99,269.15, ₹14,32,153.89] (Bootstrap: [₹14,00,137.70, ₹14,32,162.03])
+- **PayBack-AI Simulated LLM Gross (Mean ± 95% CI)**: ₹12,36,363.86 [₹12,20,782.50, ₹12,51,945.22] (Bootstrap: [₹12,21,939.62, ₹12,51,163.24])
+- **Oracle Efficiency (Mean)**: **87.34%** (Median: 87.28%, Min: 84.31%, Max: 90.05%, Stdev: 1.55%)
+  - **Normal-Theory 95% CI**: **[86.66%, 88.02%]** ($\bar{x} \pm 1.96 \cdot \text{SE}$, bounded $\le 100.00\%$)
+  - **Empirical Percentile Bootstrap 95% CI**: **[86.68%, 88.03%]** (1,000 iterations)
+- **Incremental Lift (Mean ± 95% CI)**: ₹8,97,003.76 [₹8,81,666.47, ₹9,12,341.04] (Bootstrap: [₹8,81,359.78, ₹9,12,233.94])
 
 #### Raw Per-Seed Evaluation Data Table (All 20 Seeds, N=1,000 each)
 
 | Seed | Total Failed (₹) | Oracle Ceiling (₹) | Organic (₹) | PayBack-AI Det (₹) | PayBack-AI Sim-LLM (₹) | Det % | LLM Oracle % |
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| **Seed 42** | ₹2,221,965.50 | ₹1,203,167.01 | ₹352,002.94 | ₹1,121,075.73 | ₹1,188,378.96 | 93.18% | **98.77%** |
-| **Seed 43** | ₹2,244,396.87 | ₹1,163,813.75 | ₹330,230.26 | ₹1,099,375.38 | ₹1,152,474.30 | 94.46% | **99.03%** |
-| **Seed 44** | ₹2,281,584.32 | ₹1,183,213.25 | ₹394,110.51 | ₹1,101,328.82 | ₹1,172,170.86 | 93.08% | **99.07%** |
-| **Seed 45** | ₹2,201,244.48 | ₹1,097,484.57 | ₹304,192.59 | ₹1,029,534.43 | ₹1,086,525.42 | 93.81% | **99.00%** |
-| **Seed 46** | ₹2,195,568.06 | ₹1,194,143.95 | ₹349,403.42 | ₹1,110,455.20 | ₹1,184,374.23 | 92.99% | **99.18%** |
-| **Seed 47** | ₹2,240,741.86 | ₹1,158,847.26 | ₹288,106.81 | ₹1,086,935.02 | ₹1,146,065.28 | 93.79% | **98.90%** |
-| **Seed 48** | ₹2,243,201.76 | ₹1,228,157.07 | ₹321,782.04 | ₹1,180,272.04 | ₹1,207,156.45 | 96.10% | **98.29%** |
-| **Seed 49** | ₹2,227,779.93 | ₹1,178,003.69 | ₹330,413.43 | ₹1,090,095.26 | ₹1,165,174.86 | 92.54% | **98.91%** |
-| **Seed 50** | ₹2,213,410.12 | ₹1,183,430.18 | ₹315,108.03 | ₹1,100,435.55 | ₹1,155,397.57 | 92.99% | **97.63%** |
-| **Seed 51** | ₹2,268,705.14 | ₹1,239,022.77 | ₹389,336.22 | ₹1,209,520.92 | ₹1,235,597.07 | 97.62% | **99.72%** |
-| **Seed 52** | ₹2,212,945.57 | ₹1,191,575.68 | ₹321,405.87 | ₹1,157,000.82 | ₹1,191,575.68 | 97.10% | **100.00%** |
-| **Seed 53** | ₹2,192,490.67 | ₹1,181,646.50 | ₹338,380.43 | ₹1,111,317.75 | ₹1,164,702.82 | 94.05% | **98.57%** |
-| **Seed 54** | ₹2,308,823.60 | ₹1,184,319.29 | ₹324,537.74 | ₹1,113,662.78 | ₹1,165,187.99 | 94.03% | **98.38%** |
-| **Seed 55** | ₹2,166,999.18 | ₹1,185,873.47 | ₹319,487.39 | ₹1,126,210.44 | ₹1,169,719.08 | 94.97% | **98.64%** |
-| **Seed 56** | ₹2,238,204.14 | ₹1,186,068.96 | ₹376,383.27 | ₹1,111,248.00 | ₹1,167,198.53 | 93.69% | **98.41%** |
-| **Seed 57** | ₹2,289,389.57 | ₹1,262,828.30 | ₹342,177.16 | ₹1,192,209.78 | ₹1,236,301.62 | 94.41% | **97.90%** |
-| **Seed 58** | ₹2,259,780.82 | ₹1,215,705.80 | ₹359,331.68 | ₹1,163,549.00 | ₹1,207,394.21 | 95.71% | **99.32%** |
-| **Seed 59** | ₹2,248,987.82 | ₹1,213,592.26 | ₹375,257.10 | ₹1,137,660.92 | ₹1,206,810.68 | 93.74% | **99.44%** |
-| **Seed 60** | ₹2,189,955.86 | ₹1,185,954.35 | ₹378,612.88 | ₹1,085,878.26 | ₹1,167,176.55 | 91.56% | **98.42%** |
-| **Seed 61** | ₹2,199,535.61 | ₹1,129,787.17 | ₹276,942.35 | ₹1,087,928.30 | ₹1,129,106.86 | 96.29% | **99.94%** |
-| **MEAN (N=20)** | **₹22,32,285.54** | **₹11,88,331.76** | — | **₹1,120,490.87** | **₹1,174,924.45** | **94.31%** | **98.88%** |
-| **Normal-Theory 95% CI** | [₹22,16,022.52, ₹22,48,548.57] | [₹1,172,516.04, ₹1,204,147.49] | — | [₹1,104,749.03, ₹1,136,232.72] | [₹1,159,614.26, ₹1,190,234.64] | [93.62%, 94.99%] | **[98.60%, 99.15%]** |
-| **Empirical Bootstrap 95% CI** | [₹22,17,712.14, ₹22,48,165.49] | [₹1,172,502.06, ₹1,202,512.64] | — | [₹1,104,951.35, ₹1,135,528.84] | [₹1,159,383.07, ₹1,189,451.74] | [93.67%, 95.02%] | **[98.61%, 99.14%]** |
+| **Seed 42** | ₹2,221,965.50 | ₹1,416,470.85 | ₹352,002.94 | ₹1,219,790.70 | ₹1,224,229.32 | 86.11% | **86.43%** |
+| **Seed 43** | ₹2,244,396.87 | ₹1,401,184.22 | ₹330,230.26 | ₹1,186,023.41 | ₹1,181,381.65 | 84.64% | **84.31%** |
+| **Seed 44** | ₹2,281,584.32 | ₹1,468,273.27 | ₹394,110.51 | ₹1,272,560.86 | ₹1,270,229.04 | 86.67% | **86.51%** |
+| **Seed 45** | ₹2,201,244.48 | ₹1,453,456.06 | ₹304,192.59 | ₹1,241,781.41 | ₹1,242,181.80 | 85.44% | **85.46%** |
+| **Seed 46** | ₹2,195,568.06 | ₹1,344,039.08 | ₹349,403.42 | ₹1,178,019.91 | ₹1,174,763.81 | 87.65% | **87.41%** |
+| **Seed 47** | ₹2,240,741.86 | ₹1,420,804.51 | ₹288,106.81 | ₹1,245,802.21 | ₹1,251,936.64 | 87.68% | **88.11%** |
+| **Seed 48** | ₹2,243,201.76 | ₹1,419,891.30 | ₹321,782.04 | ₹1,257,163.42 | ₹1,250,833.02 | 88.54% | **88.09%** |
+| **Seed 49** | ₹2,227,779.93 | ₹1,395,949.50 | ₹330,413.43 | ₹1,236,469.88 | ₹1,243,309.22 | 88.58% | **89.07%** |
+| **Seed 50** | ₹2,213,410.12 | ₹1,444,392.59 | ₹315,108.03 | ₹1,244,299.14 | ₹1,247,095.93 | 86.15% | **86.34%** |
+| **Seed 51** | ₹2,268,705.14 | ₹1,413,600.28 | ₹389,336.22 | ₹1,240,077.03 | ₹1,249,094.27 | 87.72% | **88.36%** |
+| **Seed 52** | ₹2,212,945.57 | ₹1,405,202.99 | ₹321,405.87 | ₹1,244,944.89 | ₹1,253,929.18 | 88.60% | **89.23%** |
+| **Seed 53** | ₹2,192,490.67 | ₹1,377,426.16 | ₹338,380.43 | ₹1,212,910.15 | ₹1,211,760.56 | 88.06% | **87.97%** |
+| **Seed 54** | ₹2,308,823.60 | ₹1,421,988.05 | ₹324,537.74 | ₹1,217,747.06 | ₹1,226,621.35 | 85.64% | **86.26%** |
+| **Seed 55** | ₹2,166,999.18 | ₹1,365,322.60 | ₹319,487.39 | ₹1,174,789.09 | ₹1,177,565.16 | 86.04% | **86.25%** |
+| **Seed 56** | ₹2,238,204.14 | ₹1,393,252.10 | ₹376,383.27 | ₹1,247,283.00 | ₹1,250,853.68 | 89.52% | **89.78%** |
+| **Seed 57** | ₹2,289,389.57 | ₹1,428,285.51 | ₹342,177.16 | ₹1,262,146.15 | ₹1,260,921.38 | 88.37% | **88.28%** |
+| **Seed 58** | ₹2,259,780.82 | ₹1,446,779.90 | ₹359,331.68 | ₹1,256,717.58 | ₹1,260,670.97 | 86.86% | **87.14%** |
+| **Seed 59** | ₹2,248,987.82 | ₹1,506,130.59 | ₹375,257.10 | ₹1,296,844.24 | ₹1,296,233.29 | 86.10% | **86.06%** |
+| **Seed 60** | ₹2,189,955.86 | ₹1,420,402.41 | ₹378,612.88 | ₹1,268,621.68 | ₹1,279,064.43 | 89.31% | **90.05%** |
+| **Seed 61** | ₹2,199,535.61 | ₹1,371,378.39 | ₹276,942.35 | ₹1,179,138.14 | ₹1,174,602.52 | 85.98% | **85.65%** |
+| **MEAN (N=20)** | **₹22,32,285.54** | **₹14,15,711.52** | — | **₹1,234,156.50** | **₹1,236,363.86** | **87.18%** | **87.34%** |
+| **Normal-Theory 95% CI** | [₹22,16,022.52, ₹22,48,548.57] | [₹13,99,269.15, ₹14,32,153.89] | — | [₹12,19,247.66, ₹12,49,065.33] | [₹12,20,782.50, ₹12,51,945.22] | [86.57%, 87.80%] | **[86.66%, 88.02%]** |
+| **Empirical Bootstrap 95% CI** | [₹22,17,712.14, ₹22,48,165.49] | [₹14,00,137.70, ₹14,32,162.03] | — | [₹12,20,005.87, ₹12,48,500.00] | [₹12,21,939.62, ₹12,51,163.24] | [86.63%, 87.78%] | **[86.68%, 88.03%]** |
 
 ---
 
@@ -354,7 +379,7 @@ To eliminate any ambiguity regarding whether database tests run against genuine 
 
 ```bash
 # 1. Clone repository
-git clone https://github.com/PayBack-AI/PayBack-AI.git
+git clone https://github.com/Adityaa024/PayBack-AI.git
 cd PayBack-AI
 
 # 2. Install backend dependencies

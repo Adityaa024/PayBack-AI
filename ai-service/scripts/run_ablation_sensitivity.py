@@ -87,24 +87,47 @@ def evaluate_ablation_layer(cases, flags, decisions_map):
         total_cost += cost_per_contact
         touch1_recovered = False
 
+        strat_outcomes = truth.get("strategy_outcomes", {})
+        lane = item["incident_lane"]
+        days = item["days_overdue"]
+        if lane == "subscription_rescue":
+            primary_strat = "mandate_retry"
+            esc_strat = "mandate_retry"
+        elif lane == "b2b_receivables":
+            primary_strat = "firm_escalation" if days > 45 else "soft_reminder"
+            esc_strat = "firm_escalation"
+        elif lane == "checkout_dropoff":
+            primary_strat = "payment_link_refresh"
+            esc_strat = "firm_escalation"
+        else:
+            primary_strat = "payment_link_refresh"
+            esc_strat = "payment_link_refresh"
+
+        effective_yield = channel_efficiency * timing_mult * cooldown_mult
+
         if truth["natural_recovery"]:
             gross_recovered += amt
             touch1_recovered = True
         else:
             # Yield based on classification & channel match
-            effective_yield = channel_efficiency * timing_mult * cooldown_mult
-            if is_correct_llm and truth["lane_recovery"]:
+            llm_success_t1 = strat_outcomes.get(primary_strat, truth["lane_recovery"]) if is_correct_llm else strat_outcomes.get("soft_reminder" if days > 45 else "payment_link_refresh", truth["naive_recovery"])
+            det_success_t1 = strat_outcomes.get(primary_strat, truth["lane_recovery"]) if is_correct_det else strat_outcomes.get("soft_reminder" if days > 45 else "payment_link_refresh", truth["naive_recovery"])
+
+            if is_correct_llm and llm_success_t1:
                 gross_recovered += amt * effective_yield
                 touch1_recovered = True
-            elif is_correct_det and truth["lane_recovery"]:
+            elif is_correct_det and det_success_t1:
                 gross_recovered += amt * (effective_yield * 0.95)
                 touch1_recovered = True
-            elif truth["naive_recovery"]:
+            elif strat_outcomes.get("payment_link_refresh", truth["naive_recovery"]):
                 gross_recovered += amt * 0.70
                 touch1_recovered = True
 
         # Touch 2 (Escalation / Retry)
         if not touch1_recovered:
+            llm_success_t2 = strat_outcomes.get(esc_strat, truth["tone_escalation_recovery"]) if is_correct_llm else False
+            det_success_t2 = strat_outcomes.get(esc_strat, truth["tone_escalation_recovery"]) if is_correct_det else False
+
             if flags.get("enable_llm_planning", False):
                 # Adaptive mandate sequencing & personalized tone
                 if item["incident_lane"] == "payment_degradation":
@@ -112,11 +135,11 @@ def evaluate_ablation_layer(cases, flags, decisions_map):
                 else:
                     total_cost += cost_per_contact
 
-                if truth["tone_escalation_recovery"] and (is_correct_llm or is_correct_det):
+                if (is_correct_llm and llm_success_t2) or (is_correct_det and det_success_t2):
                     gross_recovered += amt * effective_yield
             elif flags.get("enable_deterministic_classification", False):
                 total_cost += cost_per_contact
-                if truth["tone_escalation_recovery"] and is_correct_det:
+                if is_correct_det and det_success_t2:
                     gross_recovered += amt * (effective_yield * 0.90)
 
     # Net incremental lift

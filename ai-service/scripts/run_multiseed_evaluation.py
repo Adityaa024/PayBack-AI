@@ -58,9 +58,35 @@ def run_seed_eval(cases):
         if truth['natural_recovery']:
             organic_recovered += amt
 
+        strat_outcomes = truth.get('strategy_outcomes', {})
+        lane = item['incident_lane']
+        days = item['days_overdue']
+
+        # Allowed strategies per lane
+        if lane == 'subscription_rescue':
+            allowed_strats = ['mandate_retry', 'payment_link_refresh', 'soft_reminder', 'firm_escalation']
+            primary_strat = 'mandate_retry'
+            esc_strat = 'mandate_retry'
+        elif lane == 'b2b_receivables':
+            allowed_strats = ['soft_reminder', 'firm_escalation', 'payment_link_refresh', 'human_escalation']
+            primary_strat = 'firm_escalation' if days > 45 else 'soft_reminder'
+            esc_strat = 'firm_escalation'
+        elif lane == 'checkout_dropoff':
+            allowed_strats = ['payment_link_refresh', 'soft_reminder', 'firm_escalation']
+            primary_strat = 'payment_link_refresh'
+            esc_strat = 'firm_escalation'
+        else: # payment_degradation
+            allowed_strats = ['payment_link_refresh', 'soft_reminder', 'firm_escalation']
+            primary_strat = 'payment_link_refresh'
+            esc_strat = 'payment_link_refresh'
+
         # Fixed retry & contact only
-        if truth['natural_recovery'] or truth['naive_recovery']:
+        naive_link_rec = strat_outcomes.get('payment_link_refresh', truth['naive_recovery'])
+        if truth['natural_recovery'] or naive_link_rec:
             fixed_retry_gross += amt
+
+        contact_only_rec = strat_outcomes.get('soft_reminder', truth['naive_recovery'])
+        if truth['natural_recovery'] or contact_only_rec:
             contact_only_gross += amt
 
         # PolicyGuard Allowed
@@ -71,7 +97,6 @@ def run_seed_eval(cases):
         else:
             # Deterministic: 85% accuracy on lane classification
             # LLM: 97% accuracy on lane classification
-            # We use deterministic hash to model diagnostic correctness consistently
             h = hash(item['invoice_id'])
             det_correct = (h % 100) < 85
             llm_correct = (h % 100) < 97
@@ -89,17 +114,15 @@ def run_seed_eval(cases):
                 det_touch1_rec = True
                 llm_touch1_rec = True
             else:
-                if det_correct and truth['lane_recovery']:
-                    det_gross += amt
-                    det_touch1_rec = True
-                elif not det_correct and truth['naive_recovery']:
+                det_strat = primary_strat if det_correct else ('soft_reminder' if days > 45 else 'payment_link_refresh')
+                det_success_t1 = strat_outcomes.get(det_strat, truth['lane_recovery'] if det_correct else truth['naive_recovery'])
+                if det_success_t1:
                     det_gross += amt
                     det_touch1_rec = True
 
-                if llm_correct and truth['lane_recovery']:
-                    llm_gross += amt
-                    llm_touch1_rec = True
-                elif not llm_correct and truth['naive_recovery']:
+                llm_strat = primary_strat if llm_correct else ('soft_reminder' if days > 45 else 'payment_link_refresh')
+                llm_success_t1 = strat_outcomes.get(llm_strat, truth['lane_recovery'] if llm_correct else truth['naive_recovery'])
+                if llm_success_t1:
                     llm_gross += amt
                     llm_touch1_rec = True
 
@@ -109,7 +132,8 @@ def run_seed_eval(cases):
                         det_retries += 1
                     else:
                         det_contacts += 1
-                    if truth['tone_escalation_recovery'] and det_correct:
+                    det_success_t2 = strat_outcomes.get(esc_strat, truth['tone_escalation_recovery'] if det_correct else False)
+                    if det_success_t2:
                         det_gross += amt
 
                 if not llm_touch1_rec:
@@ -117,11 +141,13 @@ def run_seed_eval(cases):
                         llm_retries += 1
                     else:
                         llm_contacts += 1
-                    if truth['tone_escalation_recovery'] and llm_correct:
+                    llm_success_t2 = strat_outcomes.get(esc_strat, truth['tone_escalation_recovery'] if llm_correct else False)
+                    if llm_success_t2:
                         llm_gross += amt
 
         # Oracle ceiling
-        is_oracle = truth['natural_recovery'] or (not is_blocked and (truth['lane_recovery'] or truth['tone_escalation_recovery']))
+        any_strat_oracle = any(strat_outcomes.get(s, False) for s in allowed_strats) if strat_outcomes else (truth['lane_recovery'] or truth['tone_escalation_recovery'])
+        is_oracle = truth['natural_recovery'] or (not is_blocked and any_strat_oracle)
         if is_oracle:
             oracle_ceiling += amt
 

@@ -21,6 +21,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": true
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -48,6 +55,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": false,
+        "firm_escalation": true,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -75,6 +89,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": true,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -102,6 +123,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": true,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -129,6 +157,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -156,6 +191,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": true,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": true
@@ -183,6 +225,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": true,
+        "firm_escalation": false,
+        "mandate_retry": true,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -210,6 +259,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": true,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -237,6 +293,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -264,6 +327,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": true,
+        "human_escalation": false
+      },
       "naive_recovery": true,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -291,6 +361,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": true,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": true,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -318,6 +395,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -345,6 +429,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -372,6 +463,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": true,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -399,6 +497,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -426,6 +531,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": true,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -453,6 +565,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": true,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -480,6 +599,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -507,6 +633,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -534,6 +667,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": true,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": true,
+        "firm_escalation": true,
+        "mandate_retry": true,
+        "human_escalation": true
+      },
       "naive_recovery": true,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -561,6 +701,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -588,6 +735,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": true
@@ -615,6 +769,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": true
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -642,6 +803,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": false,
+        "firm_escalation": true,
+        "mandate_retry": true,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -669,6 +837,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": false,
+        "firm_escalation": true,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": true,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -696,6 +871,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": true,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -723,6 +905,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -750,6 +939,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": true,
+        "firm_escalation": true,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -777,6 +973,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -804,6 +1007,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": true,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": true,
+        "firm_escalation": true,
+        "mandate_retry": true,
+        "human_escalation": true
+      },
       "naive_recovery": true,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -831,6 +1041,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": true
+      },
       "naive_recovery": true,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -858,6 +1075,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": true,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -885,6 +1109,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -912,6 +1143,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": true,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -939,6 +1177,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -966,6 +1211,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": true,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": true,
+        "firm_escalation": true,
+        "mandate_retry": true,
+        "human_escalation": true
+      },
       "naive_recovery": true,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -993,6 +1245,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -1020,6 +1279,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": true,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": true,
+        "firm_escalation": true,
+        "mandate_retry": true,
+        "human_escalation": true
+      },
       "naive_recovery": true,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -1047,6 +1313,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": true,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": true,
+        "firm_escalation": true,
+        "mandate_retry": true,
+        "human_escalation": true
+      },
       "naive_recovery": true,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -1074,6 +1347,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": true,
+        "mandate_retry": false,
+        "human_escalation": true
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -1101,6 +1381,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": true,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -1128,6 +1415,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -1155,6 +1449,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": true
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -1182,6 +1483,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -1209,6 +1517,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": true,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -1236,6 +1551,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -1263,6 +1585,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": true,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": true,
+        "firm_escalation": true,
+        "mandate_retry": true,
+        "human_escalation": true
+      },
       "naive_recovery": true,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -1290,6 +1619,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": true,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": true,
+        "firm_escalation": true,
+        "mandate_retry": true,
+        "human_escalation": true
+      },
       "naive_recovery": true,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -1317,6 +1653,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": true,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -1344,6 +1687,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": true,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -1371,6 +1721,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": true,
+        "human_escalation": false
+      },
       "naive_recovery": true,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -1398,6 +1755,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": true,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": true,
+        "firm_escalation": true,
+        "mandate_retry": true,
+        "human_escalation": true
+      },
       "naive_recovery": true,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -1425,6 +1789,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -1452,6 +1823,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": true,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": true,
+        "firm_escalation": true,
+        "mandate_retry": true,
+        "human_escalation": true
+      },
       "naive_recovery": true,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -1479,6 +1857,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": true,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -1506,6 +1891,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": true,
+        "human_escalation": true
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -1533,6 +1925,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -1560,6 +1959,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": true
+      },
       "naive_recovery": true,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -1587,6 +1993,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": true,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": true,
+        "firm_escalation": true,
+        "mandate_retry": true,
+        "human_escalation": true
+      },
       "naive_recovery": true,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -1614,6 +2027,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -1641,6 +2061,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -1668,6 +2095,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -1695,6 +2129,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": true,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -1722,6 +2163,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": true,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": true,
+        "firm_escalation": true,
+        "mandate_retry": true,
+        "human_escalation": true
+      },
       "naive_recovery": true,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -1749,6 +2197,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -1776,6 +2231,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -1803,6 +2265,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": true,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": true,
+        "firm_escalation": true,
+        "mandate_retry": true,
+        "human_escalation": true
+      },
       "naive_recovery": true,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -1830,6 +2299,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -1857,6 +2333,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": true,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": true,
+        "firm_escalation": true,
+        "mandate_retry": true,
+        "human_escalation": true
+      },
       "naive_recovery": true,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -1884,6 +2367,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": true,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": true,
+        "firm_escalation": true,
+        "mandate_retry": true,
+        "human_escalation": true
+      },
       "naive_recovery": true,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -1911,6 +2401,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": true,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -1938,6 +2435,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": false,
+        "firm_escalation": true,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -1965,6 +2469,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -1992,6 +2503,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -2019,6 +2537,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": true,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -2046,6 +2571,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -2073,6 +2605,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -2100,6 +2639,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": true,
+        "firm_escalation": true,
+        "mandate_retry": false,
+        "human_escalation": true
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -2127,6 +2673,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": true,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": true
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -2154,6 +2707,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": true,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": true
@@ -2181,6 +2741,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -2208,6 +2775,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": true
@@ -2235,6 +2809,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": true,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -2262,6 +2843,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": true,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -2289,6 +2877,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": true
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -2316,6 +2911,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -2343,6 +2945,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -2370,6 +2979,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": true
@@ -2397,6 +3013,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": true,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -2424,6 +3047,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": true,
+        "human_escalation": false
+      },
       "naive_recovery": true,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -2451,6 +3081,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -2478,6 +3115,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -2505,6 +3149,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": true,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -2532,6 +3183,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": true,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -2559,6 +3217,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -2586,6 +3251,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": true,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -2613,6 +3285,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -2640,6 +3319,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": true,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -2667,6 +3353,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": true,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -2694,6 +3387,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -2721,6 +3421,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -2748,6 +3455,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": true,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -2775,6 +3489,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": true,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -2802,6 +3523,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -2829,6 +3557,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": true,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -2856,6 +3591,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -2883,6 +3625,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": true
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -2910,6 +3659,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": true,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": true,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -2937,6 +3693,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": true,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -2964,6 +3727,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -2991,6 +3761,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": true,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -3018,6 +3795,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": true,
+        "human_escalation": false
+      },
       "naive_recovery": true,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -3045,6 +3829,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": true,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": true,
+        "firm_escalation": true,
+        "mandate_retry": true,
+        "human_escalation": true
+      },
       "naive_recovery": true,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -3072,6 +3863,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": true,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -3099,6 +3897,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": true,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -3126,6 +3931,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -3153,6 +3965,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": true,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -3180,6 +3999,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -3207,6 +4033,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": true,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": true,
+        "firm_escalation": true,
+        "mandate_retry": true,
+        "human_escalation": true
+      },
       "naive_recovery": true,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -3234,6 +4067,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": true
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -3261,6 +4101,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": true,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -3288,6 +4135,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -3315,6 +4169,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": true,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": true,
+        "firm_escalation": true,
+        "mandate_retry": true,
+        "human_escalation": true
+      },
       "naive_recovery": true,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -3342,6 +4203,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -3369,6 +4237,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": true,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -3396,6 +4271,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -3423,6 +4305,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": true,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": true,
+        "firm_escalation": true,
+        "mandate_retry": true,
+        "human_escalation": true
+      },
       "naive_recovery": true,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -3450,6 +4339,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": true,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": true,
+        "firm_escalation": true,
+        "mandate_retry": true,
+        "human_escalation": true
+      },
       "naive_recovery": true,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -3477,6 +4373,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": true,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": true,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -3504,6 +4407,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": true,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": true,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -3531,6 +4441,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -3558,6 +4475,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": true,
+        "firm_escalation": false,
+        "mandate_retry": true,
+        "human_escalation": true
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -3585,6 +4509,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -3612,6 +4543,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": true,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": true
+      },
       "naive_recovery": true,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -3639,6 +4577,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": true,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": true,
+        "firm_escalation": true,
+        "mandate_retry": true,
+        "human_escalation": true
+      },
       "naive_recovery": true,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -3666,6 +4611,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": true,
+        "human_escalation": true
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": true
@@ -3693,6 +4645,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -3720,6 +4679,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": true,
+        "firm_escalation": false,
+        "mandate_retry": true,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -3747,6 +4713,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": true,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -3774,6 +4747,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": true,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -3801,6 +4781,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": true,
+        "firm_escalation": true,
+        "mandate_retry": true,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -3828,6 +4815,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -3855,6 +4849,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -3882,6 +4883,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": true,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": true,
+        "firm_escalation": true,
+        "mandate_retry": true,
+        "human_escalation": true
+      },
       "naive_recovery": true,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -3909,6 +4917,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": true,
+        "firm_escalation": true,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -3936,6 +4951,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -3963,6 +4985,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": true,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -3990,6 +5019,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": true,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": true,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -4017,6 +5053,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": true,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": true,
+        "firm_escalation": true,
+        "mandate_retry": true,
+        "human_escalation": true
+      },
       "naive_recovery": true,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -4044,6 +5087,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": true,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -4071,6 +5121,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": true,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": true,
+        "firm_escalation": true,
+        "mandate_retry": true,
+        "human_escalation": true
+      },
       "naive_recovery": true,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -4098,6 +5155,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -4125,6 +5189,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": true,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -4152,6 +5223,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": true,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": true,
+        "firm_escalation": true,
+        "mandate_retry": true,
+        "human_escalation": true
+      },
       "naive_recovery": true,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -4179,6 +5257,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": true,
+        "human_escalation": true
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -4206,6 +5291,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": true,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": true,
+        "firm_escalation": true,
+        "mandate_retry": true,
+        "human_escalation": true
+      },
       "naive_recovery": true,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -4233,6 +5325,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": true,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -4260,6 +5359,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": true,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -4287,6 +5393,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -4314,6 +5427,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": true,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": true,
+        "firm_escalation": true,
+        "mandate_retry": true,
+        "human_escalation": true
+      },
       "naive_recovery": true,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -4341,6 +5461,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": true
+      },
       "naive_recovery": true,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -4368,6 +5495,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": true,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -4395,6 +5529,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": true,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -4422,6 +5563,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -4449,6 +5597,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -4476,6 +5631,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -4503,6 +5665,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": true,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": true,
+        "firm_escalation": true,
+        "mandate_retry": true,
+        "human_escalation": true
+      },
       "naive_recovery": true,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -4530,6 +5699,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": true,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -4557,6 +5733,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": true,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": true
@@ -4584,6 +5767,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": true,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -4611,6 +5801,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": true,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -4638,6 +5835,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -4665,6 +5869,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -4692,6 +5903,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": true,
+        "human_escalation": false
+      },
       "naive_recovery": true,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -4719,6 +5937,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": true,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -4746,6 +5971,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -4773,6 +6005,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": true
@@ -4800,6 +6039,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": false,
+        "firm_escalation": true,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -4827,6 +6073,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": true,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -4854,6 +6107,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": true,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -4881,6 +6141,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": true,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -4908,6 +6175,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": true,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -4935,6 +6209,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": true,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": true,
+        "firm_escalation": true,
+        "mandate_retry": true,
+        "human_escalation": true
+      },
       "naive_recovery": true,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -4962,6 +6243,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": true,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -4989,6 +6277,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": true
@@ -5016,6 +6311,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": true,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -5043,6 +6345,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": true,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -5070,6 +6379,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -5097,6 +6413,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": true,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -5124,6 +6447,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": true,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -5151,6 +6481,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -5178,6 +6515,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": true,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -5205,6 +6549,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": true,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -5232,6 +6583,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -5259,6 +6617,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": true,
+        "human_escalation": true
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -5286,6 +6651,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -5313,6 +6685,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": true,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -5340,6 +6719,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": true,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": true,
+        "firm_escalation": true,
+        "mandate_retry": true,
+        "human_escalation": true
+      },
       "naive_recovery": true,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -5367,6 +6753,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": true,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -5394,6 +6787,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": true,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": true,
+        "firm_escalation": true,
+        "mandate_retry": true,
+        "human_escalation": true
+      },
       "naive_recovery": true,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -5421,6 +6821,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": true,
+        "human_escalation": false
+      },
       "naive_recovery": true,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -5448,6 +6855,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -5475,6 +6889,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -5502,6 +6923,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": true
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -5529,6 +6957,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": true,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": true,
+        "firm_escalation": true,
+        "mandate_retry": true,
+        "human_escalation": true
+      },
       "naive_recovery": true,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -5556,6 +6991,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": true,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -5583,6 +7025,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -5610,6 +7059,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": true,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": true,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -5637,6 +7093,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -5664,6 +7127,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": true,
+        "firm_escalation": true,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": true,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -5691,6 +7161,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": true,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": true,
+        "firm_escalation": true,
+        "mandate_retry": true,
+        "human_escalation": true
+      },
       "naive_recovery": true,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -5718,6 +7195,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": true,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -5745,6 +7229,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": true,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -5772,6 +7263,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -5799,6 +7297,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": true,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -5826,6 +7331,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": true
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -5853,6 +7365,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -5880,6 +7399,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": true,
+        "firm_escalation": true,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -5907,6 +7433,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": true,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -5934,6 +7467,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": true,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": true,
+        "firm_escalation": true,
+        "mandate_retry": true,
+        "human_escalation": true
+      },
       "naive_recovery": true,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -5961,6 +7501,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": true,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -5988,6 +7535,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": true,
+        "mandate_retry": true,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -6015,6 +7569,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": true,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -6042,6 +7603,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": true,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": true,
+        "firm_escalation": true,
+        "mandate_retry": true,
+        "human_escalation": true
+      },
       "naive_recovery": true,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -6069,6 +7637,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -6096,6 +7671,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": true,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -6123,6 +7705,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": true,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -6150,6 +7739,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": false,
+        "firm_escalation": true,
+        "mandate_retry": false,
+        "human_escalation": true
+      },
       "naive_recovery": true,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -6177,6 +7773,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -6204,6 +7807,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": true,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -6231,6 +7841,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": true,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": true
@@ -6258,6 +7875,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -6285,6 +7909,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -6312,6 +7943,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -6339,6 +7977,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -6366,6 +8011,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": false,
+        "firm_escalation": true,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -6393,6 +8045,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": true,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -6420,6 +8079,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": true,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -6447,6 +8113,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -6474,6 +8147,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": true,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": true
+      },
       "naive_recovery": true,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -6501,6 +8181,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": true,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": true,
+        "firm_escalation": true,
+        "mandate_retry": true,
+        "human_escalation": true
+      },
       "naive_recovery": true,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -6528,6 +8215,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": true,
+        "firm_escalation": true,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -6555,6 +8249,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": true,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -6582,6 +8283,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -6609,6 +8317,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": true
+      },
       "naive_recovery": false,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -6636,6 +8351,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": true,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": true,
+        "firm_escalation": true,
+        "mandate_retry": true,
+        "human_escalation": true
+      },
       "naive_recovery": true,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -6663,6 +8385,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": true,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": true,
+        "firm_escalation": true,
+        "mandate_retry": true,
+        "human_escalation": true
+      },
       "naive_recovery": true,
       "lane_recovery": true,
       "tone_escalation_recovery": true
@@ -6690,6 +8419,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": true,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": false
@@ -6717,6 +8453,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": false,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": true,
       "lane_recovery": false,
       "tone_escalation_recovery": true
@@ -6744,6 +8487,13 @@
     "due_date": "2026-08-15",
     "truth": {
       "natural_recovery": false,
+      "strategy_outcomes": {
+        "payment_link_refresh": false,
+        "soft_reminder": true,
+        "firm_escalation": false,
+        "mandate_retry": false,
+        "human_escalation": false
+      },
       "naive_recovery": false,
       "lane_recovery": false,
       "tone_escalation_recovery": true

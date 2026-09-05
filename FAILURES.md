@@ -141,6 +141,30 @@ Every top-tier hackathon submission encounters reality gaps. This document logs 
 - **Fail-Loudly Live Recording**: Updated `record_real_llm_traces.py` to strictly fail if live provider keys are absent and removed all synthetic fallback headers.
 - **Strict Evidence Categorization**: Clearly differentiated Real Provider Wire, Real PostgreSQL, HTTP Integration, Mocked, and Simulator evidence across documentation and tests.
 
+### 16. Ground-Truth Label Leakage in Benchmark Evaluation: Gating Without Causal Decision Branching
+**Date:** September 5, 2026
+**What happened:**
+Inspection of `backend/src/scripts/evaluate-batch.ts` revealed that both the AI Agent arm and the Oracle arm read the identical ground-truth boolean flags (`truth.lane_recovery` and `truth.tone_escalation_recovery`) through the identical `PolicyGuard.validate()` gate:
+```ts
+if (truth.natural_recovery || truth.lane_recovery) {
+  ai.recovered += amt;
+}
+if (truth.tone_escalation_recovery) {
+  ai.recovered += amt;
+}
+```
+Because both arms read the identical boolean flags through the identical gate, the AI Agent arm was mathematically guaranteed to recover the exact same amount as the theoretical-perfect Oracle (₹9,45,618.25 for both), while burning 3x the contacts (1,002 vs 321). This proved the harness was measuring `PolicyGuard` compliance rather than agent decision quality, and that the multi-agent decision engine had zero measured causal effect on the headline recovery total.
+
+**Why it happened:**
+The synthetic dataset generator (`generate_dataset.py`) produced monolithic boolean flags (`lane_recovery`, `tone_escalation_recovery`) per invoice rather than a strategy-conditioned outcome matrix. In the evaluator, the AI arm simply checked if the agent diagnosed the right lane; if so, it credited `truth.lane_recovery`. It never evaluated whether the agent's specific recommended intervention (`payment_link_refresh`, `soft_reminder`, `mandate_retry`, `firm_escalation`, `human_escalation`) was actually effective for that debt. Furthermore, the Oracle arm simply read the same boolean flags rather than clairvoyantly choosing the optimal strategy across all candidate actions.
+
+**The Fix:**
+1. **Strategy-Conditioned Effectiveness Matrix (`generate_dataset.py`)**: Replaced monolithic booleans with a per-case effectiveness matrix (`strategy_outcomes: dict[str, bool]`) across candidate strategies (`payment_link_refresh`, `soft_reminder`, `firm_escalation`, `mandate_retry`, `human_escalation`). Different strategies have distinct response distributions conditioned on the true incident lane and days overdue (e.g., mandate retry rescues subscriptions but fails on payment timeouts; 1-click retry resolves gateway dropoffs; firm escalation resolves extended corporate receivables).
+2. **Causal Agent Strategy Routing (`evaluate-batch.ts`)**: The AI Agent arm's recovery outcome is now strictly downstream of the strategy chosen by the agent (`agentDecision.strategy`). Recovery succeeds if and only if that specific chosen strategy is true in the case's effectiveness matrix.
+3. **Genuine Omniscient Oracle & Genuine Naive Baseline**: Oracle selects the optimal allowed strategy across all candidate actions ($\max_{s \in \text{Allowed}} \text{outcome}(s)$). Naive applies a fixed single strategy (`payment_link_refresh`) to all cases without adaptation, while Maximum Pressure badgers debtors with firm escalations and commits compliance violations.
+4. **Honest AI < Oracle Gap**: With real decision branching, AI Agent recovers **84.27%** (Deterministic) and **85.50%** (Simulated LLM) of the Oracle Ceiling (₹11,93,696.63 and ₹12,11,073.36 vs Oracle ₹14,16,470.85). The gap is directly explained by real diagnostic misclassifications on ambiguous cases and suboptimal strategy choices.
+5. **Adversarial Regression Test (`agent-decision-causality.test.ts`)**: Added an adversarial test constructing a case where the optimal strategy (`mandate_retry`) differs from the agent's choice (`payment_link_refresh`). The test asserts the agent recovers ₹0 while Oracle recovers ₹5,000, and proves that under the old logic the agent would have erroneously recovered ₹5,000.
+
 ## Conclusion
 Our evaluation harness ensures that every number reported across PayBack-AI is mathematically proven, reproducible, and verifiable by independent inspection down to raw cryptographic hashes, live HTTP wire headers, and physical database sockets.
 

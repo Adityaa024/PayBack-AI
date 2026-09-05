@@ -200,7 +200,7 @@ graph TD
 ## 4. Deep Dive: Key Subsystems
 
 ### 4.1 The 8 Hard PolicyGuard Stopping Rules
-Located in [`backend/src/modules/recovery/recovery.contract.ts`](file:///d:/Jaktra/Jaktra-main/backend/src/modules/recovery/recovery.contract.ts). Evaluated immediately before action scheduling:
+Located in [`backend/src/modules/recovery/recovery.contract.ts`](backend/src/modules/recovery/recovery.contract.ts). Evaluated immediately before action scheduling:
 
 | Rule | Trigger Condition | Outcome State | Reason Code |
 |---|---|---|---|
@@ -214,7 +214,7 @@ Located in [`backend/src/modules/recovery/recovery.contract.ts`](file:///d:/Jakt
 | **8. Economic Floor** | Amount < economic viability floor (₹100) | `escalated` | `ECONOMIC_FLOOR_VIOLATION` |
 
 ### 4.2 Transactional Outbox Pattern
-Located in [`backend/src/modules/recovery/outbox.service.ts`](file:///d:/Jaktra/Jaktra-main/backend/src/modules/recovery/outbox.service.ts):
+Located in [`backend/src/modules/recovery/outbox.service.ts`](backend/src/modules/recovery/outbox.service.ts):
 - Every external action intent is inserted into `recovery_outbox_intents` with an `idempotency_key` (SHA-256 of `tenantId:sessionId:actionType:attemptNumber`).
 - Parallel workers atomically claim pending intents using:
   ```sql
@@ -228,7 +228,7 @@ Located in [`backend/src/modules/recovery/outbox.service.ts`](file:///d:/Jaktra/
 - Proved concurrency-safe across 5 parallel workers in `outbox-concurrency.test.ts`.
 
 ### 4.3 Tamper-Evident Hash-Chained Audit Ledger
-Located in [`backend/src/modules/recovery/recovery.repository.ts`](file:///d:/Jaktra/Jaktra-main/backend/src/modules/recovery/recovery.repository.ts):
+Located in [`backend/src/modules/recovery/recovery.repository.ts`](backend/src/modules/recovery/recovery.repository.ts):
 - Concurrent appends serialize per tenant via PostgreSQL advisory transaction locks:
   ```sql
   SELECT pg_advisory_xact_lock(hashtext('recovery_ledger_' || tenant_id));
@@ -239,20 +239,20 @@ Located in [`backend/src/modules/recovery/recovery.repository.ts`](file:///d:/Ja
 - Demo reset (`POST /api/recovery/reset`) is strictly blocked in production (`ALLOW_DEMO_RESET=false`) and requires admin credentials. Proved in `ledger-tamper.test.ts`.
 
 ### 4.4 Versioned Merchant Policy Configuration
-Located in [`ai-service/config/merchant_policies.yaml`](file:///d:/Jaktra/Jaktra-main/ai-service/config/merchant_policies.yaml) and loaded via [`backend/src/modules/policy/merchant-policy.service.ts`](file:///d:/Jaktra/Jaktra-main/backend/src/modules/policy/merchant-policy.service.ts):
+Located in [`ai-service/config/merchant_policies.yaml`](ai-service/config/merchant_policies.yaml) and loaded via [`backend/src/modules/policy/merchant-policy.service.ts`](backend/src/modules/policy/merchant-policy.service.ts):
 - Validated via Zod with fields: `version`, `amountFloor`, `retrySchedule`, `channels`, `toneMatrix`, `compliance`.
 - Generates a deterministic SHA-256 `policyHash` stamped on every recovery contract and audit entry.
 - Proved in `merchant-policy.test.ts`.
 
 ### 4.5 Responsible Contact Controls
-Located in [`backend/src/modules/policy/responsible-contact.service.ts`](file:///d:/Jaktra/Jaktra-main/backend/src/modules/policy/responsible-contact.service.ts):
+Located in [`backend/src/modules/policy/responsible-contact.service.ts`](backend/src/modules/policy/responsible-contact.service.ts):
 - **Quiet Hours**: Suppresses outreach between 21:00 and 08:00 in customer timezone (default `Asia/Kolkata`).
 - **Channel Opt-Outs**: Respects customer preferences; blocks unconsented WhatsApp/voice calls.
 - **Contact Caps**: Enforces max 2 contacts per customer in any rolling 24-hour window.
 - **STOP Keyword Propagation**: Inbound `STOP` reply triggers `propagateCustomerOptOut()`, immediately escalating and freezing all active sessions for that debtor across the entire tenant. Proved in `responsible-contact.test.ts`.
 
 ### 4.6 Economically Grounded Decision Engine
-Located in [`backend/src/modules/recovery/economic-engine.ts`](file:///d:/Jaktra/Jaktra-main/backend/src/modules/recovery/economic-engine.ts):
+Located in [`backend/src/modules/recovery/economic-engine.ts`](backend/src/modules/recovery/economic-engine.ts):
 - Calculates Expected Incremental Value:
   $$EIV = (P_{\text{predicted}} \times \text{amountAtRisk}) - (\text{channelCost} + \text{providerCost} + \text{discountCost})$$
 - Recommends `'abstain'` when $EIV \le 0$, saving merchant capital on low-probability or high-cost chases.
@@ -261,26 +261,26 @@ Located in [`backend/src/modules/recovery/economic-engine.ts`](file:///d:/Jaktra
 
 ### 4.7 7-Arm Unified Benchmark & Empirical Lift
 Located in [`backend/src/scripts/evaluate-batch.ts`](backend/src/scripts/evaluate-batch.ts) and [`ai-service/scripts/run_evaluation.py`](ai-service/scripts/run_evaluation.py):
-- **Unified Denominator (1,000 Invoices under Seed 42, Total Failed Debt: ₹2,221,965.50, Oracle Ceiling: ₹1,203,167.01)**:
-  - `do_nothing`: Gross ₹3,52,002.94 | Net ₹3,52,002.94 | 29.26% Oracle | 0 Violations | ₹0.00 Cost
-  - `fixed_retry`: Gross ₹7,30,703.24 | Net ₹7,25,978.24 | 60.73% Oracle | 123 Violations | ₹4,725.00 Cost
-  - `contact_only`: Gross ₹6,43,016.92 | Net ₹6,39,086.92 | 53.44% Oracle | 0 Violations | ₹3,930.00 Cost
-  - `deterministic_policy`: Gross ₹11,62,390.82 | Net ₹11,54,395.82 | 96.61% Oracle | 0 Violations | ₹7,995.00 Cost
-  - `simulated_llm_policy`: Gross ₹11,89,650.23 | Net ₹11,81,640.87 | 98.88% Oracle | 0 Violations | ₹8,009.36 Cost
-  - `oracle`: Gross ₹12,03,167.01 | Net ₹12,03,167.01 | 100.00% Oracle | 0 Violations | ₹0.00 Cost
-- **Multi-Seed Stability (Seeds 42–51, $N=10$)**:
-  - Simulated LLM Policy: Mean ₹11,87,412.50 [95% CI: ₹11,81,892.15 – ₹11,92,932.85], 98.78% mean Oracle efficiency.
+- **Unified Denominator (1,000 Invoices under Seed 42, Total Failed Debt: ₹2,221,965.50, Oracle Ceiling: ₹1,416,470.85)**:
+  - `do_nothing`: Gross ₹3,52,002.94 | Net ₹3,52,002.94 | 24.85% Oracle | 0 Violations | ₹0.00 Cost
+  - `fixed_retry`: Gross ₹9,88,722.46 | Net ₹9,86,722.46 | 69.80% Oracle | 143 Violations | ₹2,000.00 Cost
+  - `contact_only`: Gross ₹6,89,682.11 | Net ₹6,88,182.11 | 48.69% Oracle | 123 Violations | ₹1,500.00 Cost
+  - `deterministic_policy`: Gross ₹11,93,696.63 | Net ₹11,92,131.63 | 84.27% Oracle | 0 Violations | ₹1,565.00 Cost
+  - `simulated_llm_policy`: Gross ₹12,11,073.36 | Net ₹12,09,467.00 | 85.50% Oracle | 0 Violations | ₹1,606.36 Cost
+  - `oracle`: Gross ₹14,16,470.85 | Net ₹14,15,771.85 | 100.00% Oracle | 0 Violations | ₹699.00 Cost
+- **Multi-Seed Stability (Seeds 42–61, $N=20$)**:
+  - Simulated LLM Policy: Mean ₹12,36,363.86 [95% CI: ₹12,20,782.50 – ₹12,51,945.22], 87.34% mean Oracle efficiency [86.66%, 88.02%].
 - **Unseen Holdout Generalization (Multi-Seed: Seeds 101–505 & Seed 999, $N=1,500$ Total Holdout Cases)**:
-  - Primary holdout (Seed 999): ₹3,27,728.84 recovered (100.00% Oracle efficiency, 0 violations).
-  - 5-Seed Holdout Distribution: Mean 100.00% Oracle efficiency [95% CI: 99.55%–100.45%], 0 violations.
+  - Primary holdout (Seed 999): ₹3,26,429.87 recovered (78.93% Oracle efficiency, 0 violations).
+  - 5-Seed Holdout Distribution: Mean 76.48% Oracle efficiency [95% CI: 72.62%–80.34%], 0 violations.
 - **Telescoping Sum Ablation (8 Layers)**:
-  - $\sum \Delta \text{Incremental Lift} = \text{₹921,683.81} == \text{Final Lift}$ ($\text{diff} = 0.000000$).
+  - $\sum \Delta \text{Incremental Lift} == \text{Final Incremental Lift}$ ($\text{diff} = 0.000000$).
 
 ---
 
 ## 5. Complete Database Schema (28 Tables)
 
-All schema tables are defined in [`backend/src/db/schema.ts`](file:///d:/Jaktra/Jaktra-main/backend/src/db/schema.ts) using Drizzle ORM:
+All schema tables are defined in [`backend/src/db/schema.ts`](backend/src/db/schema.ts) using Drizzle ORM:
 
 | Domain | Table Name | Purpose | Key Constraints & Indexes |
 |---|---|---|---|

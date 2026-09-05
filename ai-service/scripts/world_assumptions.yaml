@@ -32,3 +32,42 @@ incident_lanes:
   subscription_rescue: 0.30          # 30%
   b2b_receivables: 0.20              # 20%
   checkout_dropoff: 0.10             # 10%
+
+# Strategy Effectiveness Matrix (Per-Strategy Recovery Probability Conditioned on True Incident Lane)
+# If a case is naturally recoverable, it recovers under any strategy.
+# Otherwise, customer response probability depends strictly on matching the intervention to the incident lane.
+strategy_effectiveness_matrix:
+  payment_degradation:
+    payment_link_refresh: 0.60   # [OBSERVED] 1-click multi-rail retry resolves instant gateway/UPI drops
+    soft_reminder: 0.12          # Polite reminder alone rarely fixes a technical gateway decline
+    firm_escalation: 0.08        # Aggressive tone alienates customers with tech failures
+    mandate_retry: 0.02          # Not a recurring mandate; mandate retry does not apply
+    human_escalation: 0.08       # Manual outreach is slow for instant dropoffs
+
+  subscription_rescue:
+    mandate_retry: 0.56          # [OBSERVED] Automated re-presentation & mandate update flow rescues subscriptions
+    payment_link_refresh: 0.18   # Link recovers current cycle but fails to fix underlying recurring token
+    soft_reminder: 0.12          # Standard reminder has modest response for recurring billing
+    firm_escalation: 0.08        # Premature firm tone increases churn on recurring SaaS
+    human_escalation: 0.12       # Helpful only if customer needs high-touch payment instrument change
+
+  checkout_dropoff:
+    payment_link_refresh: 0.46   # [OBSERVED] Re-engaging with pre-filled cart / 1-click checkout recovers abandoned cart
+    soft_reminder: 0.16          # Friendly nudge recovers modest share of shoppers
+    firm_escalation: 0.06        # Aggressive tone destroys customer trust on abandoned cart
+    mandate_retry: 0.02          # Not a subscription mandate
+    human_escalation: 0.08       # Expensive and slow for consumer checkout
+
+  b2b_receivables_early:         # <= 45 days overdue
+    soft_reminder: 0.46          # [OBSERVED] Polite AP reminder with invoice PDF & GST breakdown clears commercial terms
+    firm_escalation: 0.22        # Escalation is moderately effective but may damage client relationship early
+    payment_link_refresh: 0.08   # Corporate AP departments do not pay via instant retail payment links
+    mandate_retry: 0.02          # B2B enterprise invoices rarely on retail mandate
+    human_escalation: 0.15       # Account manager follow-up has modest early yield
+
+  b2b_receivables_late:          # > 45 days overdue
+    firm_escalation: 0.52        # [OBSERVED] Formal escalation to finance controller / legal notice triggers delayed payment
+    soft_reminder: 0.18          # Polite reminders already ignored; low incremental yield
+    human_escalation: 0.28       # Executive-level account outreach resolves stalled enterprise invoices
+    payment_link_refresh: 0.06   # Ineffective for delinquent corporate accounts
+    mandate_retry: 0.02          # Ineffective

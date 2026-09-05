@@ -1,6 +1,6 @@
 {
-  "benchmark_total_incremental_lift": 922465.41,
-  "sum_of_ablation_increments": 922465.41,
+  "benchmark_total_incremental_lift": 898762.26,
+  "sum_of_ablation_increments": 898762.26,
   "invariant_verified": true,
   "telescoping_forward_ablation": [
     {
@@ -13,58 +13,58 @@
     {
       "layer": "2. + Coverage Outreach",
       "description": "Actively engaging eligible overdue accounts vs passive write-off",
-      "marginal_lift_inr": 263590.21,
-      "cumulative_lift_inr": 263590.21,
-      "percent_of_total_lift": 28.57
+      "marginal_lift_inr": 444203.66,
+      "cumulative_lift_inr": 444203.66,
+      "percent_of_total_lift": 49.42
     },
     {
       "layer": "3. + Retry Timing",
       "description": "Quiet hours suppression (10pm-8am) and time-boxed retry schedules",
       "marginal_lift_inr": 0.0,
-      "cumulative_lift_inr": 263590.21,
+      "cumulative_lift_inr": 444203.66,
       "percent_of_total_lift": 0.0
     },
     {
       "layer": "4. + Channel Selection",
       "description": "Channel matching: WhatsApp for UPI/D2C vs Email statement for B2B",
       "marginal_lift_inr": 0.0,
-      "cumulative_lift_inr": 263590.21,
+      "cumulative_lift_inr": 444203.66,
       "percent_of_total_lift": 0.0
     },
     {
       "layer": "5. + Dynamic Cooldowns",
       "description": "24h-48h cooldown enforcement to eliminate spam penalties and debtor churn",
       "marginal_lift_inr": 0.0,
-      "cumulative_lift_inr": 263590.21,
+      "cumulative_lift_inr": 444203.66,
       "percent_of_total_lift": 0.0
     },
     {
       "layer": "6. + PolicyGuard Safety",
       "description": "8 stopping rules eliminating wasted outreach on opt-outs and >90d debt",
-      "marginal_lift_inr": -44043.35,
-      "cumulative_lift_inr": 219546.86,
-      "percent_of_total_lift": -4.77
+      "marginal_lift_inr": -74589.58,
+      "cumulative_lift_inr": 369614.08,
+      "percent_of_total_lift": -8.3
     },
     {
       "layer": "7. + Deterministic Classification",
       "description": "Rule-based routing to causal incident lanes (84.8% diagnostic accuracy)",
-      "marginal_lift_inr": 647104.36,
-      "cumulative_lift_inr": 866651.22,
-      "percent_of_total_lift": 70.15
+      "marginal_lift_inr": 488786.53,
+      "cumulative_lift_inr": 858400.61,
+      "percent_of_total_lift": 54.38
     },
     {
       "layer": "8. + LLM Classification & Planning",
       "description": "LLM disambiguation (96.8% accuracy) + adaptive mandate retry sequence",
-      "marginal_lift_inr": 40653.09,
-      "cumulative_lift_inr": 907304.31,
-      "percent_of_total_lift": 4.41
+      "marginal_lift_inr": 35614.24,
+      "cumulative_lift_inr": 894014.85,
+      "percent_of_total_lift": 3.96
     },
     {
       "layer": "8. + LLM Classification & Planning",
       "description": "LLM disambiguation (96.8% accuracy) + adaptive mandate retry sequence",
-      "marginal_lift_inr": 15161.1,
-      "cumulative_lift_inr": 922465.41,
-      "percent_of_total_lift": 1.64
+      "marginal_lift_inr": 4747.41,
+      "cumulative_lift_inr": 898762.26,
+      "percent_of_total_lift": 0.53
     }
   ],
   "layers": [
@@ -78,58 +78,58 @@
     {
       "layer": "2. + Coverage Outreach",
       "description": "Actively engaging eligible overdue accounts vs passive write-off",
-      "marginal_lift_inr": 263590.21,
-      "cumulative_lift_inr": 263590.21,
-      "percent_of_total_lift": 28.57
+      "marginal_lift_inr": 444203.66,
+      "cumulative_lift_inr": 444203.66,
+      "percent_of_total_lift": 49.42
     },
     {
       "layer": "3. + Retry Timing",
       "description": "Quiet hours suppression (10pm-8am) and time-boxed retry schedules",
       "marginal_lift_inr": 0.0,
-      "cumulative_lift_inr": 263590.21,
+      "cumulative_lift_inr": 444203.66,
       "percent_of_total_lift": 0.0
     },
     {
       "layer": "4. + Channel Selection",
       "description": "Channel matching: WhatsApp for UPI/D2C vs Email statement for B2B",
       "marginal_lift_inr": 0.0,
-      "cumulative_lift_inr": 263590.21,
+      "cumulative_lift_inr": 444203.66,
       "percent_of_total_lift": 0.0
     },
     {
       "layer": "5. + Dynamic Cooldowns",
       "description": "24h-48h cooldown enforcement to eliminate spam penalties and debtor churn",
       "marginal_lift_inr": 0.0,
-      "cumulative_lift_inr": 263590.21,
+      "cumulative_lift_inr": 444203.66,
       "percent_of_total_lift": 0.0
     },
     {
       "layer": "6. + PolicyGuard Safety",
       "description": "8 stopping rules eliminating wasted outreach on opt-outs and >90d debt",
-      "marginal_lift_inr": -44043.35,
-      "cumulative_lift_inr": 219546.86,
-      "percent_of_total_lift": -4.77
+      "marginal_lift_inr": -74589.58,
+      "cumulative_lift_inr": 369614.08,
+      "percent_of_total_lift": -8.3
     },
     {
       "layer": "7. + Deterministic Classification",
       "description": "Rule-based routing to causal incident lanes (84.8% diagnostic accuracy)",
-      "marginal_lift_inr": 647104.36,
-      "cumulative_lift_inr": 866651.22,
-      "percent_of_total_lift": 70.15
+      "marginal_lift_inr": 488786.53,
+      "cumulative_lift_inr": 858400.61,
+      "percent_of_total_lift": 54.38
     },
     {
       "layer": "8. + LLM Classification & Planning",
       "description": "LLM disambiguation (96.8% accuracy) + adaptive mandate retry sequence",
-      "marginal_lift_inr": 40653.09,
-      "cumulative_lift_inr": 907304.31,
-      "percent_of_total_lift": 4.41
+      "marginal_lift_inr": 35614.24,
+      "cumulative_lift_inr": 894014.85,
+      "percent_of_total_lift": 3.96
     },
     {
       "layer": "8. + LLM Classification & Planning",
       "description": "LLM disambiguation (96.8% accuracy) + adaptive mandate retry sequence",
-      "marginal_lift_inr": 15161.1,
-      "cumulative_lift_inr": 922465.41,
-      "percent_of_total_lift": 1.64
+      "marginal_lift_inr": 4747.41,
+      "cumulative_lift_inr": 898762.26,
+      "percent_of_total_lift": 0.53
     }
   ],
   "leave_one_feature_out_ablation": [
@@ -139,153 +139,153 @@
       "lift_without_feature": 0.0,
       "raw_gross_without_feature": 352002.94,
       "raw_cost_without_feature": 0.0,
-      "marginal_drop_when_removed": 922465.41,
+      "marginal_drop_when_removed": 898762.26,
       "percent_of_total_lift": 100.0,
-      "marginal_feature_contribution": 922465.41,
-      "isolated_causal_contribution": 922465.41
+      "marginal_feature_contribution": 898762.26,
+      "isolated_causal_contribution": 898762.26
     },
     {
       "feature": "Retry Timing",
       "flag_key": "enable_retry_timing",
-      "lift_without_feature": 799703.74,
-      "raw_gross_without_feature": 1153249.18,
-      "raw_cost_without_feature": 1542.5,
-      "marginal_drop_when_removed": 122761.67,
-      "percent_of_total_lift": 13.31,
-      "marginal_feature_contribution": 122761.67,
-      "isolated_causal_contribution": 122761.67
+      "lift_without_feature": 768292.38,
+      "raw_gross_without_feature": 1121816.82,
+      "raw_cost_without_feature": 1521.5,
+      "marginal_drop_when_removed": 130469.88,
+      "percent_of_total_lift": 14.52,
+      "marginal_feature_contribution": 130469.88,
+      "isolated_causal_contribution": 130469.88
     },
     {
       "feature": "Channel Selection",
       "flag_key": "enable_channel_selection",
-      "lift_without_feature": 717862.63,
-      "raw_gross_without_feature": 1071408.07,
-      "raw_cost_without_feature": 1542.5,
-      "marginal_drop_when_removed": 204602.78,
-      "percent_of_total_lift": 22.18,
-      "marginal_feature_contribution": 204602.78,
-      "isolated_causal_contribution": 204602.78
+      "lift_without_feature": 681312.46,
+      "raw_gross_without_feature": 1034836.9,
+      "raw_cost_without_feature": 1521.5,
+      "marginal_drop_when_removed": 217449.8,
+      "percent_of_total_lift": 24.19,
+      "marginal_feature_contribution": 217449.8,
+      "isolated_causal_contribution": 217449.8
     },
     {
       "feature": "Dynamic Cooldowns",
       "flag_key": "enable_dynamic_cooldowns",
-      "lift_without_feature": 840624.3,
-      "raw_gross_without_feature": 1194169.74,
-      "raw_cost_without_feature": 1542.5,
-      "marginal_drop_when_removed": 81841.11,
-      "percent_of_total_lift": 8.87,
-      "marginal_feature_contribution": 81841.11,
-      "isolated_causal_contribution": 81841.11
+      "lift_without_feature": 811782.34,
+      "raw_gross_without_feature": 1165306.78,
+      "raw_cost_without_feature": 1521.5,
+      "marginal_drop_when_removed": 86979.92,
+      "percent_of_total_lift": 9.68,
+      "marginal_feature_contribution": 86979.92,
+      "isolated_causal_contribution": 86979.92
     },
     {
       "feature": "PolicyGuard Safety",
       "flag_key": "enable_policy_guard",
-      "lift_without_feature": 1123877.48,
-      "raw_gross_without_feature": 1477783.92,
-      "raw_cost_without_feature": 1903.5,
-      "marginal_drop_when_removed": -201412.07,
-      "percent_of_total_lift": -21.83,
-      "marginal_feature_contribution": -201412.07,
-      "isolated_causal_contribution": -201412.07
+      "lift_without_feature": 1093965.13,
+      "raw_gross_without_feature": 1447854.57,
+      "raw_cost_without_feature": 1886.5,
+      "marginal_drop_when_removed": -195202.87,
+      "percent_of_total_lift": -21.72,
+      "marginal_feature_contribution": -195202.87,
+      "isolated_causal_contribution": -195202.87
     },
     {
       "feature": "Deterministic Routing",
       "flag_key": "enable_deterministic_classification",
-      "lift_without_feature": 909355.82,
-      "raw_gross_without_feature": 1262907.76,
-      "raw_cost_without_feature": 1549.0,
-      "marginal_drop_when_removed": 13109.59,
-      "percent_of_total_lift": 1.42,
-      "marginal_feature_contribution": 13109.59,
-      "isolated_causal_contribution": 13109.59
+      "lift_without_feature": 890915.69,
+      "raw_gross_without_feature": 1244444.63,
+      "raw_cost_without_feature": 1526.0,
+      "marginal_drop_when_removed": 7846.57,
+      "percent_of_total_lift": 0.87,
+      "marginal_feature_contribution": 7846.57,
+      "isolated_causal_contribution": 7846.57
     },
     {
       "feature": "LLM Classification",
       "flag_key": "enable_llm_classification",
-      "lift_without_feature": 872928.43,
-      "raw_gross_without_feature": 1226493.37,
-      "raw_cost_without_feature": 1562.0,
-      "marginal_drop_when_removed": 49536.98,
-      "percent_of_total_lift": 5.37,
-      "marginal_feature_contribution": 49536.98,
-      "isolated_causal_contribution": 49536.98
+      "lift_without_feature": 859709.28,
+      "raw_gross_without_feature": 1213253.22,
+      "raw_cost_without_feature": 1541.0,
+      "marginal_drop_when_removed": 39052.98,
+      "percent_of_total_lift": 4.35,
+      "marginal_feature_contribution": 39052.98,
+      "isolated_causal_contribution": 39052.98
     },
     {
       "feature": "LLM Adaptive Planning",
       "flag_key": "enable_llm_planning",
-      "lift_without_feature": 907304.31,
-      "raw_gross_without_feature": 1260934.75,
-      "raw_cost_without_feature": 1627.5,
-      "marginal_drop_when_removed": 15161.1,
-      "percent_of_total_lift": 1.64,
-      "marginal_feature_contribution": 15161.1,
-      "isolated_causal_contribution": 15161.1
+      "lift_without_feature": 894014.85,
+      "raw_gross_without_feature": 1247651.29,
+      "raw_cost_without_feature": 1633.5,
+      "marginal_drop_when_removed": 4747.41,
+      "percent_of_total_lift": 0.53,
+      "marginal_feature_contribution": 4747.41,
+      "isolated_causal_contribution": 4747.41
     }
   ],
   "order_permutation_sensitivity": [
     {
       "feature": "Coverage Outreach",
       "flag_key": "enable_coverage",
-      "mean_marginal_lift": 646450.47,
-      "min_marginal_lift": 262852.21,
-      "max_marginal_lift": 979106.2,
-      "order_sensitivity_range": 716253.99
+      "mean_marginal_lift": 682624.73,
+      "min_marginal_lift": 443509.66,
+      "max_marginal_lift": 969140.48,
+      "order_sensitivity_range": 525630.82
     },
     {
       "feature": "Retry Timing",
       "flag_key": "enable_retry_timing",
-      "mean_marginal_lift": 46035.63,
+      "mean_marginal_lift": 48926.2,
       "min_marginal_lift": 0.0,
-      "max_marginal_lift": 122761.67,
-      "order_sensitivity_range": 122761.67
+      "max_marginal_lift": 130469.88,
+      "order_sensitivity_range": 130469.88
     },
     {
       "feature": "Channel Selection",
       "flag_key": "enable_channel_selection",
-      "mean_marginal_lift": 20460.28,
+      "mean_marginal_lift": 21744.98,
       "min_marginal_lift": 0.0,
-      "max_marginal_lift": 204602.78,
-      "order_sensitivity_range": 204602.78
+      "max_marginal_lift": 217449.8,
+      "order_sensitivity_range": 217449.8
     },
     {
       "feature": "Dynamic Cooldowns",
       "flag_key": "enable_dynamic_cooldowns",
-      "mean_marginal_lift": 31508.83,
+      "mean_marginal_lift": 33487.27,
       "min_marginal_lift": 0.0,
-      "max_marginal_lift": 81841.11,
-      "order_sensitivity_range": 81841.11
+      "max_marginal_lift": 86979.92,
+      "order_sensitivity_range": 86979.92
     },
     {
       "feature": "PolicyGuard Safety",
       "flag_key": "enable_policy_guard",
-      "mean_marginal_lift": -33311.01,
-      "min_marginal_lift": -201412.07,
+      "mean_marginal_lift": -41853.81,
+      "min_marginal_lift": -195202.87,
       "max_marginal_lift": 0.0,
-      "order_sensitivity_range": 201412.07
+      "order_sensitivity_range": 195202.87
     },
     {
       "feature": "Deterministic Routing",
       "flag_key": "enable_deterministic_classification",
-      "mean_marginal_lift": 4613.3,
+      "mean_marginal_lift": 2624.77,
       "min_marginal_lift": 0.0,
-      "max_marginal_lift": 13109.59,
-      "order_sensitivity_range": 13109.59
+      "max_marginal_lift": 7846.57,
+      "order_sensitivity_range": 7846.57
     },
     {
       "feature": "LLM Classification",
       "flag_key": "enable_llm_classification",
-      "mean_marginal_lift": 205885.92,
+      "mean_marginal_lift": 151040.21,
       "min_marginal_lift": 0.0,
-      "max_marginal_lift": 690402.96,
-      "order_sensitivity_range": 690402.96
+      "max_marginal_lift": 521851.11,
+      "order_sensitivity_range": 521851.11
     },
     {
       "feature": "LLM Adaptive Planning",
       "flag_key": "enable_llm_planning",
-      "mean_marginal_lift": 822.0,
-      "min_marginal_lift": -738.0,
-      "max_marginal_lift": 9696.02,
-      "order_sensitivity_range": 10434.02
+      "mean_marginal_lift": 167.91,
+      "min_marginal_lift": -694.0,
+      "max_marginal_lift": 3067.08,
+      "order_sensitivity_range": 3761.08
     }
   ],
   "policy_guard_economics": {

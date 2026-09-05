@@ -62,7 +62,7 @@ def generate_dataset(seed: int = 42, output_file: Path = None, total_cases_overr
         if random.random() < 0.01:
             value = round(random.uniform(25.0, 95.0), 2)
 
-        # Ground-truth customer responsiveness
+        # Ground-truth customer responsiveness (advances global random state identically)
         natural_rec = random.random() < assumptions['natural_recovery_rate']
         
         # Naive responsiveness: customer responds to a generic link
@@ -76,6 +76,32 @@ def generate_dataset(seed: int = 42, output_file: Path = None, total_cases_overr
         # Additional response if escalated to firm tone (Stage 2)
         tone_boost = resp_cfg.get('tone_escalation_lift', 0.12)
         tone_escalation_rec = lane_rec or (random.random() < tone_boost)
+
+        # Candidate strategy effectiveness matrix
+        # Uses independent RNG stream keyed by seed and invoice_id so global random state is untouched
+        if lane == 'b2b_receivables':
+            strat_key = 'b2b_receivables_late' if days_overdue > 45 else 'b2b_receivables_early'
+        else:
+            strat_key = lane
+
+        strat_matrix = assumptions.get('strategy_effectiveness_matrix', {})
+        strat_probs = strat_matrix.get(strat_key, {})
+        candidate_strategies = [
+            'payment_link_refresh',
+            'soft_reminder',
+            'firm_escalation',
+            'mandate_retry',
+            'human_escalation'
+        ]
+
+        strat_rng = random.Random(f"{seed}_{invoice_id}_strat")
+        strategy_outcomes = {}
+        for strat in candidate_strategies:
+            if natural_rec:
+                strategy_outcomes[strat] = True
+            else:
+                p = strat_probs.get(strat, 0.05)
+                strategy_outcomes[strat] = (strat_rng.random() < p)
 
         # Observable signals for AI agent diagnosis (with ~10% ambiguous noise)
         is_ambiguous = (random.random() < 0.10)
@@ -184,6 +210,7 @@ def generate_dataset(seed: int = 42, output_file: Path = None, total_cases_overr
             "due_date": "2026-08-15",
             "truth": {
                 "natural_recovery": natural_rec,
+                "strategy_outcomes": strategy_outcomes,
                 "naive_recovery": naive_rec,
                 "lane_recovery": lane_rec,
                 "tone_escalation_recovery": tone_escalation_rec

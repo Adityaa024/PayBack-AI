@@ -38,6 +38,7 @@ describe('Priority 1: README Metrics Parity & CI Integrity Guard', () => {
     // 2. Format numbers as en-IN integers for markdown matching
     const formatInrInt = (n: number) => Math.round(n).toLocaleString('en-IN');
     const formatInrDec = (n: number) => n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const formatPct = (n: number) => n.toFixed(2) + '%';
 
     // Assert README contains the exact formatted values or integer representations
     const expectedFragments = [
@@ -45,8 +46,8 @@ describe('Priority 1: README Metrics Parity & CI Integrity Guard', () => {
       formatInrDec(oracleCeiling),
       formatInrDec(arms.simulated_llm_policy.gross_recovered_value),
       formatInrDec(arms.deterministic_policy.gross_recovered_value),
-      `${arms.simulated_llm_policy.recovery_pct_oracle_ceiling}%`,
-      `${arms.deterministic_policy.recovery_pct_oracle_ceiling}%`,
+      formatPct(arms.simulated_llm_policy.recovery_pct_oracle_ceiling),
+      formatPct(arms.deterministic_policy.recovery_pct_oracle_ceiling),
       '100.00%', // Oracle match
     ];
 
