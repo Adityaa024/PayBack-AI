@@ -514,7 +514,7 @@ export function DebtorPortal() {
 
           {/* Footer Security Notice */}
           <div className="pt-4 text-[11px] text-[#8a8f98] border-t border-[#23252a] text-center">
-            <span>Secured by RecoverIQ Infrastructure</span>
+            <span>Secured by PayBack-AI Infrastructure</span>
           </div>
         </div>
 

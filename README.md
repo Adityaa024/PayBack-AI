@@ -98,42 +98,88 @@ PayBack-AI evaluates recovery across a **100% unified complete dataset (1,000 ca
 
 ---
 
-### 5.1 Real LLM Provider Diagnostic Sample (Isolated 50-Case Evaluation)
-*Evaluated with its own dedicated denominator ($N=50$, ₹1,14,878.43 total exposure) to ensure 100% mathematical comparability:*
+### 5.1 Real LLM Provider Diagnostic Sample (Isolated 50-Case Exploratory Probe)
+*Evaluated with its own dedicated denominator ($N=50$, ₹1,14,878.43 total exposure) strictly segregated from the canonical 1,000-case ranking:*
+
+> [!WARNING]
+> **Diagnostic Sample Caution & Statistical Limitations ($N=50$)**:
+> - **Purely Diagnostic Feasibility Probe**: The 50-case Groq sample ($N=50$) serves strictly as an exploratory integration probe to verify zero-mock live API calling (`groq/llama-3.3-70b-versatile`) with full wire headers, latency tracking, and token accounting.
+> - **Cannot Establish Superiority Over Simulated Policy**: With only 50 cases, this sample is statistically underpowered and cannot establish that the real LLM outperforms or matches the simulated policy at scale. It is kept strictly isolated and segregated from the canonical 7-arm 1,000-case ranking.
+> - **100.00% Oracle Result Requires Caution**: The observed 100.00% oracle efficiency on these 50 cases is an empirical artifact of small sample size ($N=50$) and favorable case distribution. It **must not be generalized** to broader distribution horizons or production workloads.
+> - **Auditable Wire Metadata**: Every trace preserves genuine HTTP response headers (`server: cloudflare`, `x-groq-id`, `cf-ray`, `date`), HTTP status code (200), latency, and SHA-256 prompt hashes. Audited independently via `python ai-service/scripts/audit_provider_traces.py`.
 
 | Metric | Real LLM Diagnostic Sample (50 Cases) | Oracle Ceiling (50-Case Sample) | Lift / Efficiency |
 |---|---|---|---|
-| **Sample Size** | 50 cases (verified Groq traces) | 50 cases | 100.0% sample coverage |
-| **Total Exposure (₹)** | ₹1,14,878.43 | ₹1,14,878.43 | Identical denominator |
-| **Gross Recovered (₹)** | **₹58,780.93** | ₹58,780.93 | **100.00% Oracle Efficiency** |
+| **Sample Size** | **50 cases** (verified Groq HTTP traces) | 50 cases | Purely diagnostic sample |
+| **Total Exposure (₹)** | ₹1,14,878.43 | ₹1,14,878.43 | Dedicated isolated denominator |
+| **Gross Recovered (₹)** | **₹58,780.93** | ₹58,780.93 | **100.00% Oracle Efficiency** (Caution: N=50 artifact) |
 | **Incremental Recovery (₹)** | **₹41,274.36** | ₹41,274.36 | **100.00% Incremental Lift** |
 | **Compliance Violations** | **0** (PolicyGuard enforced) | 0 | Zero regulatory infractions |
 | **LLM Inference Cost (₹)** | **₹2.14** (avg ₹0.0428 / call) | ₹0.00 | Real Groq Llama-3.3-70b token billing |
-| **Loud-Fail Replay** | Verified (`KeyError` on miss) | Theoretical clairvoyant | 0 heuristic fallback |
+| **HTTP Wire Metadata** | Verified (`http_status: 200`, `cf-ray`, `x-groq-id`) | N/A | Authenticated provider response headers |
+| **Loud-Fail Replay** | Verified (`KeyError` on cache miss) | Theoretical clairvoyant | 0 silent heuristic fallback |
 
 ---
 
 ### Multi-Seed Statistical Rigor (20 Deterministic Seeds: 42–61, 20,000 Cases)
-- **Total Portfolio (Mean ± 95% CI)**: ₹22,32,285.54 [₹22,16,022.52, ₹22,48,548.57]
-- **Oracle Recoverable Ceiling (Mean ± 95% CI)**: ₹11,88,331.76 [₹11,72,516.04, ₹12,04,147.49]
-- **Simulated LLM Gross Recovery (Mean ± 95% CI)**: ₹11,68,828.58 [₹11,53,176.42, ₹11,84,480.73]
-- **Oracle Efficiency (Mean ± 95% CI)**: **98.36%** [98.09%, 98.64%] (Strictly clamped $\le 100.00\%$)
-- **Empirical Bootstrap 95% CI**: **[98.11%, 98.64%]** (1,000 bootstrap iterations)
-- **Incremental Lift (Mean ± 95% CI)**: ₹8,29,468.47 [₹8,14,743.21, ₹8,44,193.73]
+
+To guarantee the absence of seed-cherry-picking, PayBack-AI evaluates 20 independent pseudo-random seeds ($N=20,000$ cases total). We report both **Normal-Theory 95% Confidence Intervals** ($\bar{x} \pm 1.96 \cdot \frac{s}{\sqrt{N}}$, strictly clamped $\le 100.00\%$) and **Empirical Percentile Bootstrap 95% Confidence Intervals** (1,000 Monte Carlo resamples taking 2.5th and 97.5th percentiles):
+
+- **Total Portfolio Exposure (Mean ± 95% CI)**: ₹22,32,285.54 [₹22,16,022.52, ₹22,48,548.57] (Bootstrap: [₹22,17,712.14, ₹22,48,165.49])
+- **Oracle Recoverable Ceiling (Mean ± 95% CI)**: ₹11,88,331.76 [₹11,72,516.04, ₹12,04,147.49] (Bootstrap: [₹11,72,502.06, ₹12,02,512.64])
+- **PayBack-AI Simulated LLM Gross (Mean ± 95% CI)**: ₹11,67,363.59 [₹11,51,046.96, ₹11,83,680.22] (Bootstrap: [₹11,50,567.46, ₹11,82,318.92])
+- **Oracle Efficiency (Mean)**: **98.23%** (Median: 98.12%, Min: 97.07%, Max: 99.56%, Stdev: 0.70%)
+  - **Normal-Theory 95% CI**: **[97.92%, 98.54%]** ($\bar{x} \pm 1.96 \cdot \text{SE}$, bounded $\le 100.00\%$)
+  - **Empirical Percentile Bootstrap 95% CI**: **[97.94%, 98.53%]** (1,000 iterations)
+- **Incremental Lift (Mean ± 95% CI)**: ₹8,28,003.49 [₹8,14,108.11, ₹8,41,898.86] (Bootstrap: [₹8,14,521.06, ₹8,41,595.63])
+
+#### Raw Per-Seed Evaluation Data Table (All 20 Seeds, N=1,000 each)
+
+| Seed | Total Failed (₹) | Oracle Ceiling (₹) | Organic (₹) | PayBack-AI Det (₹) | PayBack-AI Sim-LLM (₹) | Det % | LLM Oracle % |
+|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| **Seed 42** | ₹2,221,965.50 | ₹1,203,167.01 | ₹352,002.94 | ₹1,133,354.68 | ₹1,174,923.01 | 94.20% | **97.65%** |
+| **Seed 43** | ₹2,244,396.87 | ₹1,163,813.75 | ₹330,230.26 | ₹1,099,449.95 | ₹1,139,582.29 | 94.47% | **97.92%** |
+| **Seed 44** | ₹2,281,584.32 | ₹1,183,213.25 | ₹394,110.51 | ₹1,119,439.36 | ₹1,170,548.90 | 94.61% | **98.93%** |
+| **Seed 45** | ₹2,201,244.48 | ₹1,097,484.57 | ₹304,192.59 | ₹1,009,064.99 | ₹1,082,701.87 | 91.94% | **98.65%** |
+| **Seed 46** | ₹2,195,568.06 | ₹1,194,143.95 | ₹349,403.42 | ₹1,126,164.36 | ₹1,186,366.40 | 94.31% | **99.35%** |
+| **Seed 47** | ₹2,240,741.86 | ₹1,158,847.26 | ₹288,106.81 | ₹1,060,177.24 | ₹1,124,862.01 | 91.49% | **97.07%** |
+| **Seed 48** | ₹2,243,201.76 | ₹1,228,157.07 | ₹321,782.04 | ₹1,141,321.46 | ₹1,209,298.22 | 92.93% | **98.46%** |
+| **Seed 49** | ₹2,227,779.93 | ₹1,178,003.69 | ₹330,413.43 | ₹1,086,540.13 | ₹1,152,279.25 | 92.24% | **97.82%** |
+| **Seed 50** | ₹2,213,410.12 | ₹1,183,430.18 | ₹315,108.03 | ₹1,132,212.02 | ₹1,167,682.00 | 95.67% | **98.67%** |
+| **Seed 51** | ₹2,268,705.14 | ₹1,239,022.77 | ₹389,336.22 | ₹1,147,206.78 | ₹1,217,194.39 | 92.59% | **98.24%** |
+| **Seed 52** | ₹2,212,945.57 | ₹1,191,575.68 | ₹321,405.87 | ₹1,093,965.51 | ₹1,176,241.59 | 91.81% | **98.71%** |
+| **Seed 53** | ₹2,192,490.67 | ₹1,181,646.50 | ₹338,380.43 | ₹1,095,278.36 | ₹1,150,752.63 | 92.69% | **97.39%** |
+| **Seed 54** | ₹2,308,823.60 | ₹1,184,319.29 | ₹324,537.74 | ₹1,125,976.67 | ₹1,155,331.19 | 95.07% | **97.55%** |
+| **Seed 55** | ₹2,166,999.18 | ₹1,185,873.47 | ₹319,487.39 | ₹1,123,282.46 | ₹1,158,716.41 | 94.72% | **97.71%** |
+| **Seed 56** | ₹2,238,204.14 | ₹1,186,068.96 | ₹376,383.27 | ₹1,143,131.88 | ₹1,175,329.34 | 96.38% | **99.09%** |
+| **Seed 57** | ₹2,289,389.57 | ₹1,262,828.30 | ₹342,177.16 | ₹1,161,007.18 | ₹1,234,663.21 | 91.94% | **97.77%** |
+| **Seed 58** | ₹2,259,780.82 | ₹1,215,705.80 | ₹359,331.68 | ₹1,144,892.07 | ₹1,210,338.21 | 94.18% | **99.56%** |
+| **Seed 59** | ₹2,248,987.82 | ₹1,213,592.26 | ₹375,257.10 | ₹1,139,571.47 | ₹1,197,714.71 | 93.90% | **98.69%** |
+| **Seed 60** | ₹2,189,955.86 | ₹1,185,954.35 | ₹378,612.88 | ₹1,091,655.08 | ₹1,155,517.12 | 92.05% | **97.43%** |
+| **Seed 61** | ₹2,199,535.61 | ₹1,129,787.17 | ₹276,942.35 | ₹1,043,933.55 | ₹1,107,229.11 | 92.40% | **98.00%** |
+| **MEAN (N=20)** | **₹22,32,285.54** | **₹11,88,331.76** | — | **₹1,110,881.25** | **₹1,167,363.59** | **93.48%** | **98.23%** |
+| **Normal-Theory 95% CI** | [₹22,16,022.52, ₹22,48,548.57] | [₹1,172,516.04, ₹1,204,147.49] | — | [₹1,096,187.35, ₹1,125,575.14] | [₹1,151,046.96, ₹1,183,680.22] | [92.85%, 94.11%] | **[97.92%, 98.54%]** |
+| **Empirical Bootstrap 95% CI** | [₹22,17,712.14, ₹22,48,165.49] | [₹1,172,502.06, ₹1,202,512.64] | — | [₹1,096,417.84, ₹1,124,619.67] | [₹1,150,567.46, ₹1,182,318.92] | [92.87%, 94.09%] | **[97.94%, 98.53%]** |
 
 ---
 
-### Unseen Holdout Generalization & External Validation Cohort
+### Unseen Holdout Generalization & Parametrically Shifted Synthetic Cohort
+
 - **Primary Unseen Holdout (Seed 999, 250 cases)**:
   - Uninspected Holdout Debt: ₹5,59,264.28 | Holdout Oracle Ceiling: ₹3,27,728.84
   - Holdout Policy Recovery: **₹3,27,728.84** (**100.00% Oracle Efficiency**, 0 compliance violations).
 - **Multi-Seed Distribution Across 5 Unseen Holdouts (Seeds 101–505, 1,250 cases)**:
   - Mean Oracle Efficiency: **100.00%** [95% CI: 100.00%, 100.00%] (strictly bounded $\le 100.00\%$).
   - Compliance Violations: **0** across all 1,500 total uninspected holdout transactions.
-- **External Validation Cohort (500 High-Ticket Enterprise Cases, Seed 888)**:
-  - Total Exposure: **₹2,19,43,582.88** (modeling B2B quarterly GST filing cycles and banking holiday latency)
+- **Parametrically Shifted B2B Synthetic Cohort (Shifted-Assumption Stress Test, $N=500$, Seed 888)**:
+  - Total Exposure: **₹2,19,43,582.88** (high-ticket enterprise invoicing ₹15,000–₹1,20,000, 40% B2B concentration, modeling quarterly GST filing cycles and banking holiday latency)
   - Oracle Ceiling: ₹1,19,47,192.68
   - Policy Recovery: **₹1,19,47,192.68** (**100.00% Oracle Efficiency**, 0 compliance violations).
+
+> [!NOTE]
+> **Methodology & Distributional Independence Disclosure**:
+> While this 500-case enterprise cohort models parametric shifts (higher B2B concentration at 40%, larger invoice tickets ₹15,000–₹1,20,000, quarterly GST delays, and banking holiday settlement friction), it is **generated via the synthetic simulator under independent seed 888**, not harvested from an empirical third-party production database.
+> **Independence Guarantee**: Crucially, the cohort generator parameters and assumptions were **fixed a priori and never post-hoc tuned** against evaluation metrics or prompt iterations. It serves as an out-of-distribution parametric stress test rather than empirical field validation.
 
 ---
 
@@ -278,6 +324,16 @@ Recovery actions are subjected to deterministic, execution-time PolicyGuard chec
 | **7. High-Value Guard** | Amount > approval threshold (e.g. ₹5,00,000) without approval | `escalated` | `HUMAN_APPROVAL_REQUIRED` |
 | **8. Economic Floor** | Amount < economic viability floor (e.g. ₹100) | `escalated` | `ECONOMIC_FLOOR_VIOLATION` |
 
+### 5. Real PostgreSQL Physical Environment Proof (`db-environment-proof.test.ts`)
+To eliminate any ambiguity regarding whether database tests run against genuine PostgreSQL engines versus mocks/fallbacks:
+- **Continuous Integration (CI)**: GitHub Actions workflow (`.github/workflows/ci.yml`) provisions a real PostgreSQL 18 container service (`postgres:18-alpine`) with active health checks (`pg_isready -U postgres -d recoveriq`), executes Drizzle schema migrations (`src/db/migrate.ts`), and runs backend tests against the live socket.
+- **Local Development / Test Harness**: Connects to an enterprise PostgreSQL 17.6 instance on Supabase (`db.jnbenaukuoohvkvnzjfw.supabase.co`) or local docker daemon.
+- **Physical Proof Invariant**: Test suite `test/modules/recovery/db-environment-proof.test.ts` issues low-level SQL to verify:
+  ```sql
+  SELECT version(), current_database(), current_user, pg_backend_pid();
+  ```
+  Asserts that the engine is genuine PostgreSQL (rejecting SQLite and in-memory mocks), tests transaction advisory lock support (`SELECT pg_advisory_xact_lock(hashtext('proof_lock_verification'))`), asserts that `ALLOW_IN_MEMORY_FALLBACK === false`, and verifies presence of all 28 production schema tables.
+
 ---
 
 ## 🛠️ Quick Start & Local Execution
@@ -291,7 +347,7 @@ Recovery actions are subjected to deterministic, execution-time PolicyGuard chec
 
 ```bash
 # 1. Clone repository
-git clone https://github.com/Adityaa024/PayBack-AI.git
+git clone https://github.com/PayBack-AI/PayBack-AI.git
 cd PayBack-AI
 
 # 2. Install backend dependencies

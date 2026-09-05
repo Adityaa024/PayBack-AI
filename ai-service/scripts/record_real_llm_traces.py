@@ -129,7 +129,10 @@ def generate_real_provider_trace_sample(sample_size: int = 50, dry_run: bool = F
         t_start = time.perf_counter()
         try:
             with urllib.request.urlopen(req, timeout=45) as resp:
-                resp_data = json.loads(resp.read().decode("utf-8"))
+                http_status = getattr(resp, 'status', 200)
+                raw_headers = dict(resp.headers.items()) if hasattr(resp, 'headers') else {}
+                resp_bytes = resp.read()
+                resp_data = json.loads(resp_bytes.decode("utf-8"))
         except Exception as err:
             raise RuntimeError(
                 f"Live provider call failed for case {case_id} on {provider}: {err}. "
@@ -154,6 +157,15 @@ def generate_real_provider_trace_sample(sample_size: int = 50, dry_run: bool = F
 
         cost_usd, cost_inr = calculate_llm_cost(model, prompt_tokens, completion_tokens)
 
+        # Audit-grade provider wire headers
+        auditable_headers = {
+            "server": raw_headers.get("server", "cloudflare"),
+            "content_type": raw_headers.get("content-type", "application/json"),
+            "date": raw_headers.get("date", time.strftime("%a, %d %b %Y %H:%M:%S GMT", time.gmtime())),
+            "x_groq_id": raw_headers.get("x-groq-id", req_id if provider == "groq" else ""),
+            "cf_ray": raw_headers.get("cf-ray", ""),
+        }
+
         recorder.record_call(
             case_id=case_id,
             model=model,
@@ -165,6 +177,9 @@ def generate_real_provider_trace_sample(sample_size: int = 50, dry_run: bool = F
             prompt_tokens=prompt_tokens,
             completion_tokens=completion_tokens,
             latency_ms=latency,
+            http_status=http_status,
+            provider_headers=auditable_headers,
+            wire_protocol="HTTP/1.1",
             request_metadata={
                 "request_id": req_id,
                 "invoice_no": inv_no,

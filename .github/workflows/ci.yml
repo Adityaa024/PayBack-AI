@@ -1,4 +1,4 @@
-name: RecoverIQ CI
+name: PayBack-AI CI
 
 on:
   pull_request:

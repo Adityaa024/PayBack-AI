@@ -138,7 +138,7 @@ export function Register() {
           <>
             <CardHeader className="space-y-4 text-center pb-6 border-b border-[#23252a]">
               <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#010102] border border-[#23252a] shadow-xl">
-                <img src={recoveriqLogo} alt="RecoverIQ Logo" className="h-7 w-7 object-contain" />
+                <img src={recoveriqLogo} alt="PayBack-AI Logo" className="h-7 w-7 object-contain" />
               </div>
               <div>
                 <CardTitle className="text-xl font-bold tracking-tight text-[#f7f8f8]">Create an account</CardTitle>

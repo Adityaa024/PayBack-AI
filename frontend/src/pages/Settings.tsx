@@ -1201,7 +1201,7 @@ function BillingSection() {
         <div>
           <h3 className="text-sm font-bold text-[#f7f8f8]">Free Early Access Tier</h3>
           <p className="text-xs text-[#8a8f98] max-w-md mx-auto mt-1 leading-relaxed">
-            RecoverIQ Enterprise is completely free during Early Access. All automated workflows, AI dispute resolutions, and payment link integrations are fully included without operational limits.
+            PayBack-AI Enterprise is completely free during Early Access. All automated workflows, AI dispute resolutions, and payment link integrations are fully included without operational limits.
           </p>
         </div>
       </CardContent>

@@ -30,6 +30,9 @@ class LLMTraceRecord(BaseModel):
     cost_inr: float = 0.0
     cost_usd: float = 0.0
     latency_ms: float = 0.0
+    http_status: int = 200
+    provider_headers: Dict[str, str] = Field(default_factory=dict)
+    wire_protocol: str = "HTTP/1.1"
     decision_mode: str = "live_provider_call"
     recorded_at: str = Field(default_factory=lambda: time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()))
 
@@ -99,6 +102,9 @@ class LLMTraceRecorder:
         completion_tokens: int = 0,
         latency_ms: float = 0.0,
         request_metadata: Optional[Dict[str, Any]] = None,
+        http_status: int = 200,
+        provider_headers: Optional[Dict[str, str]] = None,
+        wire_protocol: str = "HTTP/1.1",
         decision_mode: str = "live_provider_call",
     ) -> LLMTraceRecord:
         prompt_hash = compute_prompt_hash(prompt_text)
@@ -118,6 +124,9 @@ class LLMTraceRecorder:
             cost_inr=cost_inr,
             cost_usd=cost_usd,
             latency_ms=latency_ms,
+            http_status=http_status,
+            provider_headers=provider_headers or {},
+            wire_protocol=wire_protocol,
             decision_mode=decision_mode,
         )
         self._traces[case_id] = record

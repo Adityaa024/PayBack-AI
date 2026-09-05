@@ -109,14 +109,14 @@ All benchmark arms are evaluated on the **exact same complete dataset of 1,000 c
   - 95% Confidence Interval: **[100%, 100%]** (Strictly clamped $\le 100.00\%$)
   - Compliance Violations: **0** across all 1,500 holdout transactions.
 
-### 4.2 External Validation Cohort (500 High-Ticket Enterprise Cases)
-*Evaluation on independent stochastic dataset modeling B2B quarterly GST filing cycles and banking holiday latency:*
-- **Cases Evaluated**: 500 enterprise accounts
+### 4.2 Parametrically Shifted B2B Synthetic Cohort (Shifted-Assumption Stress Test, $N=500$, Seed 888)
+*Shifted-assumption stress test generated using the synthetic simulator (`scripts/generate_external_validation_cohort.py`, fixed seed 888) modeling enterprise B2B quarterly GST filing delays, banking holiday latency, and higher ticket sizes (₹2,50,000 to ₹10,00,000). Fixed a priori assumptions disclose that this represents a synthetic stress test rather than organic production traffic:*
+- **Cases Evaluated**: 500 enterprise accounts ($N=500$, Seed 888)
 - **Total Exposure**: ₹2,19,43,582.88
 - **Oracle Ceiling**: ₹1,28,97,689.45
 - **Policy Recovery**: ₹1,28,97,689.45
-- **Oracle Efficiency**: **100%** (Strictly clamped $\le 100.00\%$)
-- **Compliance Violations**: **0**
+- **Oracle Efficiency**: **100.00%** (Strictly clamped $\le 100.00\%$)
+- **Compliance Violations**: **0** (Zero regulatory hard stop infractions)
 
 ---
 

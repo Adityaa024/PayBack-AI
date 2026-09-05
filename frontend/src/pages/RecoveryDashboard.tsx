@@ -708,24 +708,24 @@ export function RecoveryDashboard() {
             <div className="p-4 rounded-lg bg-white border border-stone-200 shadow-2xs space-y-2">
               <div className="font-bold text-xs uppercase tracking-wider text-stone-900 flex items-center gap-1.5">
                 <Cpu className="w-4 h-4 text-stone-700" />
-                <span>3. Multi-Seed Rigor (10 Deterministic Seeds)</span>
+                <span>3. Multi-Seed Rigor (20 Deterministic Seeds: 42–61)</span>
               </div>
               <div className="text-xs text-stone-600 space-y-1">
                 <div className="flex justify-between border-b border-stone-100 py-1">
                   <span>Total Portfolio (Mean ± 95% CI):</span>
-                  <span className="font-bold text-stone-900">₹22,33,860 [±₹17,117]</span>
+                  <span className="font-bold text-stone-900">₹22,32,286 [₹22.16L, ₹22.49L]</span>
                 </div>
                 <div className="flex justify-between border-b border-stone-100 py-1">
                   <span>Oracle Ceiling (Mean ± 95% CI):</span>
-                  <span className="font-bold text-stone-900">₹11,82,928 [±₹24,444]</span>
+                  <span className="font-bold text-stone-900">₹11,88,332 [₹11.73L, ₹12.04L]</span>
                 </div>
                 <div className="flex justify-between border-b border-stone-100 py-1">
                   <span>Gross Recovery (Mean ± 95% CI):</span>
-                  <span className="font-bold text-emerald-800">₹11,68,466 [±₹24,404]</span>
+                  <span className="font-bold text-emerald-800">₹11,67,364 [₹11.51L, ₹11.84L]</span>
                 </div>
                 <div className="flex justify-between py-1">
                   <span>Oracle Efficiency (Mean ± 95% CI):</span>
-                  <span className="font-bold text-emerald-700">98.78% [98.29%, 99.26%]</span>
+                  <span className="font-bold text-emerald-700">98.23% (Normal CI: [97.92%, 98.54%], Bootstrap: [97.94%, 98.53%])</span>
                 </div>
               </div>
             </div>
@@ -749,11 +749,30 @@ export function RecoveryDashboard() {
                   <span className="font-bold text-emerald-800">97.0% resilience via outbox</span>
                 </div>
                 <div className="flex justify-between py-1">
-                  <span>Unseen Holdout (Seed 999, 250 cases):</span>
-                  <span className="font-bold text-emerald-700">99.40% generalization</span>
+                  <span>Synthetic B2B Cohort (N=500, Seed 888):</span>
+                  <span className="font-bold text-emerald-700">100.00% bounded ceiling</span>
                 </div>
               </div>
             </div>
+          </div>
+
+          {/* Real LLM Diagnostic Sample Notice Card */}
+          <div className="p-4 rounded-lg bg-emerald-50/50 border border-emerald-200 shadow-2xs space-y-2 text-xs">
+            <div className="flex items-center justify-between">
+              <span className="font-bold text-emerald-950 uppercase tracking-wider flex items-center gap-1.5">
+                <Bot className="w-4 h-4 text-emerald-700" />
+                <span>Real LLM Provider Diagnostic Sample (N=50, Groq Llama 3.3 70B)</span>
+              </span>
+              <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-semibold text-[10px]">
+                Isolated Denominator (₹1,14,878.43)
+              </span>
+            </div>
+            <p className="text-emerald-900">
+              <strong>Exploratory Feasibility Probe:</strong> Verified genuine live HTTP wire execution against Groq API (<code className="bg-emerald-100 px-1 py-0.5 rounded font-mono">http_status: 200</code>, Cloudflare response headers, <code className="bg-emerald-100 px-1 py-0.5 rounded font-mono">x-groq-id</code>, SHA-256 prompt hash).
+            </p>
+            <p className="text-emerald-800">
+              <strong>Statistical Caution:</strong> Kept strictly segregated from canonical 1,000-case ranking. A 100% oracle result across 50 cases is an exploratory artifact of small sample size ($N=50$) and cannot establish superiority over simulated policies or be generalized to production scale.
+            </p>
           </div>
 
           {/* Transparent Limitations & Weak Results Box */}

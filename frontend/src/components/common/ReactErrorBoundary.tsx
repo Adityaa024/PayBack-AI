@@ -41,7 +41,7 @@ export class ReactErrorBoundary extends Component<Props, State> {
         <div className="min-h-screen w-full bg-[#0b0c0e] bg-gradient-to-b from-[#0b0c0e] via-[#0f1117] to-[#0b0c0e] flex flex-col items-center justify-center p-6 text-[#f7f8f8]">
           {/* Top Brand Tag */}
           <div className="absolute top-8 left-8 flex items-center gap-2">
-            <span className="text-lg font-bold tracking-tight text-[#f7f8f8]">RecoverIQ</span>
+            <span className="text-lg font-bold tracking-tight text-[#f7f8f8]">PayBack-AI</span>
           </div>
 
           {/* Main Error Container */}

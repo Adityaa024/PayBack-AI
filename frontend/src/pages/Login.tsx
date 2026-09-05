@@ -89,14 +89,14 @@ export function Login() {
             {step === "mfa" ? (
               <ShieldCheck className="h-6 w-6 text-[#f7f8f8]" />
             ) : (
-              <img src={recoveriqLogo} alt="RecoverIQ Logo" className="h-7 w-7 object-contain" />
+              <img src={recoveriqLogo} alt="PayBack-AI Logo" className="h-7 w-7 object-contain" />
             )}
           </div>
           <div>
             {step === "credentials" ? (
               <>
                 <CardTitle className="text-xl font-bold tracking-tight text-[#f7f8f8]">Welcome back</CardTitle>
-                <p className="text-xs text-[#8a8f98] mt-1.5">Sign in to your RecoverIQ account</p>
+                <p className="text-xs text-[#8a8f98] mt-1.5">Sign in to your PayBack-AI account</p>
               </>
             ) : (
               <>

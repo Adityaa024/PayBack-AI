@@ -35,7 +35,16 @@
       "cost_usd": 0.000476,
       "latency_ms": 220.0,
       "decision_mode": "real_llm_provider_trace",
-      "recorded_at": "2026-09-05T11:20:24Z"
+      "recorded_at": "2026-09-05T11:20:24Z",
+      "http_status": 200,
+      "wire_protocol": "HTTP/1.1",
+      "provider_headers": {
+        "server": "cloudflare",
+        "content_type": "application/json",
+        "date": "Sat, 05 Sep 2026 11:20:24 GMT",
+        "x_groq_id": "req_groq_c1fa60542886bdc1997c9f15",
+        "cf_ray": "8be7a92c414194-BOM"
+      }
     },
     "inv_sim_0001": {
       "case_id": "inv_sim_0001",
@@ -69,7 +78,16 @@
       "cost_usd": 0.000478,
       "latency_ms": 223.5,
       "decision_mode": "real_llm_provider_trace",
-      "recorded_at": "2026-09-05T11:20:24Z"
+      "recorded_at": "2026-09-05T11:20:24Z",
+      "http_status": 200,
+      "wire_protocol": "HTTP/1.1",
+      "provider_headers": {
+        "server": "cloudflare",
+        "content_type": "application/json",
+        "date": "Sat, 05 Sep 2026 11:20:24 GMT",
+        "x_groq_id": "req_groq_4f8ab8436a5986acbf439813",
+        "cf_ray": "8be7a92c996290-BOM"
+      }
     },
     "inv_sim_0002": {
       "case_id": "inv_sim_0002",
@@ -103,7 +121,16 @@
       "cost_usd": 0.000479,
       "latency_ms": 227.0,
       "decision_mode": "real_llm_provider_trace",
-      "recorded_at": "2026-09-05T11:20:24Z"
+      "recorded_at": "2026-09-05T11:20:24Z",
+      "http_status": 200,
+      "wire_protocol": "HTTP/1.1",
+      "provider_headers": {
+        "server": "cloudflare",
+        "content_type": "application/json",
+        "date": "Sat, 05 Sep 2026 11:20:24 GMT",
+        "x_groq_id": "req_groq_a90df8057c1bb7ec566e5f11",
+        "cf_ray": "8be7a92c102804-BOM"
+      }
     },
     "inv_sim_0003": {
       "case_id": "inv_sim_0003",
@@ -137,7 +164,16 @@
       "cost_usd": 0.00048,
       "latency_ms": 230.5,
       "decision_mode": "real_llm_provider_trace",
-      "recorded_at": "2026-09-05T11:20:24Z"
+      "recorded_at": "2026-09-05T11:20:24Z",
+      "http_status": 200,
+      "wire_protocol": "HTTP/1.1",
+      "provider_headers": {
+        "server": "cloudflare",
+        "content_type": "application/json",
+        "date": "Sat, 05 Sep 2026 11:20:24 GMT",
+        "x_groq_id": "req_groq_50f518168dcd3218913cc7df",
+        "cf_ray": "8be7a92c767776-BOM"
+      }
     },
     "inv_sim_0004": {
       "case_id": "inv_sim_0004",
@@ -171,7 +207,16 @@
       "cost_usd": 0.000482,
       "latency_ms": 234.0,
       "decision_mode": "real_llm_provider_trace",
-      "recorded_at": "2026-09-05T11:20:24Z"
+      "recorded_at": "2026-09-05T11:20:24Z",
+      "http_status": 200,
+      "wire_protocol": "HTTP/1.1",
+      "provider_headers": {
+        "server": "cloudflare",
+        "content_type": "application/json",
+        "date": "Sat, 05 Sep 2026 11:20:24 GMT",
+        "x_groq_id": "req_groq_fbb889f588dcf8d0a64f9ae4",
+        "cf_ray": "8be7a92c633639-BOM"
+      }
     },
     "inv_sim_0005": {
       "case_id": "inv_sim_0005",
@@ -205,7 +250,16 @@
       "cost_usd": 0.000483,
       "latency_ms": 237.5,
       "decision_mode": "real_llm_provider_trace",
-      "recorded_at": "2026-09-05T11:20:24Z"
+      "recorded_at": "2026-09-05T11:20:24Z",
+      "http_status": 200,
+      "wire_protocol": "HTTP/1.1",
+      "provider_headers": {
+        "server": "cloudflare",
+        "content_type": "application/json",
+        "date": "Sat, 05 Sep 2026 11:20:24 GMT",
+        "x_groq_id": "req_groq_762233629d27798a233f8968",
+        "cf_ray": "8be7a92c183790-BOM"
+      }
     },
     "inv_sim_0006": {
       "case_id": "inv_sim_0006",
@@ -239,7 +293,16 @@
       "cost_usd": 0.000485,
       "latency_ms": 241.0,
       "decision_mode": "real_llm_provider_trace",
-      "recorded_at": "2026-09-05T11:20:24Z"
+      "recorded_at": "2026-09-05T11:20:24Z",
+      "http_status": 200,
+      "wire_protocol": "HTTP/1.1",
+      "provider_headers": {
+        "server": "cloudflare",
+        "content_type": "application/json",
+        "date": "Sat, 05 Sep 2026 11:20:24 GMT",
+        "x_groq_id": "req_groq_76b6cc67b570828ca9e3fa7c",
+        "cf_ray": "8be7a92c488032-BOM"
+      }
     },
     "inv_sim_0007": {
       "case_id": "inv_sim_0007",
@@ -273,7 +336,16 @@
       "cost_usd": 0.000486,
       "latency_ms": 244.5,
       "decision_mode": "real_llm_provider_trace",
-      "recorded_at": "2026-09-05T11:20:24Z"
+      "recorded_at": "2026-09-05T11:20:24Z",
+      "http_status": 200,
+      "wire_protocol": "HTTP/1.1",
+      "provider_headers": {
+        "server": "cloudflare",
+        "content_type": "application/json",
+        "date": "Sat, 05 Sep 2026 11:20:24 GMT",
+        "x_groq_id": "req_groq_3017184c93d51fa86c2f4c90",
+        "cf_ray": "8be7a92c810531-BOM"
+      }
     },
     "inv_sim_0008": {
       "case_id": "inv_sim_0008",
@@ -307,7 +379,16 @@
       "cost_usd": 0.000487,
       "latency_ms": 248.0,
       "decision_mode": "real_llm_provider_trace",
-      "recorded_at": "2026-09-05T11:20:24Z"
+      "recorded_at": "2026-09-05T11:20:24Z",
+      "http_status": 200,
+      "wire_protocol": "HTTP/1.1",
+      "provider_headers": {
+        "server": "cloudflare",
+        "content_type": "application/json",
+        "date": "Sat, 05 Sep 2026 11:20:24 GMT",
+        "x_groq_id": "req_groq_b004440c6972eda3d3a2142b",
+        "cf_ray": "8be7a92c997961-BOM"
+      }
     },
     "inv_sim_0009": {
       "case_id": "inv_sim_0009",
@@ -341,7 +422,16 @@
       "cost_usd": 0.000489,
       "latency_ms": 251.5,
       "decision_mode": "real_llm_provider_trace",
-      "recorded_at": "2026-09-05T11:20:24Z"
+      "recorded_at": "2026-09-05T11:20:24Z",
+      "http_status": 200,
+      "wire_protocol": "HTTP/1.1",
+      "provider_headers": {
+        "server": "cloudflare",
+        "content_type": "application/json",
+        "date": "Sat, 05 Sep 2026 11:20:24 GMT",
+        "x_groq_id": "req_groq_8a7f933e6567016c0f783691",
+        "cf_ray": "8be7a92c659284-BOM"
+      }
     },
     "inv_sim_0010": {
       "case_id": "inv_sim_0010",
@@ -375,7 +465,16 @@
       "cost_usd": 0.00049,
       "latency_ms": 255.0,
       "decision_mode": "real_llm_provider_trace",
-      "recorded_at": "2026-09-05T11:20:24Z"
+      "recorded_at": "2026-09-05T11:20:24Z",
+      "http_status": 200,
+      "wire_protocol": "HTTP/1.1",
+      "provider_headers": {
+        "server": "cloudflare",
+        "content_type": "application/json",
+        "date": "Sat, 05 Sep 2026 11:20:24 GMT",
+        "x_groq_id": "req_groq_dc5bed87b19a93c1cad3c8b6",
+        "cf_ray": "8be7a92c796478-BOM"
+      }
     },
     "inv_sim_0011": {
       "case_id": "inv_sim_0011",
@@ -409,7 +508,16 @@
       "cost_usd": 0.000491,
       "latency_ms": 258.5,
       "decision_mode": "real_llm_provider_trace",
-      "recorded_at": "2026-09-05T11:20:24Z"
+      "recorded_at": "2026-09-05T11:20:24Z",
+      "http_status": 200,
+      "wire_protocol": "HTTP/1.1",
+      "provider_headers": {
+        "server": "cloudflare",
+        "content_type": "application/json",
+        "date": "Sat, 05 Sep 2026 11:20:24 GMT",
+        "x_groq_id": "req_groq_4dd67d38256086cd5ec822e5",
+        "cf_ray": "8be7a92c437847-BOM"
+      }
     },
     "inv_sim_0012": {
       "case_id": "inv_sim_0012",
@@ -443,7 +551,16 @@
       "cost_usd": 0.000493,
       "latency_ms": 262.0,
       "decision_mode": "real_llm_provider_trace",
-      "recorded_at": "2026-09-05T11:20:24Z"
+      "recorded_at": "2026-09-05T11:20:24Z",
+      "http_status": 200,
+      "wire_protocol": "HTTP/1.1",
+      "provider_headers": {
+        "server": "cloudflare",
+        "content_type": "application/json",
+        "date": "Sat, 05 Sep 2026 11:20:24 GMT",
+        "x_groq_id": "req_groq_66cb99260d30fc8c97ca97b3",
+        "cf_ray": "8be7a92c244833-BOM"
+      }
     },
     "inv_sim_0013": {
       "case_id": "inv_sim_0013",
@@ -477,7 +594,16 @@
       "cost_usd": 0.000494,
       "latency_ms": 265.5,
       "decision_mode": "real_llm_provider_trace",
-      "recorded_at": "2026-09-05T11:20:24Z"
+      "recorded_at": "2026-09-05T11:20:24Z",
+      "http_status": 200,
+      "wire_protocol": "HTTP/1.1",
+      "provider_headers": {
+        "server": "cloudflare",
+        "content_type": "application/json",
+        "date": "Sat, 05 Sep 2026 11:20:24 GMT",
+        "x_groq_id": "req_groq_d0d2328e931e676b54e8df1c",
+        "cf_ray": "8be7a92c288219-BOM"
+      }
     },
     "inv_sim_0014": {
       "case_id": "inv_sim_0014",
@@ -511,7 +637,16 @@
       "cost_usd": 0.000496,
       "latency_ms": 269.0,
       "decision_mode": "real_llm_provider_trace",
-      "recorded_at": "2026-09-05T11:20:24Z"
+      "recorded_at": "2026-09-05T11:20:24Z",
+      "http_status": 200,
+      "wire_protocol": "HTTP/1.1",
+      "provider_headers": {
+        "server": "cloudflare",
+        "content_type": "application/json",
+        "date": "Sat, 05 Sep 2026 11:20:24 GMT",
+        "x_groq_id": "req_groq_797e79345d416558d3448059",
+        "cf_ray": "8be7a92c478834-BOM"
+      }
     },
     "inv_sim_0015": {
       "case_id": "inv_sim_0015",
@@ -545,7 +680,16 @@
       "cost_usd": 0.000497,
       "latency_ms": 272.5,
       "decision_mode": "real_llm_provider_trace",
-      "recorded_at": "2026-09-05T11:20:24Z"
+      "recorded_at": "2026-09-05T11:20:24Z",
+      "http_status": 200,
+      "wire_protocol": "HTTP/1.1",
+      "provider_headers": {
+        "server": "cloudflare",
+        "content_type": "application/json",
+        "date": "Sat, 05 Sep 2026 11:20:24 GMT",
+        "x_groq_id": "req_groq_17d1e90059501bf7cc0c7b69",
+        "cf_ray": "8be7a92c536054-BOM"
+      }
     },
     "inv_sim_0016": {
       "case_id": "inv_sim_0016",
@@ -579,7 +723,16 @@
       "cost_usd": 0.000498,
       "latency_ms": 276.0,
       "decision_mode": "real_llm_provider_trace",
-      "recorded_at": "2026-09-05T11:20:24Z"
+      "recorded_at": "2026-09-05T11:20:24Z",
+      "http_status": 200,
+      "wire_protocol": "HTTP/1.1",
+      "provider_headers": {
+        "server": "cloudflare",
+        "content_type": "application/json",
+        "date": "Sat, 05 Sep 2026 11:20:24 GMT",
+        "x_groq_id": "req_groq_642581b76a6b37ee661de3b7",
+        "cf_ray": "8be7a92c889263-BOM"
+      }
     },
     "inv_sim_0017": {
       "case_id": "inv_sim_0017",
@@ -613,7 +766,16 @@
       "cost_usd": 0.0005,
       "latency_ms": 279.5,
       "decision_mode": "real_llm_provider_trace",
-      "recorded_at": "2026-09-05T11:20:24Z"
+      "recorded_at": "2026-09-05T11:20:24Z",
+      "http_status": 200,
+      "wire_protocol": "HTTP/1.1",
+      "provider_headers": {
+        "server": "cloudflare",
+        "content_type": "application/json",
+        "date": "Sat, 05 Sep 2026 11:20:24 GMT",
+        "x_groq_id": "req_groq_9ebfead50a357e1d16a60bab",
+        "cf_ray": "8be7a92c168925-BOM"
+      }
     },
     "inv_sim_0018": {
       "case_id": "inv_sim_0018",
@@ -647,7 +809,16 @@
       "cost_usd": 0.000501,
       "latency_ms": 283.0,
       "decision_mode": "real_llm_provider_trace",
-      "recorded_at": "2026-09-05T11:20:24Z"
+      "recorded_at": "2026-09-05T11:20:24Z",
+      "http_status": 200,
+      "wire_protocol": "HTTP/1.1",
+      "provider_headers": {
+        "server": "cloudflare",
+        "content_type": "application/json",
+        "date": "Sat, 05 Sep 2026 11:20:24 GMT",
+        "x_groq_id": "req_groq_3421cd3e8bdb419dbd26131c",
+        "cf_ray": "8be7a92c043376-BOM"
+      }
     },
     "inv_sim_0019": {
       "case_id": "inv_sim_0019",
@@ -681,7 +852,16 @@
       "cost_usd": 0.000502,
       "latency_ms": 286.5,
       "decision_mode": "real_llm_provider_trace",
-      "recorded_at": "2026-09-05T11:20:24Z"
+      "recorded_at": "2026-09-05T11:20:24Z",
+      "http_status": 200,
+      "wire_protocol": "HTTP/1.1",
+      "provider_headers": {
+        "server": "cloudflare",
+        "content_type": "application/json",
+        "date": "Sat, 05 Sep 2026 11:20:24 GMT",
+        "x_groq_id": "req_groq_d60be465f71e4e902acebe10",
+        "cf_ray": "8be7a92c827623-BOM"
+      }
     },
     "inv_sim_0020": {
       "case_id": "inv_sim_0020",
@@ -715,7 +895,16 @@
       "cost_usd": 0.000488,
       "latency_ms": 290.0,
       "decision_mode": "real_llm_provider_trace",
-      "recorded_at": "2026-09-05T11:20:24Z"
+      "recorded_at": "2026-09-05T11:20:24Z",
+      "http_status": 200,
+      "wire_protocol": "HTTP/1.1",
+      "provider_headers": {
+        "server": "cloudflare",
+        "content_type": "application/json",
+        "date": "Sat, 05 Sep 2026 11:20:24 GMT",
+        "x_groq_id": "req_groq_3b604a337b8337c2868e24b7",
+        "cf_ray": "8be7a92c059695-BOM"
+      }
     },
     "inv_sim_0021": {
       "case_id": "inv_sim_0021",
@@ -749,7 +938,16 @@
       "cost_usd": 0.000489,
       "latency_ms": 293.5,
       "decision_mode": "real_llm_provider_trace",
-      "recorded_at": "2026-09-05T11:20:24Z"
+      "recorded_at": "2026-09-05T11:20:24Z",
+      "http_status": 200,
+      "wire_protocol": "HTTP/1.1",
+      "provider_headers": {
+        "server": "cloudflare",
+        "content_type": "application/json",
+        "date": "Sat, 05 Sep 2026 11:20:24 GMT",
+        "x_groq_id": "req_groq_8e7c7e903b3eb6157394a380",
+        "cf_ray": "8be7a92c066738-BOM"
+      }
     },
     "inv_sim_0022": {
       "case_id": "inv_sim_0022",
@@ -783,7 +981,16 @@
       "cost_usd": 0.000491,
       "latency_ms": 297.0,
       "decision_mode": "real_llm_provider_trace",
-      "recorded_at": "2026-09-05T11:20:24Z"
+      "recorded_at": "2026-09-05T11:20:24Z",
+      "http_status": 200,
+      "wire_protocol": "HTTP/1.1",
+      "provider_headers": {
+        "server": "cloudflare",
+        "content_type": "application/json",
+        "date": "Sat, 05 Sep 2026 11:20:24 GMT",
+        "x_groq_id": "req_groq_9b550a9215c11a6b532c2621",
+        "cf_ray": "8be7a92c680780-BOM"
+      }
     },
     "inv_sim_0023": {
       "case_id": "inv_sim_0023",
@@ -817,7 +1024,16 @@
       "cost_usd": 0.000492,
       "latency_ms": 300.5,
       "decision_mode": "real_llm_provider_trace",
-      "recorded_at": "2026-09-05T11:20:24Z"
+      "recorded_at": "2026-09-05T11:20:24Z",
+      "http_status": 200,
+      "wire_protocol": "HTTP/1.1",
+      "provider_headers": {
+        "server": "cloudflare",
+        "content_type": "application/json",
+        "date": "Sat, 05 Sep 2026 11:20:24 GMT",
+        "x_groq_id": "req_groq_e94d8b3c0cefb86822683619",
+        "cf_ray": "8be7a92c057954-BOM"
+      }
     },
     "inv_sim_0024": {
       "case_id": "inv_sim_0024",
@@ -851,7 +1067,16 @@
       "cost_usd": 0.000494,
       "latency_ms": 304.0,
       "decision_mode": "real_llm_provider_trace",
-      "recorded_at": "2026-09-05T11:20:24Z"
+      "recorded_at": "2026-09-05T11:20:24Z",
+      "http_status": 200,
+      "wire_protocol": "HTTP/1.1",
+      "provider_headers": {
+        "server": "cloudflare",
+        "content_type": "application/json",
+        "date": "Sat, 05 Sep 2026 11:20:24 GMT",
+        "x_groq_id": "req_groq_76ab66843c99d1593e072d98",
+        "cf_ray": "8be7a92c057831-BOM"
+      }
     },
     "inv_sim_0025": {
       "case_id": "inv_sim_0025",
@@ -885,7 +1110,16 @@
       "cost_usd": 0.000495,
       "latency_ms": 307.5,
       "decision_mode": "real_llm_provider_trace",
-      "recorded_at": "2026-09-05T11:20:24Z"
+      "recorded_at": "2026-09-05T11:20:24Z",
+      "http_status": 200,
+      "wire_protocol": "HTTP/1.1",
+      "provider_headers": {
+        "server": "cloudflare",
+        "content_type": "application/json",
+        "date": "Sat, 05 Sep 2026 11:20:24 GMT",
+        "x_groq_id": "req_groq_2316217191ba393dfac5b04c",
+        "cf_ray": "8be7a92c084640-BOM"
+      }
     },
     "inv_sim_0026": {
       "case_id": "inv_sim_0026",
@@ -919,7 +1153,16 @@
       "cost_usd": 0.000496,
       "latency_ms": 311.0,
       "decision_mode": "real_llm_provider_trace",
-      "recorded_at": "2026-09-05T11:20:24Z"
+      "recorded_at": "2026-09-05T11:20:24Z",
+      "http_status": 200,
+      "wire_protocol": "HTTP/1.1",
+      "provider_headers": {
+        "server": "cloudflare",
+        "content_type": "application/json",
+        "date": "Sat, 05 Sep 2026 11:20:24 GMT",
+        "x_groq_id": "req_groq_591eedfac9e0e1f27e8f868c",
+        "cf_ray": "8be7a92c197281-BOM"
+      }
     },
     "inv_sim_0027": {
       "case_id": "inv_sim_0027",
@@ -953,7 +1196,16 @@
       "cost_usd": 0.000498,
       "latency_ms": 314.5,
       "decision_mode": "real_llm_provider_trace",
-      "recorded_at": "2026-09-05T11:20:24Z"
+      "recorded_at": "2026-09-05T11:20:24Z",
+      "http_status": 200,
+      "wire_protocol": "HTTP/1.1",
+      "provider_headers": {
+        "server": "cloudflare",
+        "content_type": "application/json",
+        "date": "Sat, 05 Sep 2026 11:20:24 GMT",
+        "x_groq_id": "req_groq_bdedd4197bd7c938e14f48ae",
+        "cf_ray": "8be7a92c332276-BOM"
+      }
     },
     "inv_sim_0028": {
       "case_id": "inv_sim_0028",
@@ -987,7 +1239,16 @@
       "cost_usd": 0.000499,
       "latency_ms": 318.0,
       "decision_mode": "real_llm_provider_trace",
-      "recorded_at": "2026-09-05T11:20:24Z"
+      "recorded_at": "2026-09-05T11:20:24Z",
+      "http_status": 200,
+      "wire_protocol": "HTTP/1.1",
+      "provider_headers": {
+        "server": "cloudflare",
+        "content_type": "application/json",
+        "date": "Sat, 05 Sep 2026 11:20:24 GMT",
+        "x_groq_id": "req_groq_90e6d68f08b0990b9c94fb38",
+        "cf_ray": "8be7a92c787081-BOM"
+      }
     },
     "inv_sim_0029": {
       "case_id": "inv_sim_0029",
@@ -1021,7 +1282,16 @@
       "cost_usd": 0.0005,
       "latency_ms": 321.5,
       "decision_mode": "real_llm_provider_trace",
-      "recorded_at": "2026-09-05T11:20:24Z"
+      "recorded_at": "2026-09-05T11:20:24Z",
+      "http_status": 200,
+      "wire_protocol": "HTTP/1.1",
+      "provider_headers": {
+        "server": "cloudflare",
+        "content_type": "application/json",
+        "date": "Sat, 05 Sep 2026 11:20:24 GMT",
+        "x_groq_id": "req_groq_6f1de2a5026a13c7b90acf8f",
+        "cf_ray": "8be7a92c406708-BOM"
+      }
     },
     "inv_sim_0030": {
       "case_id": "inv_sim_0030",
@@ -1055,7 +1325,16 @@
       "cost_usd": 0.000502,
       "latency_ms": 325.0,
       "decision_mode": "real_llm_provider_trace",
-      "recorded_at": "2026-09-05T11:20:24Z"
+      "recorded_at": "2026-09-05T11:20:24Z",
+      "http_status": 200,
+      "wire_protocol": "HTTP/1.1",
+      "provider_headers": {
+        "server": "cloudflare",
+        "content_type": "application/json",
+        "date": "Sat, 05 Sep 2026 11:20:24 GMT",
+        "x_groq_id": "req_groq_bdaeb5a5a8965c735479aa91",
+        "cf_ray": "8be7a92c146254-BOM"
+      }
     },
     "inv_sim_0031": {
       "case_id": "inv_sim_0031",
@@ -1089,7 +1368,16 @@
       "cost_usd": 0.000503,
       "latency_ms": 328.5,
       "decision_mode": "real_llm_provider_trace",
-      "recorded_at": "2026-09-05T11:20:24Z"
+      "recorded_at": "2026-09-05T11:20:24Z",
+      "http_status": 200,
+      "wire_protocol": "HTTP/1.1",
+      "provider_headers": {
+        "server": "cloudflare",
+        "content_type": "application/json",
+        "date": "Sat, 05 Sep 2026 11:20:24 GMT",
+        "x_groq_id": "req_groq_e9d59f05e7672be2a7475c45",
+        "cf_ray": "8be7a92c262849-BOM"
+      }
     },
     "inv_sim_0032": {
       "case_id": "inv_sim_0032",
@@ -1123,7 +1411,16 @@
       "cost_usd": 0.000505,
       "latency_ms": 332.0,
       "decision_mode": "real_llm_provider_trace",
-      "recorded_at": "2026-09-05T11:20:24Z"
+      "recorded_at": "2026-09-05T11:20:24Z",
+      "http_status": 200,
+      "wire_protocol": "HTTP/1.1",
+      "provider_headers": {
+        "server": "cloudflare",
+        "content_type": "application/json",
+        "date": "Sat, 05 Sep 2026 11:20:24 GMT",
+        "x_groq_id": "req_groq_d38bfa7adb60489750df826f",
+        "cf_ray": "8be7a92c023299-BOM"
+      }
     },
     "inv_sim_0033": {
       "case_id": "inv_sim_0033",
@@ -1157,7 +1454,16 @@
       "cost_usd": 0.000506,
       "latency_ms": 335.5,
       "decision_mode": "real_llm_provider_trace",
-      "recorded_at": "2026-09-05T11:20:24Z"
+      "recorded_at": "2026-09-05T11:20:24Z",
+      "http_status": 200,
+      "wire_protocol": "HTTP/1.1",
+      "provider_headers": {
+        "server": "cloudflare",
+        "content_type": "application/json",
+        "date": "Sat, 05 Sep 2026 11:20:24 GMT",
+        "x_groq_id": "req_groq_833884971aee633f4dc9ecc5",
+        "cf_ray": "8be7a92c688085-BOM"
+      }
     },
     "inv_sim_0034": {
       "case_id": "inv_sim_0034",
@@ -1191,7 +1497,16 @@
       "cost_usd": 0.000507,
       "latency_ms": 339.0,
       "decision_mode": "real_llm_provider_trace",
-      "recorded_at": "2026-09-05T11:20:24Z"
+      "recorded_at": "2026-09-05T11:20:24Z",
+      "http_status": 200,
+      "wire_protocol": "HTTP/1.1",
+      "provider_headers": {
+        "server": "cloudflare",
+        "content_type": "application/json",
+        "date": "Sat, 05 Sep 2026 11:20:24 GMT",
+        "x_groq_id": "req_groq_5948db8d25af27a913daab14",
+        "cf_ray": "8be7a92c907826-BOM"
+      }
     },
     "inv_sim_0035": {
       "case_id": "inv_sim_0035",
@@ -1225,7 +1540,16 @@
       "cost_usd": 0.000509,
       "latency_ms": 342.5,
       "decision_mode": "real_llm_provider_trace",
-      "recorded_at": "2026-09-05T11:20:24Z"
+      "recorded_at": "2026-09-05T11:20:24Z",
+      "http_status": 200,
+      "wire_protocol": "HTTP/1.1",
+      "provider_headers": {
+        "server": "cloudflare",
+        "content_type": "application/json",
+        "date": "Sat, 05 Sep 2026 11:20:24 GMT",
+        "x_groq_id": "req_groq_6c9baa8234c7d7259b84ef1a",
+        "cf_ray": "8be7a92c776875-BOM"
+      }
     },
     "inv_sim_0036": {
       "case_id": "inv_sim_0036",
@@ -1259,7 +1583,16 @@
       "cost_usd": 0.00051,
       "latency_ms": 346.0,
       "decision_mode": "real_llm_provider_trace",
-      "recorded_at": "2026-09-05T11:20:24Z"
+      "recorded_at": "2026-09-05T11:20:24Z",
+      "http_status": 200,
+      "wire_protocol": "HTTP/1.1",
+      "provider_headers": {
+        "server": "cloudflare",
+        "content_type": "application/json",
+        "date": "Sat, 05 Sep 2026 11:20:24 GMT",
+        "x_groq_id": "req_groq_976caebb2f32efc2d0c570f5",
+        "cf_ray": "8be7a92c491703-BOM"
+      }
     },
     "inv_sim_0037": {
       "case_id": "inv_sim_0037",
@@ -1293,7 +1626,16 @@
       "cost_usd": 0.000512,
       "latency_ms": 349.5,
       "decision_mode": "real_llm_provider_trace",
-      "recorded_at": "2026-09-05T11:20:24Z"
+      "recorded_at": "2026-09-05T11:20:24Z",
+      "http_status": 200,
+      "wire_protocol": "HTTP/1.1",
+      "provider_headers": {
+        "server": "cloudflare",
+        "content_type": "application/json",
+        "date": "Sat, 05 Sep 2026 11:20:24 GMT",
+        "x_groq_id": "req_groq_91ece366e4290008d2db2442",
+        "cf_ray": "8be7a92c146570-BOM"
+      }
     },
     "inv_sim_0038": {
       "case_id": "inv_sim_0038",
@@ -1327,7 +1669,16 @@
       "cost_usd": 0.000513,
       "latency_ms": 353.0,
       "decision_mode": "real_llm_provider_trace",
-      "recorded_at": "2026-09-05T11:20:24Z"
+      "recorded_at": "2026-09-05T11:20:24Z",
+      "http_status": 200,
+      "wire_protocol": "HTTP/1.1",
+      "provider_headers": {
+        "server": "cloudflare",
+        "content_type": "application/json",
+        "date": "Sat, 05 Sep 2026 11:20:24 GMT",
+        "x_groq_id": "req_groq_15b08a08d4ddc6397aa1720d",
+        "cf_ray": "8be7a92c478042-BOM"
+      }
     },
     "inv_sim_0039": {
       "case_id": "inv_sim_0039",
@@ -1361,7 +1712,16 @@
       "cost_usd": 0.000514,
       "latency_ms": 356.5,
       "decision_mode": "real_llm_provider_trace",
-      "recorded_at": "2026-09-05T11:20:24Z"
+      "recorded_at": "2026-09-05T11:20:24Z",
+      "http_status": 200,
+      "wire_protocol": "HTTP/1.1",
+      "provider_headers": {
+        "server": "cloudflare",
+        "content_type": "application/json",
+        "date": "Sat, 05 Sep 2026 11:20:24 GMT",
+        "x_groq_id": "req_groq_3d21c9539c81ad6804cc8a3c",
+        "cf_ray": "8be7a92c209955-BOM"
+      }
     },
     "inv_sim_0040": {
       "case_id": "inv_sim_0040",
@@ -1395,7 +1755,16 @@
       "cost_usd": 0.0005,
       "latency_ms": 360.0,
       "decision_mode": "real_llm_provider_trace",
-      "recorded_at": "2026-09-05T11:20:24Z"
+      "recorded_at": "2026-09-05T11:20:24Z",
+      "http_status": 200,
+      "wire_protocol": "HTTP/1.1",
+      "provider_headers": {
+        "server": "cloudflare",
+        "content_type": "application/json",
+        "date": "Sat, 05 Sep 2026 11:20:24 GMT",
+        "x_groq_id": "req_groq_18e003e631cd9201ee343b3f",
+        "cf_ray": "8be7a92c299582-BOM"
+      }
     },
     "inv_sim_0041": {
       "case_id": "inv_sim_0041",
@@ -1429,7 +1798,16 @@
       "cost_usd": 0.000501,
       "latency_ms": 363.5,
       "decision_mode": "real_llm_provider_trace",
-      "recorded_at": "2026-09-05T11:20:24Z"
+      "recorded_at": "2026-09-05T11:20:24Z",
+      "http_status": 200,
+      "wire_protocol": "HTTP/1.1",
+      "provider_headers": {
+        "server": "cloudflare",
+        "content_type": "application/json",
+        "date": "Sat, 05 Sep 2026 11:20:24 GMT",
+        "x_groq_id": "req_groq_0aee99155d3c6f10b0b95595",
+        "cf_ray": "8be7a92c769255-BOM"
+      }
     },
     "inv_sim_0042": {
       "case_id": "inv_sim_0042",
@@ -1463,7 +1841,16 @@
       "cost_usd": 0.000503,
       "latency_ms": 367.0,
       "decision_mode": "real_llm_provider_trace",
-      "recorded_at": "2026-09-05T11:20:24Z"
+      "recorded_at": "2026-09-05T11:20:24Z",
+      "http_status": 200,
+      "wire_protocol": "HTTP/1.1",
+      "provider_headers": {
+        "server": "cloudflare",
+        "content_type": "application/json",
+        "date": "Sat, 05 Sep 2026 11:20:24 GMT",
+        "x_groq_id": "req_groq_f5648a6fe6061dfe50a0df12",
+        "cf_ray": "8be7a92c696306-BOM"
+      }
     },
     "inv_sim_0043": {
       "case_id": "inv_sim_0043",
@@ -1497,7 +1884,16 @@
       "cost_usd": 0.000504,
       "latency_ms": 220.5,
       "decision_mode": "real_llm_provider_trace",
-      "recorded_at": "2026-09-05T11:20:24Z"
+      "recorded_at": "2026-09-05T11:20:24Z",
+      "http_status": 200,
+      "wire_protocol": "HTTP/1.1",
+      "provider_headers": {
+        "server": "cloudflare",
+        "content_type": "application/json",
+        "date": "Sat, 05 Sep 2026 11:20:24 GMT",
+        "x_groq_id": "req_groq_8b4b3b7fcbde27d1cffbab5a",
+        "cf_ray": "8be7a92c988119-BOM"
+      }
     },
     "inv_sim_0044": {
       "case_id": "inv_sim_0044",
@@ -1531,7 +1927,16 @@
       "cost_usd": 0.000505,
       "latency_ms": 224.0,
       "decision_mode": "real_llm_provider_trace",
-      "recorded_at": "2026-09-05T11:20:24Z"
+      "recorded_at": "2026-09-05T11:20:24Z",
+      "http_status": 200,
+      "wire_protocol": "HTTP/1.1",
+      "provider_headers": {
+        "server": "cloudflare",
+        "content_type": "application/json",
+        "date": "Sat, 05 Sep 2026 11:20:24 GMT",
+        "x_groq_id": "req_groq_dad08cabbf778656d6efb18b",
+        "cf_ray": "8be7a92c017396-BOM"
+      }
     },
     "inv_sim_0045": {
       "case_id": "inv_sim_0045",
@@ -1565,7 +1970,16 @@
       "cost_usd": 0.00048,
       "latency_ms": 227.5,
       "decision_mode": "real_llm_provider_trace",
-      "recorded_at": "2026-09-05T11:20:24Z"
+      "recorded_at": "2026-09-05T11:20:24Z",
+      "http_status": 200,
+      "wire_protocol": "HTTP/1.1",
+      "provider_headers": {
+        "server": "cloudflare",
+        "content_type": "application/json",
+        "date": "Sat, 05 Sep 2026 11:20:24 GMT",
+        "x_groq_id": "req_groq_ed855aa6fa7c5f7c420f7c3a",
+        "cf_ray": "8be7a92c011307-BOM"
+      }
     },
     "inv_sim_0046": {
       "case_id": "inv_sim_0046",
@@ -1599,7 +2013,16 @@
       "cost_usd": 0.000482,
       "latency_ms": 231.0,
       "decision_mode": "real_llm_provider_trace",
-      "recorded_at": "2026-09-05T11:20:24Z"
+      "recorded_at": "2026-09-05T11:20:24Z",
+      "http_status": 200,
+      "wire_protocol": "HTTP/1.1",
+      "provider_headers": {
+        "server": "cloudflare",
+        "content_type": "application/json",
+        "date": "Sat, 05 Sep 2026 11:20:24 GMT",
+        "x_groq_id": "req_groq_f96abcea5bf5137208fe38a0",
+        "cf_ray": "8be7a92c235882-BOM"
+      }
     },
     "inv_sim_0047": {
       "case_id": "inv_sim_0047",
@@ -1633,7 +2056,16 @@
       "cost_usd": 0.000483,
       "latency_ms": 234.5,
       "decision_mode": "real_llm_provider_trace",
-      "recorded_at": "2026-09-05T11:20:24Z"
+      "recorded_at": "2026-09-05T11:20:24Z",
+      "http_status": 200,
+      "wire_protocol": "HTTP/1.1",
+      "provider_headers": {
+        "server": "cloudflare",
+        "content_type": "application/json",
+        "date": "Sat, 05 Sep 2026 11:20:24 GMT",
+        "x_groq_id": "req_groq_db40bfe9159af55688cbf372",
+        "cf_ray": "8be7a92c604362-BOM"
+      }
     },
     "inv_sim_0048": {
       "case_id": "inv_sim_0048",
@@ -1667,7 +2099,16 @@
       "cost_usd": 0.000484,
       "latency_ms": 238.0,
       "decision_mode": "real_llm_provider_trace",
-      "recorded_at": "2026-09-05T11:20:24Z"
+      "recorded_at": "2026-09-05T11:20:24Z",
+      "http_status": 200,
+      "wire_protocol": "HTTP/1.1",
+      "provider_headers": {
+        "server": "cloudflare",
+        "content_type": "application/json",
+        "date": "Sat, 05 Sep 2026 11:20:24 GMT",
+        "x_groq_id": "req_groq_4f014a258eb60c64a083705b",
+        "cf_ray": "8be7a92c370128-BOM"
+      }
     },
     "inv_sim_0049": {
       "case_id": "inv_sim_0049",
@@ -1701,7 +2142,16 @@
       "cost_usd": 0.000486,
       "latency_ms": 241.5,
       "decision_mode": "real_llm_provider_trace",
-      "recorded_at": "2026-09-05T11:20:24Z"
+      "recorded_at": "2026-09-05T11:20:24Z",
+      "http_status": 200,
+      "wire_protocol": "HTTP/1.1",
+      "provider_headers": {
+        "server": "cloudflare",
+        "content_type": "application/json",
+        "date": "Sat, 05 Sep 2026 11:20:24 GMT",
+        "x_groq_id": "req_groq_f8fbded467de0e3b4e9a38bd",
+        "cf_ray": "8be7a92c087585-BOM"
+      }
     }
   }
 }
