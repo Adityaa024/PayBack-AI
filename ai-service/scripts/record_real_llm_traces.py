@@ -157,11 +157,11 @@ def generate_real_provider_trace_sample(sample_size: int = 50, dry_run: bool = F
 
         cost_usd, cost_inr = calculate_llm_cost(model, prompt_tokens, completion_tokens)
 
-        # Audit-grade provider wire headers
+        # Audit-grade provider wire headers: strictly capture raw response headers without manual enrichment
         auditable_headers = {
-            "server": raw_headers.get("server", "cloudflare"),
-            "content_type": raw_headers.get("content-type", "application/json"),
-            "date": raw_headers.get("date", time.strftime("%a, %d %b %Y %H:%M:%S GMT", time.gmtime())),
+            "server": raw_headers.get("server", ""),
+            "content_type": raw_headers.get("content-type", ""),
+            "date": raw_headers.get("date", ""),
             "x_groq_id": raw_headers.get("x-groq-id", req_id if provider == "groq" else ""),
             "cf_ray": raw_headers.get("cf-ray", ""),
         }

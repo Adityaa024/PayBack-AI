@@ -64,4 +64,17 @@ describe('Real PostgreSQL Environment Proof & Infrastructure Boundary Audit', ()
     expect(tablesFound).toContain('recovery_outbox_intents');
     expect(tablesFound).toContain('recovery_audit_log');
   });
+
+  it('proves fail-closed behavior: unavailable database rejects fallback and throws connection error', async () => {
+    // Attempting to connect to an invalid port with ALLOW_IN_MEMORY_FALLBACK=false MUST fail loudly
+    const invalidClient = createDatabaseClient({ connectionString: 'postgresql://postgres:postgres@127.0.0.1:59999/nonexistent' });
+    let threw = false;
+    try {
+      await invalidClient.execute(sql`SELECT 1;`);
+    } catch (err: any) {
+      threw = true;
+      expect(err).toBeDefined();
+    }
+    expect(threw, 'System must fail closed when PostgreSQL is unavailable, with zero silent in-memory fallback').toBe(true);
+  });
 });

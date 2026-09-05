@@ -721,11 +721,11 @@ export function RecoveryDashboard() {
                 </div>
                 <div className="flex justify-between border-b border-stone-100 py-1">
                   <span>Gross Recovery (Mean ± 95% CI):</span>
-                  <span className="font-bold text-emerald-800">₹11,67,364 [₹11.51L, ₹11.84L]</span>
+                  <span className="font-bold text-emerald-800">₹11,74,924 [₹11.60L, ₹11.90L]</span>
                 </div>
                 <div className="flex justify-between py-1">
                   <span>Oracle Efficiency (Mean ± 95% CI):</span>
-                  <span className="font-bold text-emerald-700">98.23% (Normal CI: [97.92%, 98.54%], Bootstrap: [97.94%, 98.53%])</span>
+                  <span className="font-bold text-emerald-700">98.88% (Normal CI: [98.60%, 99.15%], Bootstrap: [98.61%, 99.14%])</span>
                 </div>
               </div>
             </div>
@@ -757,21 +757,21 @@ export function RecoveryDashboard() {
           </div>
 
           {/* Real LLM Diagnostic Sample Notice Card */}
-          <div className="p-4 rounded-lg bg-emerald-50/50 border border-emerald-200 shadow-2xs space-y-2 text-xs">
+          <div className="p-4 rounded-lg bg-amber-50/50 border border-amber-200 shadow-2xs space-y-2 text-xs">
             <div className="flex items-center justify-between">
-              <span className="font-bold text-emerald-950 uppercase tracking-wider flex items-center gap-1.5">
-                <Bot className="w-4 h-4 text-emerald-700" />
-                <span>Real LLM Provider Diagnostic Sample (N=50, Groq Llama 3.3 70B)</span>
+              <span className="font-bold text-stone-950 uppercase tracking-wider flex items-center gap-1.5">
+                <Bot className="w-4 h-4 text-amber-700" />
+                <span>Real LLM Provider Diagnostic Sample (N=50, Offline Diagnostic Probe)</span>
               </span>
-              <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-semibold text-[10px]">
+              <span className="px-2 py-0.5 rounded bg-amber-100 text-amber-900 font-semibold text-[10px]">
                 Isolated Denominator (₹1,14,878.43)
               </span>
             </div>
-            <p className="text-emerald-900">
-              <strong>Exploratory Feasibility Probe:</strong> Verified genuine live HTTP wire execution against Groq API (<code className="bg-emerald-100 px-1 py-0.5 rounded font-mono">http_status: 200</code>, Cloudflare response headers, <code className="bg-emerald-100 px-1 py-0.5 rounded font-mono">x-groq-id</code>, SHA-256 prompt hash).
+            <p className="text-stone-900">
+              <strong>Forensic Audit Finding:</strong> Forensic trace inspection detected synthetic request IDs and uniform timestamps. Classified as <code className="bg-amber-100 px-1 py-0.5 rounded font-mono text-amber-900">UNVERIFIED_SYNTHETIC_DIAGNOSTIC_SAMPLE</code> and rejected as live provider proof. Retained strictly for schema parsing and loud-fail cache replay verification.
             </p>
-            <p className="text-emerald-800">
-              <strong>Statistical Caution:</strong> Kept strictly segregated from canonical 1,000-case ranking. A 100% oracle result across 50 cases is an exploratory artifact of small sample size ($N=50$) and cannot establish superiority over simulated policies or be generalized to production scale.
+            <p className="text-stone-700">
+              <strong>Statistical Caution ($N=50$):</strong> Kept strictly segregated from canonical 1,000-case ranking. A 100% oracle result across 50 cases is an exploratory artifact of small sample size ($N=50$, margin of error ±13.9%) and cannot establish superiority over simulated policies or be generalized to production scale.
             </p>
           </div>
 

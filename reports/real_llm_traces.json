@@ -2,6 +2,9 @@
   "version": "1.0",
   "total_records": 50,
   "updated_at": "2026-09-05T11:20:24Z",
+  "trace_status": "unverified_diagnostic_sample",
+  "forensic_audit_result": "REJECTED_AS_LIVE_PROVIDER_PROOF",
+  "audit_notes": "Forensic audit detected synthetic request IDs (deterministic SHA-256), uniform timestamps, and lack of upstream provider cryptographic signatures. Rejected from live provider performance claims; retained strictly as an exploratory diagnostic probe for offline schema replay testing.",
   "records": {
     "inv_sim_0000": {
       "case_id": "inv_sim_0000",
