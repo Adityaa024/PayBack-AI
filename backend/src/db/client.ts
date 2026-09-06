@@ -11,7 +11,7 @@ export type DrizzleWithPool = NodePgDatabase<typeof schema> & { $pool: pg.Pool }
 
 export function createDatabaseClient(options: DatabaseClientOptions): DrizzleWithPool {
   const isTest = process.env['NODE_ENV'] === 'test';
-  const needsSsl = options.connectionString.includes('sslmode=') || options.connectionString.includes('neon.tech');
+  const needsSsl = options.connectionString.includes('sslmode=') || options.connectionString.includes('neon.tech') || options.connectionString.includes('supabase');
   const pool = new pg.Pool({
     connectionString: options.connectionString,
     max: options.maxConnections ?? (isTest ? 10 : 20),
