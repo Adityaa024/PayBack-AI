@@ -4,7 +4,6 @@ import crypto from 'crypto';
 import { TOTP, NobleCryptoPlugin, ScureBase32Plugin } from 'otplib';
 const totp = new TOTP({ crypto: new NobleCryptoPlugin(), base32: new ScureBase32Plugin() });
 import QRCode from 'qrcode';
-import type { StringValue } from 'ms';
 import type { RedisClientType } from 'redis';
 import type { UserRepository } from './user.repository.js';
 import type { LockoutService } from './lockout.service.js';
@@ -482,7 +481,7 @@ export class AuthService {
       email: user.email,
       role: user.role,
     };
-    return jwt.sign(payload, this.jwtSecret, { expiresIn: this.jwtExpiresIn as StringValue });
+    return jwt.sign(payload, this.jwtSecret, { expiresIn: this.jwtExpiresIn as any });
   }
 
   private signMfaPendingToken(user: User): string {
@@ -494,7 +493,7 @@ export class AuthService {
       role: user.role,
       mfaPending: true,
     };
-    return jwt.sign(payload, this.jwtSecret, { expiresIn: MFA_PENDING_EXPIRES as StringValue });
+    return jwt.sign(payload, this.jwtSecret, { expiresIn: MFA_PENDING_EXPIRES as any });
   }
 
   private stripSensitive(user: User): SafeUser {
