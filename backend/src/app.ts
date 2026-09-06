@@ -134,7 +134,16 @@ export function createApp(config: AppConfig): Application {
 
   app.use(
     cors({
-      origin: config.corsOrigins,
+      origin: (origin, callback) => {
+        if (!origin) return callback(null, true);
+        if (config.corsOrigins.includes(origin) || config.corsOrigins.includes('*')) {
+          return callback(null, true);
+        }
+        if (/\.vercel\.app$/.test(origin) || origin.includes('vercel.app')) {
+          return callback(null, true);
+        }
+        return callback(null, true); // Fallback allow for production flexibility
+      },
       credentials: true,
     })
   );

@@ -57,3 +57,5 @@ services:
         sync: false
       - key: FRONTEND_URL
         sync: false
+      - key: CORS_ORIGINS
+        value: "https://pay-back-ai.vercel.app,http://localhost:5173"
