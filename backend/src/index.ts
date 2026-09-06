@@ -7,36 +7,7 @@ import { runMigrations } from './db/migrate.js';
 
 import { createClient as createRedisClient } from 'redis';
 
-await runMigrations().catch((err) => {
-  logger.warn('Database migrations skipped or failed on startup (starting in demo/degraded mode):', err?.message || err);
-});
-
-async function waitForRedis(url?: string, maxAttempts = 5, delayMs = 2000): Promise<void> {
-  if (!url || process.env['NODE_ENV'] === 'test') return;
-  const client = createRedisClient({ url });
-  client.on('error', () => {}); 
-  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-    try {
-      await client.connect();
-      await client.ping();
-      logger.info('✓ Redis service connected and healthy');
-      await client.disconnect();
-      return;
-    } catch {
-      logger.warn(`Waiting for Redis readiness (attempt ${attempt}/${maxAttempts})...`);
-      if (attempt === maxAttempts) {
-        logger.warn('Redis unavailable after max attempts — starting in fail-open mode');
-        return;
-      }
-      await new Promise((r) => setTimeout(r, delayMs));
-    }
-  }
-}
-
-await waitForRedis(config.REDIS_URL);
-
 const db = createDatabaseClient({ connectionString: config.DATABASE_URL });
-
 
 const app = createApp({
   corsOrigins: config.CORS_ORIGINS,
@@ -51,6 +22,34 @@ const server = app.listen(config.PORT, () => {
   logger.info(`RecoverIQ backend running on port ${config.PORT} [${config.NODE_ENV}]`);
   logger.info(`Health → http://localhost:${config.PORT}/api/health`);
 });
+
+// Background tasks run non-blocking after server is listening on $PORT
+runMigrations().catch((err) => {
+  logger.warn('Database migrations skipped or failed on startup (starting in demo/degraded mode):', err?.message || err);
+});
+
+async function waitForRedis(url?: string, maxAttempts = 2, delayMs = 1000): Promise<void> {
+  if (!url || process.env['NODE_ENV'] === 'test') return;
+  const client = createRedisClient({ url });
+  client.on('error', () => {}); 
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      await client.connect();
+      await client.ping();
+      logger.info('✓ Redis service connected and healthy');
+      await client.disconnect();
+      return;
+    } catch {
+      if (attempt === maxAttempts) {
+        logger.warn('Redis unavailable — starting in fail-open mode');
+        return;
+      }
+      await new Promise((r) => setTimeout(r, delayMs));
+    }
+  }
+}
+
+waitForRedis(config.REDIS_URL).catch(() => {});
 
 function shutdown(signal: string): void {
   logger.info(`Received ${signal}. Starting graceful shutdown…`);
