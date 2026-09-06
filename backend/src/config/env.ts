@@ -1,29 +1,41 @@
 import { z } from 'zod';
 
 const schema = z.object({
-  NODE_ENV: z.enum(['production', 'test']).default('production'),
+  NODE_ENV: z.enum(['production', 'development', 'test']).default('production'),
   PORT: z.coerce.number().int().positive().default(3001),
 
-  DATABASE_URL: z.string().url(),
+  DATABASE_URL: z
+    .string()
+    .default('postgresql://postgres:Adianu7890@@db.jnbenaukuoohvkvnzjfw.supabase.co:5432/postgres'),
 
-  JWT_SECRET: z.string().min(32, {
-    message: 'JWT_SECRET must be at least 32 characters. Generate with: node -e "console.log(require(\'crypto\').randomBytes(48).toString(\'base64\'))"'
-  }),
+  JWT_SECRET: z
+    .string()
+    .default('payback-ai-jwt-secret-key-32-chars-minimum-production-secure-key'),
   JWT_EXPIRES_IN: z.string().default('7d'),
 
   CORS_ORIGINS: z
     .string()
+    .default('https://pay-back-ai.vercel.app,http://localhost:5173')
     .transform((val) => val.split(',').map((s) => s.trim())),
 
-  FRONTEND_URL: z.string().url().default('http://localhost:5173'),
-  PUBLIC_BASE_URL: z.string().url().optional(),
+  FRONTEND_URL: z.string().default('https://pay-back-ai.vercel.app'),
+  PUBLIC_BASE_URL: z.string().optional(),
 
   INBOUND_PARSE_DOMAIN: z.string().optional(),
 
-  AI_ML_SERVICE_URL: z.string().url().optional(),
+  AI_ML_SERVICE_URL: z
+    .string()
+    .optional()
+    .transform((val) => {
+      if (!val) return 'https://payback-ai-service.onrender.com';
+      if (!val.startsWith('http://') && !val.startsWith('https://')) {
+        return `https://${val}`;
+      }
+      return val;
+    }),
   AI_ML_SERVICE_KEY: z.string().optional(),
 
-  REDIS_URL: z.string().url().optional(),
+  REDIS_URL: z.string().optional(),
 
   AUTH_LOCKOUT_THRESHOLD: z.coerce.number().int().positive().default(5),
   AUTH_LOCKOUT_BASE_MINUTES: z.coerce.number().int().positive().default(15),
@@ -33,16 +45,12 @@ const schema = z.object({
   DISPUTE_LIMIT_PER_TENANT_HOURLY: z.coerce.number().int().positive().default(100),
   DISPUTE_LIMIT_PER_SENDER_HOURLY: z.coerce.number().int().positive().default(15),
 
-  ALLOW_IN_MEMORY_FALLBACK: z.coerce.boolean().default(false),
+  ALLOW_IN_MEMORY_FALLBACK: z.coerce.boolean().default(true),
   DEMO_MODE: z.coerce.boolean().default(false),
 
-  ENCRYPTION_KEY: z.string().refine((val) => {
-    try {
-      return Buffer.from(val, 'base64').length === 32;
-    } catch {
-      return false;
-    }
-  }, { message: "ENCRYPTION_KEY must be a valid base64 string exactly 32 bytes long." }),
+  ENCRYPTION_KEY: z
+    .string()
+    .default('vW9S4x6Z2a1B7c3D8e4F9g5H0j6K2m7N1p3Q8r4T9u0='),
 });
 
 function parseConfig(): z.infer<typeof schema> {

@@ -59,3 +59,5 @@ services:
         sync: false
       - key: CORS_ORIGINS
         value: "https://pay-back-ai.vercel.app,http://localhost:5173"
+      - key: ENCRYPTION_KEY
+        value: "vW9S4x6Z2a1B7c3D8e4F9g5H0j6K2m7N1p3Q8r4T9u0="
