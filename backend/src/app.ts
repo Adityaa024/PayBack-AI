@@ -132,21 +132,28 @@ export function createApp(config: AppConfig): Application {
   
   app.set('trust proxy', 1);
 
-  app.use(
-    cors({
-      origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
-        if (!origin) return callback(null, true);
-        if (config.corsOrigins.includes(origin) || config.corsOrigins.includes('*')) {
-          return callback(null, true);
-        }
-        if (/\.vercel\.app$/.test(origin) || origin.includes('vercel.app')) {
-          return callback(null, true);
-        }
-        return callback(null, true); // Fallback allow for production flexibility
-      },
-      credentials: true,
-    })
-  );
+  const corsOptions = {
+    origin: true,
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'],
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'X-Requested-With',
+      'x-tenant-id',
+      'x-request-id',
+      'x-api-key',
+      'Accept',
+      'Origin',
+      'Access-Control-Request-Method',
+      'Access-Control-Request-Headers',
+    ],
+    exposedHeaders: ['x-request-id', 'x-total-count'],
+    optionsSuccessStatus: 200,
+  };
+
+  app.use(cors(corsOptions));
+  app.options('*', cors(corsOptions));
 
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
