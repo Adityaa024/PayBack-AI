@@ -218,6 +218,21 @@ interface SliceAccumulator {
   simulated_llm_gross: number;
 }
 
+export interface PolicyFailureCase {
+  invoice_id: string;
+  amount: number;
+  failure_reason: string;
+  true_lane: string;
+  policy_diagnosed_lane: string;
+  policy_strategy: string;
+  oracle_action: string;
+  oracle_recovered: number;
+  policy_recovered: number;
+  missed_amount: number;
+  gap_category: string;
+  explanation: string;
+}
+
 export function runBatchEvaluation() {
   if (!fs.existsSync(BATCH_FILE)) {
     throw new Error(`Batch file not found at ${BATCH_FILE}`);
@@ -301,20 +316,6 @@ export function runBatchEvaluation() {
     return map.get(key)!;
   };
 
-  interface PolicyFailureCase {
-    invoice_id: string;
-    amount: number;
-    failure_reason: string;
-    true_lane: string;
-    policy_diagnosed_lane: string;
-    policy_strategy: string;
-    oracle_action: string;
-    oracle_recovered: number;
-    policy_recovered: number;
-    missed_amount: number;
-    gap_category: string;
-    explanation: string;
-  }
   const policyFailuresVsOracle: PolicyFailureCase[] = [];
 
   for (const item of rawCases) {
@@ -423,7 +424,7 @@ export function runBatchEvaluation() {
         evidence: [`root_cause: ${agentDecision.root_cause}`, `days_overdue: ${item.days_overdue}`],
         confidence: agentDecision.confidence,
       },
-      recommendedAction: agentDecision.strategy === 'mandate_retry' ? 'sequence_mandate_retry' : 'send_payment_link',
+      recommendedAction: agentDecision.strategy === 'mandate_retry' ? 'mandate_retry' : 'send_payment_link',
       actionParameters: {
         maxAmount: amt,
         expiresInHours: 48,
@@ -803,7 +804,7 @@ export function runBatchEvaluation() {
             amountAtRisk: amt,
             currency: 'INR',
             diagnosis: { primary: diagnosedLane, evidence: [`root_cause: ${trace.parsed_response?.root_cause}`], confidence: trace.parsed_response?.confidence || 0.9 },
-            recommendedAction: strat === 'mandate_retry' ? 'sequence_mandate_retry' : 'send_payment_link',
+            recommendedAction: strat === 'mandate_retry' ? 'mandate_retry' : 'send_payment_link',
             actionParameters: { maxAmount: amt, expiresInHours: 48, allowedMethods: ['upi', 'card', 'netbanking'] },
             customerMessage: 'Empathetic reminder with tailored link',
             cooldownHours: 24,
@@ -1213,7 +1214,7 @@ export function runBatchEvaluation() {
   const isRealEval = results.arms.real_llm_policy && results.arms.real_llm_policy.evaluated;
   const realVal = (prop: string, prefix: string = '', suffix: string = '') => {
     if (!isRealEval) return 'Gated (offline)';
-    const v = results.arms.real_llm_policy[prop];
+    const v = (results.arms.real_llm_policy as Record<string, any>)[prop];
     if (typeof v === 'number') {
       return `${prefix}${v.toLocaleString('en-IN')}${suffix}`;
     }

@@ -258,7 +258,7 @@ export function parseCsvBuffer(buffer: Buffer): CsvParseResult {
   const parsed = Papa.parse<CsvRowInput>(content, {
     header: true,
     skipEmptyLines: true,
-    transformHeader: (header) => canonicalizeKey(header),
+    transformHeader: (header: string) => canonicalizeKey(header),
   });
 
   const valid: ParsedRow[] = [];

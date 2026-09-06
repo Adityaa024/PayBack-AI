@@ -134,7 +134,7 @@ export function createApp(config: AppConfig): Application {
 
   app.use(
     cors({
-      origin: (origin, callback) => {
+      origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
         if (!origin) return callback(null, true);
         if (config.corsOrigins.includes(origin) || config.corsOrigins.includes('*')) {
           return callback(null, true);
@@ -150,7 +150,7 @@ export function createApp(config: AppConfig): Application {
 
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
-  app.use((req, res, next) => {
+  app.use((req: Request, res: Response, next: NextFunction) => {
     res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
     next();
   });
