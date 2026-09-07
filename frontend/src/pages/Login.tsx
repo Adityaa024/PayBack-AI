@@ -23,7 +23,7 @@ export function Login() {
   const location = useLocation();
   const { login } = useAuth();
 
-  const from = location.state?.from?.pathname || "/";
+  const from = location.state?.from?.pathname || "/recovery";
 
   const handleCredentialsSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -50,7 +50,7 @@ export function AppLayout() {
     {
       title: "OPERATIONS",
       items: [
-        { label: "Home", path: "/", icon: Home, visible: true },
+        { label: "Home", path: "/overview", icon: Home, visible: true },
         { label: "Recovery Queue", path: "/recovery", icon: TrendingUp, visible: true },
         { label: "Customers", path: "/customers", icon: Users, visible: true },
         { label: "Invoices", path: "/invoices", icon: FileText, visible: true },
@@ -122,8 +122,8 @@ export function AppLayout() {
 
                 {visibleItems.map((item) => {
                   const Icon = item.icon;
-                  const isActive = item.path === "/"
-                    ? location.pathname === "/" || location.pathname === "/overview"
+                  const isActive = item.path === "/overview"
+                    ? location.pathname === "/overview" || location.pathname === "/dashboard"
                     : location.pathname.startsWith(item.path);
 
                   return (

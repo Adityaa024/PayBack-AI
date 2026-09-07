@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { AppLayout } from "./layouts/AppLayout";
 import { PortfolioOverview } from "./pages/PortfolioOverview";
 import { RecoveryDashboard } from "./pages/RecoveryDashboard";
@@ -26,6 +26,7 @@ function App() {
   return (
     <Routes>
       {/* Public Routes */}
+      <Route path="/" element={<Navigate to="/login" replace />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -36,7 +37,6 @@ function App() {
       <Route element={<ProtectedRoute />}>
         <Route element={<AppLayout />}>
           {/* 1. Portfolio Overview */}
-          <Route path="/" element={<PortfolioOverview />} />
           <Route path="/overview" element={<PortfolioOverview />} />
           <Route path="/dashboard" element={<Dashboard />} />
 
