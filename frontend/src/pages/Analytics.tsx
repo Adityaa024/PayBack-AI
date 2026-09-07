@@ -242,8 +242,8 @@ export function Analytics() {
               <p className="text-xs text-stone-500 mt-0.5">Trailing 6-month billed vs. verified collected velocity.</p>
             </div>
           </div>
-          <div className="h-60 w-full pt-2">
-            <ResponsiveContainer width="100%" height="100%">
+          <div className="h-60 w-full min-w-0 pt-2">
+            <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={240}>
               <AreaChart data={monthlyCashflowData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f1f0ea" vertical={false} />
                 <XAxis dataKey="month" stroke="#78716c" fontSize={11} tickLine={false} />
