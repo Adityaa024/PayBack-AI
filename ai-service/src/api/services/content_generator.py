@@ -151,13 +151,67 @@ class ContentGenerator:
             total_installments=total_inst or 1,
         )
 
-        llm_response = await self.llm.generate(messages, temperature=settings.LLM_TEMPERATURE)
+        try:
+            llm_response = await self.llm.generate(messages, temperature=settings.LLM_TEMPERATURE)
+            used_fallback = llm_response.used_fallback
+            model_name = llm_response.model
+            provider_name = llm_response.provider
+            gen_ms = round(llm_response.generation_ms, 2)
+            token_cnt = llm_response.completion_tokens + llm_response.prompt_tokens
+            raw_content = llm_response.content
+        except LLMGenerationError as exc:
+            logger.warning(
+                "llm_generation_failed_using_deterministic_template",
+                invoice_id=request.invoice_id,
+                channel=request.channel,
+                tier=request.urgency_tier,
+                error=str(exc)
+            )
+            inv_no = sanitize_input(getattr(request, "invoice_no", "") or "Invoice")
+            c_name = sanitize_input(getattr(request, "client_name", "") or "Valued Customer")
+            amt = sanitize_input(str(getattr(request, "invoice_amount", "0.00")))
+            curr = getattr(request, "currency", "INR")
+            d_overdue = getattr(request, "days_overdue", 0)
+
+            if request.channel == "email":
+                fb_subj = f"Payment Reminder: {inv_no} ({curr} {amt})"
+                if inst_num and total_inst:
+                    fb_subj = f"Payment Reminder: Installment #{inst_num} of {total_inst} ({inv_no})"
+                fb_body = (
+                    f"Dear {c_name},\n\n"
+                    f"This is a formal payment reminder regarding invoice {inv_no} for the amount of {curr} {amt}, "
+                    f"which is currently {d_overdue} day(s) overdue.\n\n"
+                    f"{cta_instruction}\n\n"
+                    f"If you have already settled this invoice, please disregard this notice.\n\n"
+                    f"Sincerely,\n{sender_name}"
+                )
+                html_body = _plain_to_html(fb_body, sender_name)
+                return GenerationResult(
+                    subject=fb_subj,
+                    html_body=html_body,
+                    plain_body=fb_body,
+                    metadata={"tier_used": request.urgency_tier, "model": "deterministic_template", "generation_ms": 1.0, "token_count": 0}
+                )
+            elif request.channel == "sms":
+                fb_body = f"Reminder: Invoice {inv_no} for {curr} {amt} is {d_overdue} days overdue. Please settle: {payment_link or 'contact support'}."
+                return GenerationResult(
+                    subject=None,
+                    plain_body=fb_body[:160],
+                    metadata={"tier_used": request.urgency_tier, "model": "deterministic_template", "generation_ms": 1.0, "token_count": 0}
+                )
+            else:
+                fb_body = f"Hello {c_name}, invoice {inv_no} for {curr} {amt} is overdue. Please complete your payment here: {payment_link or 'contact support'}."
+                return GenerationResult(
+                    subject=None,
+                    plain_body=fb_body,
+                    metadata={"tier_used": request.urgency_tier, "model": "deterministic_template", "generation_ms": 1.0, "token_count": 0}
+                )
 
         metadata = {
             "tier_used": request.urgency_tier,
-            "model": llm_response.model,
-            "generation_ms": round(llm_response.generation_ms, 2),
-            "token_count": llm_response.completion_tokens + llm_response.prompt_tokens
+            "model": model_name,
+            "generation_ms": gen_ms,
+            "token_count": token_cnt
         }
 
         logger.info(
@@ -165,15 +219,14 @@ class ContentGenerator:
             invoice_id=request.invoice_id,
             tier=request.urgency_tier,
             channel=request.channel,
-            model=llm_response.model,
-            provider=llm_response.provider,
-            generation_ms=round(llm_response.generation_ms, 2),
-            token_count=llm_response.completion_tokens + llm_response.prompt_tokens,
-            used_fallback=llm_response.used_fallback
+            model=model_name,
+            provider=provider_name,
+            generation_ms=gen_ms,
+            token_count=token_cnt,
+            used_fallback=used_fallback
         )
 
-        # Clean markdown formatting backticks from the LLM content
-        content = llm_response.content.strip()
+        content = raw_content.strip()
         if content.startswith("```"):
             first_newline = content.find("\n")
             if first_newline != -1:
