@@ -48,6 +48,10 @@ const schema = z.object({
   ALLOW_IN_MEMORY_FALLBACK: z.coerce.boolean().default(false),
   DEMO_MODE: z.coerce.boolean().default(false),
 
+  RAZORPAY_KEY_ID: z.string().optional(),
+  RAZORPAY_KEY_SECRET: z.string().optional(),
+  RAZORPAY_WEBHOOK_SECRET: z.string().optional(),
+
   ENCRYPTION_KEY: z
     .string()
     .default('vW9S4x6Z2a1B7c3D8e4F9g5H0j6K2m7N1p3Q8r4T9u0='),

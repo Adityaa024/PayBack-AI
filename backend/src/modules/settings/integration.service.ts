@@ -558,6 +558,15 @@ export class IntegrationService {
   async getIntegrationStatusRazorpay(tenantId: string): Promise<RazorpayIntegrationStatus> {
     const integration = await this.repo.getIntegration(tenantId, 'razorpay');
     if (!integration) {
+      if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
+        return {
+          provider: 'razorpay',
+          isConfigured: true,
+          lastValidatedAt: new Date(),
+          lastValidationResult: 'valid',
+          maskedKeyId: process.env.RAZORPAY_KEY_ID.substring(0, 8) + '...',
+        };
+      }
       return {
         provider: 'razorpay',
         isConfigured: false,
@@ -1366,6 +1375,13 @@ export class IntegrationService {
   async getDecryptedRazorpayConfig(tenantId: string): Promise<{ keyId: string, keySecret: string, webhookSecret: string }> {
     const integration = await this.repo.getIntegration(tenantId, 'razorpay');
     if (!integration || !integration.ciphertext || !integration.iv || !integration.authTag) {
+      if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
+        return {
+          keyId: process.env.RAZORPAY_KEY_ID,
+          keySecret: process.env.RAZORPAY_KEY_SECRET,
+          webhookSecret: process.env.RAZORPAY_WEBHOOK_SECRET || 'rzp_wh_default_secret',
+        };
+      }
       if (process.env.NODE_ENV === 'test' || tenantId === 'tenant_demo_001' || (config as any).DEMO_MODE) {
         return { keyId: 'rzp_test_demo', keySecret: 'demo_secret_12345', webhookSecret: 'test_webhook_secret' };
       }

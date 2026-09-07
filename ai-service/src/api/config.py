@@ -15,7 +15,12 @@ class Settings(BaseSettings):
 
     LLM_PROVIDER: str = "groq"
     LLM_MODEL: str = "openai/gpt-oss-20b"
-    LLM_API_KEY: str = Field(default="", alias="LLM_API_KEY")
+    LLM_API_KEY: str = Field(
+        default="",
+        validation_alias=AliasChoices("LLM_API_KEY", "GROQ_API_KEY", "OPENAI_API_KEY")
+    )
+    GROQ_API_KEY: str | None = Field(default=None, alias="GROQ_API_KEY")
+    OPENAI_API_KEY: str | None = Field(default=None, alias="OPENAI_API_KEY")
     LLM_TEMPERATURE: float = 0.4
     LLM_MAX_TOKENS: int = 400
     LLM_TIMEOUT_SECONDS: int = 30
@@ -27,6 +32,7 @@ class Settings(BaseSettings):
         default=None,
         validation_alias=AliasChoices(
             "LLM_FALLBACK_API_KEY",
+            "OPENAI_API_KEY",
             "GROQ_FALLBACK_API_KEY",
             "GROQ_SECONDARY_API_KEY",
             "GROQ_FALLBACK_KEY",

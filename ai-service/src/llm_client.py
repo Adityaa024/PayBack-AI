@@ -41,16 +41,31 @@ class LLMClient:
         self.refresh_providers(force=True)
 
     def refresh_providers(self, force: bool = False):
+        groq_key = (
+            getattr(settings, "GROQ_API_KEY", None)
+            or os.environ.get("GROQ_API_KEY")
+            or (settings.LLM_API_KEY if settings.LLM_PROVIDER == "groq" else "")
+            or ""
+        ).strip()
+        openai_key = (
+            getattr(settings, "OPENAI_API_KEY", None)
+            or os.environ.get("OPENAI_API_KEY")
+            or (settings.LLM_API_KEY if settings.LLM_PROVIDER == "openai" else "")
+            or ""
+        ).strip()
+
         if force or self.primary is None:
-            primary_model = _format_model_string(settings.LLM_PROVIDER, settings.LLM_MODEL)
-            primary_key = (settings.LLM_API_KEY or "").strip()
-            self.primary = {
-                "model": primary_model,
-                "api_key": primary_key,
-            } if primary_model and primary_key else None
+            if groq_key:
+                primary_model = _format_model_string("groq", settings.LLM_MODEL if settings.LLM_PROVIDER == "groq" else "llama-3.3-70b-versatile")
+                self.primary = {"model": primary_model, "api_key": groq_key}
+            elif openai_key:
+                self.primary = {"model": "openai/gpt-4o-mini", "api_key": openai_key}
+            else:
+                primary_model = _format_model_string(settings.LLM_PROVIDER, settings.LLM_MODEL)
+                primary_key = (settings.LLM_API_KEY or "").strip()
+                self.primary = {"model": primary_model, "api_key": primary_key} if primary_model and primary_key else None
 
         if force or self.fallback is None:
-            fallback_model = _format_model_string(settings.LLM_FALLBACK_PROVIDER, settings.LLM_FALLBACK_MODEL)
             fallback_key = (
                 settings.LLM_FALLBACK_API_KEY
                 or os.environ.get("GROQ_FALLBACK_API_KEY")
@@ -59,10 +74,16 @@ class LLMClient:
                 or os.environ.get("LLM_SECONDARY_API_KEY")
                 or ""
             ).strip()
-            self.fallback = {
-                "model": fallback_model,
-                "api_key": fallback_key,
-            } if fallback_model and fallback_key else None
+
+            if fallback_key:
+                fallback_model = _format_model_string(settings.LLM_FALLBACK_PROVIDER, settings.LLM_FALLBACK_MODEL)
+                self.fallback = {"model": fallback_model, "api_key": fallback_key}
+            elif openai_key and (self.primary and not self.primary.get("model", "").startswith("openai")):
+                self.fallback = {"model": "openai/gpt-4o-mini", "api_key": openai_key}
+            elif groq_key and (self.primary and not self.primary.get("model", "").startswith("groq")):
+                self.fallback = {"model": "groq/llama-3.3-70b-versatile", "api_key": groq_key}
+            else:
+                self.fallback = None
 
     async def generate(self, messages: list, temperature: float = 0.4) -> LLMResponse:
         self.refresh_providers()
