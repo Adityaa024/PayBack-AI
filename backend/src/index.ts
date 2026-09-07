@@ -18,7 +18,7 @@ const app = createApp({
   aimlServiceKey: config.AI_ML_SERVICE_KEY,
 });
 
-const server = app.listen(config.PORT, () => {
+const server = app.listen(config.PORT, '0.0.0.0', () => {
   logger.info(`RecoverIQ backend running on port ${config.PORT} [${config.NODE_ENV}]`);
   logger.info(`Health → http://localhost:${config.PORT}/api/health`);
 });
