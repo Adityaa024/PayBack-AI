@@ -15,40 +15,15 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const defaultDemoUser: User = {
-  id: "demo_admin",
-  tenantId: "tenant_demo_001",
-  name: "Razorpay Judge / Demo",
-  email: "judge@razorpay.com",
-  role: "admin",
-  mfaEnabled: false,
-  created_at: new Date().toISOString(),
-};
-
-const isTestEnv = import.meta.env.MODE === "test";
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(() => {
-    if (isTestEnv) {
-      return null;
-    }
-    return defaultDemoUser;
-  });
+  const [user, setUser] = useState<User | null>(null);
 
   const [isLoading, setIsLoading] = useState(() => {
-    if (isTestEnv) {
-      return !!localStorage.getItem("auth_token");
-    }
-    return false;
+    return !!localStorage.getItem("auth_token");
   });
 
   const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!isTestEnv && !localStorage.getItem("auth_token")) {
-      localStorage.setItem("auth_token", "demo_bearer_token");
-    }
-  }, []);
 
   useEffect(() => {
     const handler = () => {
