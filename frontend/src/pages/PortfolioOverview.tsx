@@ -5,6 +5,7 @@ import {
   ArrowUpRight, AlertOctagon, Scale, CheckCircle2,
   Calendar, FileText, ChevronRight, Layers, DollarSign
 } from "lucide-react";
+import { useAuth } from "../contexts/AuthContext";
 import { recoveryService } from "../services/recovery";
 import { disputeService } from "../services/dispute";
 import { dlqService } from "../services/dlq";
@@ -13,6 +14,7 @@ import { MoneyValue, EmptyState, LoadingState, ErrorState } from "../components/
 
 export function PortfolioOverview() {
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   // Queries
   const { data: stats, isLoading: statsLoading, isError: statsError } = useQuery({
@@ -77,7 +79,7 @@ export function PortfolioOverview() {
             <span className="px-2 py-0.5 rounded text-[11px] font-semibold uppercase tracking-wider bg-stone-200 text-stone-700">
               Operations Control
             </span>
-            <span className="text-xs text-stone-500 font-mono">Tenant ID: primary-sandbox</span>
+            <span className="text-xs text-stone-500 font-mono">Tenant ID: {user?.tenantId || 'tenant_demo_001'}</span>
           </div>
           <h1 className="text-2xl font-bold text-stone-900 tracking-tight mt-1">Portfolio Cash Overview</h1>
           <p className="text-xs text-stone-500 mt-0.5">
