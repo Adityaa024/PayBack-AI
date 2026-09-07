@@ -6,7 +6,7 @@ const schema = z.object({
 
   DATABASE_URL: z
     .string()
-    .default('postgresql://postgres:Adianu7890@@db.jnbenaukuoohvkvnzjfw.supabase.co:5432/postgres'),
+    .default('postgresql://postgres.jnbenaukuoohvkvnzjfw:Adianu7890%40@aws-0-ap-northeast-1.pooler.supabase.com:5432/postgres'),
 
   JWT_SECRET: z
     .string()
