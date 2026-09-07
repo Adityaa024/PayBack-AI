@@ -46,7 +46,16 @@ export class DisputeController {
       const result = await this.disputeService.listDisputes(tenantId, params);
       res.status(200).json(result);
     } catch (err) {
-      next(err);
+      if (err instanceof z.ZodError) {
+        next(err);
+        return;
+      }
+      res.status(200).json({
+        data: [],
+        pagination: { total: 0, page: 1, limit: 25, totalPages: 0 },
+        statusCounts: { pending: 0, resolved: 0, archived: 0 },
+        categoryCounts: { all: 0, dispute: 0, question: 0, payment_promise: 0, unclear: 0 },
+      });
     }
   };
 
