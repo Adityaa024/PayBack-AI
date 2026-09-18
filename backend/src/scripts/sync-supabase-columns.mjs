@@ -1,9 +1,16 @@
+import 'dotenv/config';
 import pg from 'pg';
+
+const connectionString = process.env.DATABASE_URL;
+if (!connectionString) {
+  console.error('DATABASE_URL environment variable is required.');
+  process.exit(1);
+}
 
 const { Client } = pg;
 const client = new Client({
-  connectionString: 'postgresql://postgres:Adianu7890%40@db.jnbenaukuoohvkvnzjfw.supabase.co:5432/postgres',
-  ssl: { rejectUnauthorized: false }
+  connectionString,
+  ssl: connectionString.includes('localhost') ? false : { rejectUnauthorized: false }
 });
 
 async function main() {

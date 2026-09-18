@@ -35,7 +35,7 @@ services:
       - key: PORT
         value: 3001
       - key: DATABASE_URL
-        value: postgresql://postgres.jnbenaukuoohvkvnzjfw:Adianu7890%40@aws-0-ap-northeast-1.pooler.supabase.com:5432/postgres
+        sync: false
       - key: AI_ML_SERVICE_URL
         fromService:
           type: web

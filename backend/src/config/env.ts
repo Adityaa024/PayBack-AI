@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { z } from 'zod';
 
 const schema = z.object({
@@ -6,7 +7,7 @@ const schema = z.object({
 
   DATABASE_URL: z
     .string()
-    .default('postgresql://postgres.jnbenaukuoohvkvnzjfw:Adianu7890%40@aws-0-ap-northeast-1.pooler.supabase.com:5432/postgres'),
+    .default('postgresql://postgres:postgres@localhost:5432/payback_db'),
 
   JWT_SECRET: z
     .string()

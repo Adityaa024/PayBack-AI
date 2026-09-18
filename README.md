@@ -435,7 +435,7 @@ Recovery actions are subjected to deterministic, execution-time PolicyGuard chec
 ### 5. Real PostgreSQL Physical Environment Proof (`db-environment-proof.test.ts`)
 To eliminate any ambiguity regarding whether database tests run against genuine PostgreSQL engines versus mocks/fallbacks:
 - **Continuous Integration (CI)**: GitHub Actions workflow (`.github/workflows/ci.yml`) provisions a real PostgreSQL 18 container service (`postgres:18-alpine`) with active health checks (`pg_isready -U postgres -d recoveriq`), executes Drizzle schema migrations (`src/db/migrate.ts`), and runs backend tests against the live socket.
-- **Local Development / Test Harness**: Connects to an enterprise PostgreSQL 17.6 instance on Supabase (`db.jnbenaukuoohvkvnzjfw.supabase.co`) or local docker daemon.
+- **Local Development / Test Harness**: Connects to a PostgreSQL instance (configured via `DATABASE_URL`) or local docker daemon.
 - **Physical Proof Invariant**: Test suite `test/modules/recovery/db-environment-proof.test.ts` issues low-level SQL to verify:
   ```sql
   SELECT version(), current_database(), current_user, pg_backend_pid();
